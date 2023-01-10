@@ -323,6 +323,9 @@ void yyfree ( void *  );
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
+
+#define yywrap() (/*CONSTCOND*/1)
+#define YY_SKIP_YYWRAP
 typedef flex_uint8_t YY_CHAR;
 
 FILE *yyin = NULL, *yyout = NULL;
@@ -363,8 +366,8 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[20] =
     {   0,
-        0,    0,    9,    7,    6,    7,    4,    3,    7,    3,
-        5,    2,    5,    3,    4,    5,    2,    1,    0
+        0,    0,    9,    7,    6,    7,    4,    2,    7,    2,
+        5,    3,    5,    2,    4,    5,    3,    1,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -448,11 +451,10 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "test.l"
-#line 3 "test.l"
-#include "y.tab.h"
-
-#line 454 "lex.yy.c"
-#line 455 "lex.yy.c"
+#line 2 "test.l"
+   #include "y.tab.h"
+#line 456 "lex.yy.c"
+#line 457 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -669,9 +671,10 @@ YY_DECL
 		}
 
 	{
-#line 6 "test.l"
+#line 7 "test.l"
 
-#line 674 "lex.yy.c"
+
+#line 677 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -730,46 +733,46 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 7 "test.l"
-{ return IF; }
+#line 9 "test.l"
+{return IF;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 8 "test.l"
-{return S;}
+#line 10 "test.l"
+{return RELOP;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 9 "test.l"
-{ return RELOP; }
+#line 11 "test.l"
+{return S;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 10 "test.l"
-{ return NUMBER; }
+#line 12 "test.l"
+{return NUMBER;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 11 "test.l"
-{ return ID; }
+#line 13 "test.l"
+{return ID;}
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 12 "test.l"
-{ ; }
+#line 14 "test.l"
+{;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 13 "test.l"
-{ return yytext[0]; }
+#line 15 "test.l"
+{return yytext[0];}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 14 "test.l"
+#line 16 "test.l"
 ECHO;
 	YY_BREAK
-#line 772 "lex.yy.c"
+#line 775 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1774,5 +1777,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 14 "test.l"
+#line 16 "test.l"
+
 
