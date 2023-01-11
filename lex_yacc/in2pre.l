@@ -10,15 +10,19 @@
           return DIGIT;
         }
 [a-zA-Z_][a-zA-Z0-9_]* {
+        printf("\nLength %d \n", yyleng);
+
           yylval.s = strdup(yytext);
           return ID;
         }
-"+"   return *yytext;
-"-"   return *yytext;
-"/"   return *yytext;
-"*"   return *yytext;
+[+-/*] {
+
+  return OP;
+}
 [()]   return *yytext;
-[\n]      return NEWLINE;
+[\n]  {  
+    return NEWLINE;
+    }
 
 %%
 
