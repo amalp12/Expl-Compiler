@@ -49,27 +49,25 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    DIGIT = 258,
-    NEWLINE = 259,
-    ID = 260
+    NEWLINE = 258,
+    ID = 259,
+    OP = 260
   };
 #endif
 /* Tokens.  */
-#define DIGIT 258
-#define NEWLINE 259
-#define ID 260
+#define NEWLINE 258
+#define ID 259
+#define OP 260
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 11 "in2post.y"
+#line 11 "in2pre.y"
 
     char * s;
-    int integer;
-    char c;
 
-#line 73 "y.tab.h"
+#line 71 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

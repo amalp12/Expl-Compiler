@@ -5,17 +5,14 @@
 
 %%
 
-[0-9]+ {
-          yylval.integer = atoi(yytext);
-          return DIGIT;
-        }
-[a-zA-Z_][a-zA-Z0-9_]* {
-        printf("\nLength %d \n", yyleng);
+
+[a-zA-Z0-9_][a-zA-Z0-9_]* {
 
           yylval.s = strdup(yytext);
           return ID;
         }
 [+-/*] {
+  yylval.s = strdup(yytext);
 
   return OP;
 }
