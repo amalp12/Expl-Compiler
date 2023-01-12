@@ -540,7 +540,7 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    41,    41,    52,    56,    60,    64,    68,    72
+       0,    41,    41,    49,    53,    57,    61,    65,    69
 };
 #endif
 
@@ -1335,67 +1335,64 @@ yyreduce:
   case 2:
 #line 41 "expr_tree.y"
                      {
-
-    
-   
-    
+ 
     printf("Generating Assembly Code... \n");
     codeGen((yyvsp[-1].node), fopen("assemblycode.xsm","w"));
-    exit(0);
+    exit(1);
 }
-#line 1347 "y.tab.c"
+#line 1344 "y.tab.c"
     break;
 
   case 3:
-#line 52 "expr_tree.y"
+#line 49 "expr_tree.y"
                        {
     (yyval.node) = makeOperatorNode('+',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1355 "y.tab.c"
+#line 1352 "y.tab.c"
     break;
 
   case 4:
-#line 56 "expr_tree.y"
+#line 53 "expr_tree.y"
                   {
     (yyval.node) = makeOperatorNode('-',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1363 "y.tab.c"
+#line 1360 "y.tab.c"
     break;
 
   case 5:
-#line 60 "expr_tree.y"
+#line 57 "expr_tree.y"
                 {
     (yyval.node) = makeOperatorNode('*',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1371 "y.tab.c"
+#line 1368 "y.tab.c"
     break;
 
   case 6:
-#line 64 "expr_tree.y"
+#line 61 "expr_tree.y"
                 {
     (yyval.node) = makeOperatorNode('/',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1379 "y.tab.c"
+#line 1376 "y.tab.c"
     break;
 
   case 7:
-#line 68 "expr_tree.y"
+#line 65 "expr_tree.y"
              {
     (yyval.node) = (yyvsp[-1].node);
 }
-#line 1387 "y.tab.c"
+#line 1384 "y.tab.c"
     break;
 
   case 8:
-#line 72 "expr_tree.y"
+#line 69 "expr_tree.y"
        {
     (yyval.node) = (yyvsp[0].node);
 }
-#line 1395 "y.tab.c"
+#line 1392 "y.tab.c"
     break;
 
 
-#line 1399 "y.tab.c"
+#line 1396 "y.tab.c"
 
       default: break;
     }
@@ -1627,7 +1624,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 79 "expr_tree.y"
+#line 76 "expr_tree.y"
 
 
 void yyerror(char const *s)

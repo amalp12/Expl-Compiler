@@ -39,10 +39,7 @@ int yylex(void);
 Each node can be opertator node or a leaf Node
 */
 start : expr NEWLINE {
-
-    
-   
-    
+ 
     printf("Generating Assembly Code... \n");
     codeGen($<node>1, fopen("assemblycode.xsm","w"));
     exit(1);
