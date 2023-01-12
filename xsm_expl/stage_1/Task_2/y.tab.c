@@ -66,7 +66,7 @@
 
 
 /* First part of user prologue.  */
-#line 1 "expr_tree.y"
+#line 1 "expr_tree_prefix.y"
   
 #ifndef STARTER_H
 #define STARTER_H
@@ -165,7 +165,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 32 "expr_tree.y"
+#line 32 "expr_tree_prefix.y"
 
     struct expr_tree_node * node;
     char c;
@@ -487,9 +487,9 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  6
+#define YYFINAL  14
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   24
+#define YYLAST   18
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  11
@@ -498,7 +498,7 @@ union yyalloc
 /* YYNRULES -- Number of rules.  */
 #define YYNRULES  8
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  17
+#define YYNSTATES  21
 
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   263
@@ -570,7 +570,7 @@ static const yytype_int16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF (-4)
+#define YYPACT_NINF (-5)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -584,8 +584,9 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      10,    -4,    10,     3,    16,     5,    -4,    10,    10,    10,
-      10,    -4,    -4,    -4,    -4,    -3,    -3
+       8,    -5,     8,     8,     8,     8,     8,     5,    10,     8,
+       8,     8,     8,    -4,    -5,    -5,    -5,    -5,    -5,    -5,
+      -5
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -593,20 +594,21 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     8,     0,     0,     0,     0,     1,     0,     0,     0,
-       0,     2,     7,     5,     6,     3,     4
+       0,     8,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     1,     2,     5,     6,     3,     4,
+       7
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -4,    -4,    -2
+      -5,    -5,    -2
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     3,     4
+      -1,     7,     8
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -614,24 +616,23 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       5,     7,     8,     6,     0,    13,    14,    15,    16,     7,
-       8,     9,    10,     1,     0,    12,     0,     0,     0,     2,
-       7,     8,     9,    10,    11
+       9,    10,    11,    12,    13,    14,    20,    16,    17,    18,
+      19,     1,     2,     3,     4,     5,     0,     6,    15
 };
 
 static const yytype_int8 yycheck[] =
 {
-       2,     4,     5,     0,    -1,     7,     8,     9,    10,     4,
-       5,     6,     7,     3,    -1,    10,    -1,    -1,    -1,     9,
-       4,     5,     6,     7,     8
+       2,     3,     4,     5,     6,     0,    10,     9,    10,    11,
+      12,     3,     4,     5,     6,     7,    -1,     9,     8
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,     9,    12,    13,    13,     0,     4,     5,     6,
-       7,     8,    10,    13,    13,    13,    13
+       0,     3,     4,     5,     6,     7,     9,    12,    13,    13,
+      13,    13,    13,    13,     0,     8,    13,    13,    13,    13,
+      10
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
@@ -1339,11 +1340,11 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 47 "expr_tree.y"
+#line 47 "expr_tree_prefix.y"
                      {
-    FILE * target_file = fopen("assemblycode.xsm","w");
+    FILE * target_file = fopen("assemblycodefromprefix.xsm","w");
   
-    printf("Generating Assembly Code... \n");
+    printf("Generating Assembly Code From Prefix... \n");
     fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
     codeGen((yyvsp[-1].node), target_file);
     fprintf(target_file, "INT 10\n");
@@ -1352,59 +1353,59 @@ yyreduce:
 
     exit(1);
 }
-#line 1356 "y.tab.c"
+#line 1357 "y.tab.c"
     break;
 
   case 3:
-#line 61 "expr_tree.y"
+#line 61 "expr_tree_prefix.y"
                        {
-    (yyval.node) = makeOperatorNode('+',(yyvsp[-2].node),(yyvsp[0].node));
+    (yyval.node) = makeOperatorNode('+',(yyvsp[-1].node),(yyvsp[0].node));
 }
-#line 1364 "y.tab.c"
+#line 1365 "y.tab.c"
     break;
 
   case 4:
-#line 65 "expr_tree.y"
+#line 65 "expr_tree_prefix.y"
                   {
-    (yyval.node) = makeOperatorNode('-',(yyvsp[-2].node),(yyvsp[0].node));
+    (yyval.node) = makeOperatorNode('-',(yyvsp[-1].node),(yyvsp[0].node));
 }
-#line 1372 "y.tab.c"
+#line 1373 "y.tab.c"
     break;
 
   case 5:
-#line 69 "expr_tree.y"
-                {
-    (yyval.node) = makeOperatorNode('*',(yyvsp[-2].node),(yyvsp[0].node));
+#line 69 "expr_tree_prefix.y"
+                 {
+    (yyval.node) = makeOperatorNode('*',(yyvsp[-1].node),(yyvsp[0].node));
 }
-#line 1380 "y.tab.c"
+#line 1381 "y.tab.c"
     break;
 
   case 6:
-#line 73 "expr_tree.y"
+#line 73 "expr_tree_prefix.y"
                 {
-    (yyval.node) = makeOperatorNode('/',(yyvsp[-2].node),(yyvsp[0].node));
+    (yyval.node) = makeOperatorNode('/',(yyvsp[-1].node),(yyvsp[0].node));
 }
-#line 1388 "y.tab.c"
+#line 1389 "y.tab.c"
     break;
 
   case 7:
-#line 77 "expr_tree.y"
+#line 77 "expr_tree_prefix.y"
              {
     (yyval.node) = (yyvsp[-1].node);
 }
-#line 1396 "y.tab.c"
+#line 1397 "y.tab.c"
     break;
 
   case 8:
-#line 81 "expr_tree.y"
+#line 81 "expr_tree_prefix.y"
        {
     (yyval.node) = (yyvsp[0].node);
 }
-#line 1404 "y.tab.c"
+#line 1405 "y.tab.c"
     break;
 
 
-#line 1408 "y.tab.c"
+#line 1409 "y.tab.c"
 
       default: break;
     }
@@ -1636,7 +1637,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 88 "expr_tree.y"
+#line 88 "expr_tree_prefix.y"
 
 
 void yyerror(char const *s)
@@ -1646,6 +1647,6 @@ void yyerror(char const *s)
 int main()
 {
 
-  yyin=fopen("input.txt","r");
+  yyin=fopen("input_prefix.txt","r");
   yyparse();   
 }
