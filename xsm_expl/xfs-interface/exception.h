@@ -1,6 +1,5 @@
-#ifndef XFS_EXCEPTION_H
-
-#define XFS_EXCEPTION_H
+#ifndef EXCEPTION_H
+#define EXCEPTION_H
 
 #include <setjmp.h>
 
@@ -9,5 +8,4 @@
 
 void exception_throwException(int code);
 void exception_printErrorMessage(int code);
-
 #endif

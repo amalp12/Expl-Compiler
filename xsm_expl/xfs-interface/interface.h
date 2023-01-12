@@ -1,27 +1,37 @@
-#ifndef XFS_INTERFACE_H
-
-#define XFS_INTERFACE_H
-
-#include "exception.h"
-#include "diskUtility.h"
-
+#ifndef INTERFACE_H
+#define INTERFACE_H
 #define DO_NOT_FORMAT 0
 #define FORMAT 1
 
-#define DEFAULT_DISK_NAME "disk.xfs"
+/*
+  This function invokes a command line interface for interacting with XFS.
+*/
+void cli();	
 
-void cli(int argc, char **argv);
+/*
+ This function processes each command the user enters
+*/
 void runCommand(char command[]);
-char *xfs_cli_stripwhite(char *str);
-void cli_init_completion();
-void cli_run_with_completion();
-char **xfs_cli_completion(const char *text, int start, int end);
-char *xfs_cli_command_gen(const char *text, int state);
-char *xfs_cli_opt_gen(const char *text, int state);
-char *xfs_cli_file_gen(const char *text, int state);
-char *xfs_cli_int_gen(const char *text, int state);
-char *xfs_cli_module_gen(const char *text, int state);
-char *xfs_cli_dump_gen(const char *text, int state);
-static void xfs_cli_destroy_file_list(XOSFILE *files);
+
+void
+cli_init_completion ();
+
+void
+cli_run_with_completion ();
+
+char**
+xfs_cli_completion(const char *text, int start, int end);
+
+char*
+xfs_cli_command_gen (const char *text, int state);
+
+char*
+xfs_cli_opt_gen(const char *text, int state);
+
+char*
+xfs_cli_file_gen (const char *text, int state);
+
+char*
+xfs_cli_int_gen (const char *text, int state);
 
 #endif

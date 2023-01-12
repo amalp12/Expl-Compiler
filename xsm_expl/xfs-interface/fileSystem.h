@@ -1,8 +1,5 @@
-#ifndef XFS_FILESYS_H
-
-#define XFS_FILESYS_H
-
-#include "constants.h"
+#ifndef FILESYS_H
+#define FILESYS_H
 
 #define BLOCK_SIZE 512
 #define WORD_SIZE 16
@@ -15,12 +12,10 @@
 #define SHELL_BLOCK 9
 #define IDLE_BLOCK 11
 #define LIBRARY_BLOCK 13
-
 #define EX_HANDLER 15
 #define TIMERINT 17
 #define DISKCONTROLLER_INT 19
 #define CONSOLE_INT 21
-
 #define INT0 EX_HANDLER
 #define INT1 TIMERINT
 #define INT2 DISKCONTROLLER_INT
@@ -49,10 +44,11 @@
 #define MOD6 65
 #define MOD7 67
 
-#define OS_STARTUP_CODE_SIZE 1
+
+#define OS_STARTUP_CODE_SIZE 2
 #define NO_OF_FREE_LIST_BLOCKS 1
 #define NO_OF_ROOTFILE_BLOCKS 1
-#define NO_OF_INIT_BLOCKS 2
+#define NO_OF_INIT_BLOCKS 4
 #define NO_OF_SHELL_BLOCKS 2
 #define NO_OF_IDLE_BLOCKS 2
 #define NO_OF_LIBRARY_BLOCKS 2
@@ -94,7 +90,7 @@
 #define NO_OF_INODE_BLOCKS 2
 
 #define NO_OF_INTERRUPTS 18
-#define NO_OF_MODULES 11
+#define NO_OF_MODULES 8
 
 #define DATA_START_BLOCK 69
 #define NO_OF_DATA_BLOCKS 187
@@ -103,7 +99,13 @@
 #define NO_OF_SWAP_BLOCKS 256
 
 #define NO_OF_DISK_BLOCKS 512
+
 #define DISK_SIZE (NO_OF_DISK_BLOCKS * BLOCK_SIZE)
+
+
+/*
+Declarations for INODE Entry
+*/ 
 
 #define INODE_MAX_FILE_NUM 60
 #define INODE_MAX_BLOCK_NUM 4
@@ -120,7 +122,12 @@
 
 #define FILETYPE_ROOT 1
 #define FILETYPE_DATA 2
-#define FILETYPE_EXEC 3
+#define FILETYPE_EXEC 3 //TODO check whether these are used
+
+
+/*
+	Root File Declarations
+*/
 
 #define ROOTFILE_ENTRY_FILENAME 0
 #define ROOTFILE_ENTRY_FILESIZE 1
@@ -129,15 +136,21 @@
 #define ROOTFILE_ENTRY_PERMISSION 4
 #define ROOTFILE_ENTRY_SIZE 8
 
-#define XFS_NUM_BLOCKS 512
-#define TEMP_BLOCK 69
-#define INPUT_FILESIZE 200
+
+/*
+Other declarations
+*/
+
+#define NO_BLOCKS_TO_COPY 69		//Rest of the blocks have data. 
+#define EXTRA_BLOCKS	1			// Need a temporary block
+#define TEMP_BLOCK 69				//Temporary block no: starting from 0.
 
 typedef struct _XOSFILE
 {
-    char *name;
-    int size;
-    struct _XOSFILE *next;
+	char *name;
+	int size;
+
+	struct _XOSFILE *next;
 } XOSFILE;
 
 #endif

@@ -1,16 +1,27 @@
-#ifndef XFS_INODE_H
+#ifndef INODE_H
+#define INODE_H
 
-#define XFS_INODE_H
-
-#include "disk.h"
-#include "virtualDisk.h"
-
-int FindEmptyInodeEntry();
-int getInodeEntry(char *name);
-void AddEntryToMemInode(int startIndex, int fileType, char *nameOfFile, int fileSize, int *addrOfDataBlocks);
-void AddEntryToMemRootFile(int startIndexInRootFile, int fileType, char *nameOfFile, int size_of_file);
+/*
+  This function removes the inode entry corresponding to the first arguement.
+*/
 int removeInodeEntry(int locationOfInode);
-int removeRootFileEntry(int locationOfRootFile);
-int getDataBlocks(int *dataBlockAddr, int locationOfInode);
+
+/*
+  This function returns the basic block entry(pass by pointer) corresponding to the address specified by the second arguement.
+*/
+int getDataBlocks(int *basicBlockAddr, int locationOfInode);
+
+
+/*
+  This function returns an  empty inode entry if present.
+*/
+int FindEmptyInodeEntry();
+
+/*
+  This function adds the name, size and basic block address of the file to corresponding entry in the inode.
+*/
+void AddEntryToMemInode(int startIndexInInode, int fileType, char *nameOfFile, int size_of_file, int* addrOfDataBlocks);
+
+int getInodeEntry(char *name);
 
 #endif
