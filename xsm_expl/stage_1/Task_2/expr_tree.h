@@ -1,9 +1,3 @@
-#ifndef STARTER_H
-#define STARTER_H
-#include <stdio.h>
-#include <stdlib.h>
-#endif
-
 struct expr_tree_node{
 
     int value;

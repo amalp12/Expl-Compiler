@@ -3,16 +3,22 @@
 #define STARTER_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #endif
 
 #ifndef CODEGEN_H
 #define CODEGEN_H
 #include "codegen.h"
+#include "codegen.c"
+
 #endif
 
 #ifndef EXPR_TREE_H
 #define EXPR_TREE_H
 #include "expr_tree.h"
+#include "expr_tree.c"
+
 #endif
 
 
@@ -39,9 +45,15 @@ int yylex(void);
 Each node can be opertator node or a leaf Node
 */
 start : expr NEWLINE {
- 
+    FILE * target_file = fopen("assemblycode.xsm","w");
+  
     printf("Generating Assembly Code... \n");
-    codeGen($<node>1, fopen("assemblycode.xsm","w"));
+    fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
+    codeGen($<node>1, target_file);
+    fprintf(target_file, "INT 10\n");
+    printf("Complete \n");
+
+
     exit(1);
 }
 ;

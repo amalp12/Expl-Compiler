@@ -1,13 +1,3 @@
-#ifndef STARTER_H
-#define STARTER_H
-#include <stdio.h>
-#include <stdlib.h>
-#endif
-
-#ifndef EXPR_TREE_H
-#define EXPR_TREE_H
-#include "expr_tree.h"
-#endif
 
 
 struct  expr_tree_node * makeLeafNode(int value)

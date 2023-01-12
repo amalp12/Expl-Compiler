@@ -1,7 +1,3 @@
-#ifndef CODEGEN_H
-#define CODEGEN_H
-#include "codegen.h"
-#endif
 /*
 1.    At the leaf nodes of the tree (corresponding to a NUM), Allocate a new register and store the number to the register.
 
@@ -47,48 +43,44 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     // Corner null case
     if(t==NULL) return 0;
 
-    // leaf node case (base case)
-    if(t->left == NULL && t->right == NULL)
-    {
-
-        reg_index newReg= getFreeReg();
-        fprintf(target_file, "ADD R%d, R%d", newReg,  t->value);
-        return newReg;
-
-    }
-
     // Evaluating the left and right trees respectively
     // Note that the order is very important
     reg_index leftReg = codeGen(t->left, target_file);
     reg_index rightReg = codeGen(t->right, target_file);
 
-
-    // Addition
-    if(t->operator == "+")
+    // leaf node case (base case)
+    if(t->left == NULL && t->right == NULL)
     {
-        fprintf(target_file, "ADD R%d, R%d", leftReg, rightReg);
+
+        reg_index newReg= getFreeReg();
+        fprintf(target_file, "MOV R%d, %d\n", newReg,  t->value);
+        return newReg;
+
     }
 
+
+
     // Addition
-    if(t->operator == "+")
+    if(!strcmp(t->operator, "+"))
     {
-        fprintf(target_file, "ADD R%d, R%d", leftReg, rightReg);
+        fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
     }
+
 
     // Subtraction
-    if(t->operator == "-")
+    if(!strcmp(t->operator, "-"))
     {
         fprintf(target_file, "SUB R%d, R%d\n", leftReg, rightReg);
     }
 
     // Muliplication
-    if(t->operator == "*")
+    if(!strcmp(t->operator, "*"))
     {
         fprintf(target_file, "MUL R%d, R%d\n", leftReg, rightReg);
     }
 
     // Division
-    if(t->operator == "/")
+    if(!strcmp(t->operator, "/"))
     {
         fprintf(target_file, "DIV R%d, R%d\n", leftReg, rightReg);
     }
@@ -99,8 +91,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
     // the result is stored in the register used for left tree evaluation
     // return register number storing result
-    return leftReg;
-    
+    if(leftReg<rightReg) return leftReg;
+    else return rightReg;   
 
 
     

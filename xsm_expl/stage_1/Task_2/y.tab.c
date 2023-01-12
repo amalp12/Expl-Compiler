@@ -72,16 +72,22 @@
 #define STARTER_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #endif
 
 #ifndef CODEGEN_H
 #define CODEGEN_H
 #include "codegen.h"
+#include "codegen.c"
+
 #endif
 
 #ifndef EXPR_TREE_H
 #define EXPR_TREE_H
 #include "expr_tree.h"
+#include "expr_tree.c"
+
 #endif
 
 
@@ -91,7 +97,7 @@ extern FILE* yyin;
 int yylex(void);
 
 
-#line 95 "y.tab.c"
+#line 101 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -159,12 +165,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 26 "expr_tree.y"
+#line 32 "expr_tree.y"
 
     struct expr_tree_node * node;
     char c;
 
-#line 168 "y.tab.c"
+#line 174 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -540,7 +546,7 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    41,    41,    49,    53,    57,    61,    65,    69
+       0,    47,    47,    61,    65,    69,    73,    77,    81
 };
 #endif
 
@@ -1333,66 +1339,72 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 41 "expr_tree.y"
+#line 47 "expr_tree.y"
                      {
- 
+    FILE * target_file = fopen("assemblycode.xsm","w");
+  
     printf("Generating Assembly Code... \n");
-    codeGen((yyvsp[-1].node), fopen("assemblycode.xsm","w"));
+    fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
+    codeGen((yyvsp[-1].node), target_file);
+    fprintf(target_file, "INT 10\n");
+    printf("Complete \n");
+
+
     exit(1);
 }
-#line 1344 "y.tab.c"
+#line 1356 "y.tab.c"
     break;
 
   case 3:
-#line 49 "expr_tree.y"
+#line 61 "expr_tree.y"
                        {
     (yyval.node) = makeOperatorNode('+',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1352 "y.tab.c"
+#line 1364 "y.tab.c"
     break;
 
   case 4:
-#line 53 "expr_tree.y"
+#line 65 "expr_tree.y"
                   {
     (yyval.node) = makeOperatorNode('-',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1360 "y.tab.c"
+#line 1372 "y.tab.c"
     break;
 
   case 5:
-#line 57 "expr_tree.y"
+#line 69 "expr_tree.y"
                 {
     (yyval.node) = makeOperatorNode('*',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1368 "y.tab.c"
+#line 1380 "y.tab.c"
     break;
 
   case 6:
-#line 61 "expr_tree.y"
+#line 73 "expr_tree.y"
                 {
     (yyval.node) = makeOperatorNode('/',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1376 "y.tab.c"
+#line 1388 "y.tab.c"
     break;
 
   case 7:
-#line 65 "expr_tree.y"
+#line 77 "expr_tree.y"
              {
     (yyval.node) = (yyvsp[-1].node);
 }
-#line 1384 "y.tab.c"
+#line 1396 "y.tab.c"
     break;
 
   case 8:
-#line 69 "expr_tree.y"
+#line 81 "expr_tree.y"
        {
     (yyval.node) = (yyvsp[0].node);
 }
-#line 1392 "y.tab.c"
+#line 1404 "y.tab.c"
     break;
 
 
-#line 1396 "y.tab.c"
+#line 1408 "y.tab.c"
 
       default: break;
     }
@@ -1624,7 +1636,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 76 "expr_tree.y"
+#line 88 "expr_tree.y"
 
 
 void yyerror(char const *s)

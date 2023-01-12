@@ -4,7 +4,9 @@
 #define STARTER_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #endif
+
 
 
 #ifndef EXPR_TREE_H

@@ -3,6 +3,8 @@
 #ifndef EXPR_TREE_H
 #define EXPR_TREE_H
 #include "expr_tree.h"
+#include "expr_tree.c"
+
 #endif
 
 %}
