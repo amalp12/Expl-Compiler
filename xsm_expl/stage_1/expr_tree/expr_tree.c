@@ -69,8 +69,8 @@ void printPrefix(struct expr_tree_node * t)
 void printPostfix(struct expr_tree_node * t)
 {
     if(t==NULL) return;
-    printPrefix(t->left);
-    printPrefix(t->right);
+    printPostfix(t->left);
+    printPostfix(t->right);
     if(t->operator==NULL)
     {
         printf(" %d" ,t->value);
