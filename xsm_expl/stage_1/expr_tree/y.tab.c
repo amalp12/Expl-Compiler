@@ -524,7 +524,7 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    25,    25,    32,    36,    40,    44,    48,    52
+       0,    25,    25,    39,    43,    47,    51,    55,    59
 };
 #endif
 
@@ -1319,63 +1319,70 @@ yyreduce:
   case 2:
 #line 25 "expr_tree.y"
                      {
+    printf("Prefix :\n");
+    printPrefix((yyvsp[-1].node));
+    printf("\n");
+    printf("Postfix :\n");
+    printPostfix((yyvsp[-1].node));
+    printf("\n");
     (yyval.c) = (yyvsp[0].c);
     printf("Answer : %d\n",evaluate((yyvsp[-1].node)));
+
     exit(1);
 }
-#line 1327 "y.tab.c"
+#line 1334 "y.tab.c"
     break;
 
   case 3:
-#line 32 "expr_tree.y"
+#line 39 "expr_tree.y"
                        {
     (yyval.node) = makeOperatorNode('+',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1335 "y.tab.c"
+#line 1342 "y.tab.c"
     break;
 
   case 4:
-#line 36 "expr_tree.y"
+#line 43 "expr_tree.y"
                   {
     (yyval.node) = makeOperatorNode('-',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1343 "y.tab.c"
+#line 1350 "y.tab.c"
     break;
 
   case 5:
-#line 40 "expr_tree.y"
+#line 47 "expr_tree.y"
                 {
     (yyval.node) = makeOperatorNode('*',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1351 "y.tab.c"
+#line 1358 "y.tab.c"
     break;
 
   case 6:
-#line 44 "expr_tree.y"
+#line 51 "expr_tree.y"
                 {
     (yyval.node) = makeOperatorNode('/',(yyvsp[-2].node),(yyvsp[0].node));
 }
-#line 1359 "y.tab.c"
+#line 1366 "y.tab.c"
     break;
 
   case 7:
-#line 48 "expr_tree.y"
+#line 55 "expr_tree.y"
              {
     (yyval.node) = (yyvsp[-1].node);
 }
-#line 1367 "y.tab.c"
+#line 1374 "y.tab.c"
     break;
 
   case 8:
-#line 52 "expr_tree.y"
+#line 59 "expr_tree.y"
        {
     (yyval.node) = (yyvsp[0].node);
 }
-#line 1375 "y.tab.c"
+#line 1382 "y.tab.c"
     break;
 
 
-#line 1379 "y.tab.c"
+#line 1386 "y.tab.c"
 
       default: break;
     }
@@ -1607,7 +1614,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 59 "expr_tree.y"
+#line 66 "expr_tree.y"
 
 
 void yyerror(char const *s)

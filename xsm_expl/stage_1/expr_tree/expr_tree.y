@@ -23,8 +23,15 @@ int yylex(void);
 Each node can be opertator node or a leaf Node
 */
 start : expr NEWLINE {
+    printf("Prefix :\n");
+    printPrefix($<node>1);
+    printf("\n");
+    printf("Postfix :\n");
+    printPostfix($<node>1);
+    printf("\n");
     $<c>$ = $<c>2;
     printf("Answer : %d\n",evaluate($<node>1));
+
     exit(1);
 }
 ;
