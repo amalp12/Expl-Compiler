@@ -49,7 +49,13 @@ start : expr NEWLINE {
   
     printf("Generating Assembly Code... \n");
     fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
-    codeGen($<node>1, target_file);
+    fprintf(target_file, "MOV SP, 4095\n");
+    fprintf(target_file, "MOV BP, 4096\n");
+
+
+    
+    write(codeGen($<node>1, target_file), target_file);
+
     fprintf(target_file, "INT 10\n");
     printf("Complete \n");
 

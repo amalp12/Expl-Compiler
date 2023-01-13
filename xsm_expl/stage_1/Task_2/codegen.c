@@ -97,3 +97,32 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
     
 }
+
+void write(reg_index reg_number, FILE * target_file)
+{
+    for(int i = 0 ; i <= LAST_USED_REGISTER; i++)
+    {
+        fprintf(target_file, "PUSH R%d\n", i);
+
+    }
+
+
+    fprintf(target_file, "MOV R1, R%d\n",reg_number); 
+    fprintf(target_file, "MOV R0, \"Write\"\n"); 
+    fprintf(target_file, "PUSH R0\n"); //func
+    fprintf(target_file, "MOV R0, -2\n");
+    fprintf(target_file, "PUSH R0\n"); // 1
+    fprintf(target_file, "PUSH R1\n"); // 2
+    fprintf(target_file, "PUSH R0\n"); //3
+    fprintf(target_file, "PUSH R0\n"); // ret
+    fprintf(target_file, "CALL 0\n");
+
+
+
+    for(int i = LAST_USED_REGISTER ; i >=0; i--)
+    {
+        fprintf(target_file, "POP R%d\n", i);
+
+    }
+
+}

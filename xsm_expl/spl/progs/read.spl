@@ -1,20 +1,15 @@
 alias userSP R3;
-alias physicalSP R4;
-alias address R5;
+alias address R4;
+alias data R5;
 
 userSP = SP;
 
-physicalSP = [PTBR +  ( userSP / 512 ) * 2] * 512 + (userSP % 512);
+address = [[PTBR +  ( (userSP-3)/ 512 ) * 2] * 512 + ((userSP-3) % 512)];
 
-address = [physicalSP - 3];
+address=[PTBR + (address/512)*2]*512 + (address%512);
 
-// translate adress
-address = [PTBR + (address/512) * 2 ] * 512 + (address % 512);
+[address]=P0;
 
-inline "IN";
-
-[address] = P0;
-
-[physicalSP - 1] = 0;
+[[PTBR +  ( (userSP-1)/ 512 ) * 2] * 512 + ((userSP-1) % 512)]=0;
 
 ireturn;
