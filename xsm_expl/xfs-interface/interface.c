@@ -11,6 +11,7 @@
 #include "fileSystem.h"
 #include "exception.h"
 #include "diskUtility.h"
+#include "virtualDisk.h"
 
 
 jmp_buf exp_point;//for exception handling

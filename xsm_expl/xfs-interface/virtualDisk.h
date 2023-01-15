@@ -17,5 +17,6 @@ int getValue(char* str );
 void storeValueAt(int address, int num);
 void storeValue(char *str, int num);
 void storeStringValueAt(int address, char *value);
+void _disk_init();
 
 #endif

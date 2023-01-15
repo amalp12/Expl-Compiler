@@ -2,8 +2,10 @@
 #define LABELS_H
 
 #include <stdlib.h>
+#include <time.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "constants.h"
 
 typedef struct _label{
@@ -22,5 +24,6 @@ int labels_get_target (const char *name);
 int labels_is_charstring (char *str);
 int labels_resolve (const char *filename, char *outfile, int base_address);
 void labels_random_name (char *name);
+int remove_newline_character (char *str,int length);
 
 #endif

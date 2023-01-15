@@ -3,6 +3,8 @@
 #define DO_NOT_FORMAT 0
 #define FORMAT 1
 
+#include <ctype.h>
+
 /*
   This function invokes a command line interface for interacting with XFS.
 */
@@ -33,5 +35,6 @@ xfs_cli_file_gen (const char *text, int state);
 
 char*
 xfs_cli_int_gen (const char *text, int state);
+
 
 #endif

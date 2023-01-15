@@ -206,12 +206,11 @@ labels_resolve (const char *filename, char *outfile, int base_address)
 void
 labels_random_name (char *name)
 {
-	srand (time(NULL));
+	srand(time(NULL));
 	sprintf (name, "tempfile.%d.xsm", rand());	
 }
 
-int
-remove_newline_character (char *str,int length)
+int remove_newline_character (char *str,int length)
 {
 	char *p = str;
 	int i=0;
