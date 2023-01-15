@@ -1,3 +1,7 @@
+#ifndef TYPEDEF_H
+#define TYPEDEF_H
+#include "typedef.h"
+#endif
 /*
 1.    At the leaf nodes of the tree (corresponding to a NUM), Allocate a new register and store the number to the register.
 
@@ -34,6 +38,81 @@ void freeLastReg() // Free the last used register
     LAST_USED_REGISTER--;
 }
 
+
+
+void write(reg_index reg_number, FILE * target_file)
+{
+    for(int i = 0 ; i <= LAST_USED_REGISTER; i++)
+    {
+        fprintf(target_file, "PUSH R%d\n", i);
+
+    }
+
+
+    fprintf(target_file, "MOV R1, R%d\n",reg_number); 
+    fprintf(target_file, "MOV R0, \"Write\"\n"); 
+    fprintf(target_file, "PUSH R0\n"); //func
+    fprintf(target_file, "MOV R0, -2\n");
+    fprintf(target_file, "PUSH R0\n"); // 1
+    fprintf(target_file, "PUSH R1\n"); // 2
+    fprintf(target_file, "PUSH R0\n"); //3
+    fprintf(target_file, "PUSH R0\n"); // ret
+    fprintf(target_file, "CALL 0\n");
+    fprintf(target_file, "POP R0\n"); // ret
+    fprintf(target_file, "POP R0\n"); //3
+    fprintf(target_file, "POP R1\n"); // 2
+    fprintf(target_file, "POP R0\n"); // 1
+    fprintf(target_file, "POP R0\n"); //func
+
+
+    for(int i = LAST_USED_REGISTER ; i >=0; i--)
+    {
+        fprintf(target_file, "POP R%d\n", i);
+
+    }
+
+}
+
+
+
+
+void read(reg_index reg_number, FILE * target_file)
+{
+    for(int i = 0 ; i <= LAST_USED_REGISTER; i++)
+    {
+        fprintf(target_file, "PUSH R%d\n", i);
+
+    }
+
+
+    fprintf(target_file, "MOV R1, R%d\n",reg_number); 
+    fprintf(target_file, "MOV R0, \"Read\"\n"); 
+    fprintf(target_file, "PUSH R0\n"); //func
+    fprintf(target_file, "MOV R0, -1\n");
+    fprintf(target_file, "PUSH R0\n"); // 1
+    fprintf(target_file, "PUSH R1\n"); // 2
+    fprintf(target_file, "PUSH R0\n"); //3
+    fprintf(target_file, "PUSH R0\n"); // ret
+    fprintf(target_file, "CALL 0\n");
+    fprintf(target_file, "POP R0\n"); // ret
+    fprintf(target_file, "POP R0\n"); //3
+    fprintf(target_file, "POP R1\n"); // 2
+    fprintf(target_file, "POP R0\n"); // 1
+    fprintf(target_file, "POP R0\n"); //func
+
+
+    for(int i = LAST_USED_REGISTER ; i >=0; i--)
+    {
+        fprintf(target_file, "POP R%d\n", i);
+
+    }
+
+}
+
+int getVarAddress(char c)
+{
+    return  4096+((*varname)-'a');
+}
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     
     
@@ -53,38 +132,76 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     {
 
         reg_index newReg= getFreeReg();
-        fprintf(target_file, "MOV R%d, %d\n", newReg,  t->value);
+        if(t->varname != NULL ) fprintf(target_file, "MOV R%d, []\n", newReg,  getVarAddress(*(t->varname)));
+        else fprintf(target_file, "MOV R%d, %d\n", newReg,  t->val);
         return newReg;
 
     }
 
 
-
-    // Addition
-    if(!strcmp(t->operator, "+"))
+    switch (t->type)
     {
-        fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
+    
+        // Addition
+        case (_TYPE_PLUS):
+        {
+            fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
+            break;
+        }
+        // Subtraction
+        case(_TYPE_MINUS):
+        {
+            fprintf(target_file, "SUB R%d, R%d\n", leftReg, rightReg);
+            break;
+        }
+
+        // Muliplication
+        case(_TYPE_MUL):
+        {
+            fprintf(target_file, "MUL R%d, R%d\n", leftReg, rightReg);
+            break;
+        }
+
+        // Division
+        case(_TYPE_DIV):
+        {
+            fprintf(target_file, "DIV R%d, R%d\n", leftReg, rightReg);
+            break;
+        }
+
+        // EQUAL TO
+        case(_TYPE_EQUALS):
+        {
+            fprintf(target_file, "MOV R%d, R%d\n", leftReg, rightReg);
+            break;
+        }
+        case(_TYPE_CONNECTOR):
+        {
+            break;
+        }
+        case(_TYPE_READ):
+        {
+            char * varname = t->left->varname;
+            int memory_loc = getVarAddress(*(t->left->varname));
+            reg_index new_reg = getFreeReg();
+            fprintf(target_file, "MOV R%d, %d\n", new_reg, memory_loc);
+            read(new_reg, target_file);
+            freeLastReg();
+
+            break;
+        }
+        case(_TYPE_WRITE):
+        {
+            int memory_loc = getVarAddress(*(t->left->varname));
+            reg_index new_reg = getFreeReg();
+            fprintf(target_file, "MOV R%d, %d\n", new_reg, memory_loc);
+            fprintf(target_file, "MOV R%d, [R%d\n]", new_reg, new_reg);
+            write(new_reg, target_file);
+            freeLastReg();
+            break;
+        }
+
     }
-
-
-    // Subtraction
-    if(!strcmp(t->operator, "-"))
-    {
-        fprintf(target_file, "SUB R%d, R%d\n", leftReg, rightReg);
-    }
-
-    // Muliplication
-    if(!strcmp(t->operator, "*"))
-    {
-        fprintf(target_file, "MUL R%d, R%d\n", leftReg, rightReg);
-    }
-
-    // Division
-    if(!strcmp(t->operator, "/"))
-    {
-        fprintf(target_file, "DIV R%d, R%d\n", leftReg, rightReg);
-    }
-
 
     // freeing the register used by the right tree evaluation
     freeLastReg();

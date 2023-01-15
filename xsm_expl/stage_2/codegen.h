@@ -14,14 +14,17 @@
 #include "expr_tree.h"
 #endif
 
-#define reg_index int
+#ifndef TYPEDEF_H
+#define TYPEDEF_H
+#include "typedef.h"
+#endif
+
+
 
 int LAST_USED_REGISTER = -1;
 
 int getFreeReg(); // Allocate a free register
 
 void freeLastReg(); // Free the last used register
-
-
 
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) ;
