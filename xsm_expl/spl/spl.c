@@ -3,7 +3,7 @@
 #include "spl.h"
 #include "label.h"
 #include "y.tab.h"
-
+#include "file.h"
 extern FILE *yyin;
 
 int out_linecount=0; //no of lines of code generated

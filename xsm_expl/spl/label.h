@@ -25,4 +25,5 @@ void label_pushWhile(label *start, label *end);
 void label_popWhile();
 label* label_getWhileEnd();
 label* label_getWhileStart();
+void label_free(label *ll);
 #endif

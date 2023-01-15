@@ -46,4 +46,14 @@ int deleteDataFromDisk(char *name);
 void formatDisk(int format);
 void expandpath(char *path);
 void addext(char *filename, char *ext);
+int dumpInodeTable(const char* filename);
+int loadShellCode(char* infile );
+int loadLibraryCode(char* infile );
+int loadIdleCode(char* infile );
+int deleteFileFromDisk(char *name);
+void exportFile(char *filename, char *unixfile);
+int copyBlocksToFile (int startblock,int endblock,char *filename);
+int dumpRootFile(const char* filename);
+
+
 #endif
