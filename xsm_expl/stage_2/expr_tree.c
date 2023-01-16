@@ -74,19 +74,20 @@ struct expr_tree_node* makeOperatorNode(char c,struct expr_tree_node *l,struct e
             	break;
         }
 	}
-	return makeNode(0,num, NULL, l, r);
+	return makeNode(-1,num, NULL, l, r);
 }
 struct expr_tree_node * makeIdNode(char c)
 {
     char * id = (char *)(malloc(sizeof(char)));
     (*id) = c;  
-    return makeNode(_NONE, _TYPE_WRITE,id,NULL,NULL);
+
+    return makeNode(_NONE, _TYPE_ID,id,NULL,NULL);
 }
 
 struct expr_tree_node * makeNumberNode(int num )
 {
 
-    return makeNode(num, _TYPE_WRITE,NULL,NULL,NULL);
+    return makeNode(num, _TYPE_NUM,NULL,NULL,NULL);
 }
 
 struct expr_tree_node * makeWriteNode(struct expr_tree_node *expr)

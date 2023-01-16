@@ -68,11 +68,15 @@ program : START Slist END SEMICOLON
 {
   FILE * target_file = fopen("assemblycode.xsm","w");
   
+  // printInfix($<node>2);
+
+;
   printf("Generating Assembly Code... \n");
-  fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
-  codeGen($<node>1, target_file);
-  fprintf(target_file, "INT 10\n");
+  explInit(target_file);
+  codeGen($<node>2, target_file);
+  explEnd(target_file);
   printf("Complete \n");
+
   if(target_file) fclose(target_file);
 
   exit(1);
@@ -84,8 +88,8 @@ program : START Slist END SEMICOLON
 };
 Slist : Slist Stmt {$<node>$ = makeConnectorNode($<node>1,$<node>2);}| Stmt {$<node>$ = $<node>1;};
 Stmt : InputStmt | OutputStmt | AsgStmt;
-InputStmt : READ '(' ID ')' SEMICOLON{$<node>$ = makeReadNode($<node>3);};
-OutputStmt : WRITE '(' expr ')' SEMICOLON{$<node>$ = makeWriteNode($<node>3);}; 
+InputStmt : READ '(' ID ')' SEMICOLON {$<node>$ = makeReadNode($<node>3);};
+OutputStmt : WRITE '(' expr ')' SEMICOLON {$<node>$ = makeWriteNode($<node>3);}; 
 AsgStmt :  ID EQUALS expr SEMICOLON {$<node>$ = makeOperatorNode('=',$<node>1,$<node>3) ;};
 expr : expr PLUS expr  {$<node>$ = makeOperatorNode('+',$<node>1,$<node>3);}
 | expr MINUS expr  { $<node>$ = makeOperatorNode('-',$<node>1,$<node>3);}

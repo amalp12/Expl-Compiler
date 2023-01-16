@@ -109,49 +109,59 @@ void read(reg_index reg_number, FILE * target_file)
 
 }
 
-int getVarAddress(char c)
+int getVarAddress(char varname)
 {
-    return  4096+((*varname)-'a');
+    return  4096+(varname-'a');
 }
+
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     
-    
-    
-    
-
     // Corner null case
-    if(t==NULL) return 0;
+    if(t==NULL) return -1;
 
     // Evaluating the left and right trees respectively
     // Note that the order is very important
     reg_index leftReg = codeGen(t->left, target_file);
     reg_index rightReg = codeGen(t->right, target_file);
 
-    // leaf node case (base case)
-    if(t->left == NULL && t->right == NULL)
-    {
-
-        reg_index newReg= getFreeReg();
-        if(t->varname != NULL ) fprintf(target_file, "MOV R%d, []\n", newReg,  getVarAddress(*(t->varname)));
-        else fprintf(target_file, "MOV R%d, %d\n", newReg,  t->val);
-        return newReg;
-
-    }
-
-
+   
+    reg_index return_val;
     switch (t->type)
     {
     
+        case(_TYPE_ID):
+        {
+            reg_index newReg= getFreeReg();
+            // if leaf is an identifier
+            fprintf(target_file, "MOV R%d, [%d]\n", newReg,  getVarAddress(*(t->varname)));
+            return_val = newReg;
+            break;
+        }
+        case(_TYPE_NUM):
+        {
+            reg_index newReg= getFreeReg();
+            // if leaf is a number
+            fprintf(target_file, "MOV R%d, %d\n", newReg,  t->val);
+            return_val =  newReg;
+            break;
+        }
         // Addition
         case (_TYPE_PLUS):
         {
+
             fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
+            // freeing the register used by the right tree evaluation
+            freeLastReg();
+            return_val =  leftReg;
             break;
         }
         // Subtraction
         case(_TYPE_MINUS):
         {
             fprintf(target_file, "SUB R%d, R%d\n", leftReg, rightReg);
+            // freeing the register used by the right tree evaluation
+            freeLastReg();
+            return_val =  leftReg;
             break;
         }
 
@@ -159,6 +169,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         case(_TYPE_MUL):
         {
             fprintf(target_file, "MUL R%d, R%d\n", leftReg, rightReg);
+            // freeing the register used by the right tree evaluation
+            freeLastReg();
+            return_val =  leftReg;
             break;
         }
 
@@ -166,51 +179,162 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         case(_TYPE_DIV):
         {
             fprintf(target_file, "DIV R%d, R%d\n", leftReg, rightReg);
+            // freeing the register used by the right tree evaluation
+            freeLastReg();
+            return_val =  leftReg;
             break;
         }
 
         // EQUAL TO
         case(_TYPE_EQUALS):
         {
-            fprintf(target_file, "MOV R%d, R%d\n", leftReg, rightReg);
+            fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(*(t->left->varname)));
+            fprintf(target_file, "MOV [R%d], R%d\n", leftReg, rightReg);
+            // freeing the register used by the right tree evaluation
+            freeLastReg();
+            return_val =  leftReg;
             break;
         }
         case(_TYPE_CONNECTOR):
         {
+            return_val =  -1;
             break;
         }
         case(_TYPE_READ):
         {
-            char * varname = t->left->varname;
-            int memory_loc = getVarAddress(*(t->left->varname));
             reg_index new_reg = getFreeReg();
-            fprintf(target_file, "MOV R%d, %d\n", new_reg, memory_loc);
+            fprintf(target_file, "MOV R%d, %d\n", new_reg, getVarAddress(*(t->left->varname)));
             read(new_reg, target_file);
             freeLastReg();
-
+            return_val = -1;
             break;
         }
         case(_TYPE_WRITE):
-        {
-            int memory_loc = getVarAddress(*(t->left->varname));
-            reg_index new_reg = getFreeReg();
-            fprintf(target_file, "MOV R%d, %d\n", new_reg, memory_loc);
-            fprintf(target_file, "MOV R%d, [R%d\n]", new_reg, new_reg);
-            write(new_reg, target_file);
+        {    
+            write(leftReg, target_file);
             freeLastReg();
+            return_val = -1;
+            break;
+        }
+        default:
+        {
+            printf("Invalid type\n");
             break;
         }
 
     }
 
-    // freeing the register used by the right tree evaluation
-    freeLastReg();
+    
 
     // the result is stored in the register used for left tree evaluation
     // return register number storing result
-    if(leftReg<rightReg) return leftReg;
-    else return rightReg;   
+    return return_val;
+}
 
-
+void printNode(struct expr_tree_node * t)
+{
+    if(t==NULL) return;
+    switch (t->type)
+    {
     
+        // Addition
+        case (_TYPE_PLUS):
+        {
+            printf("+ ");
+            break;
+        }
+        // Subtraction
+        case(_TYPE_MINUS):
+        {
+            printf("- ");
+            break;
+        }
+
+        // Muliplication
+        case(_TYPE_MUL):
+        {
+            printf("* ");
+            break;
+        }
+
+        // Division
+        case(_TYPE_DIV):
+        {
+            printf("/ ");
+            break;
+        }
+
+        // EQUAL TO
+        case(_TYPE_EQUALS):
+        {
+            printf("= ");
+            break;
+        }
+        case(_TYPE_CONNECTOR):
+        {
+            printf("conn ");
+            break;
+        }
+        case(_TYPE_READ):
+        {
+            printf("r ");
+            break;
+        }
+        case(_TYPE_WRITE):
+        {
+            printf("w ");
+            break;
+        }
+        case(_TYPE_ID):
+        {
+            printf("id ");
+            break;
+        }
+        case(_TYPE_NUM):
+        {
+            printf("num ");
+            break;
+        }
+        default:
+        {
+            printf("error ");
+            break;
+        }
+
+    }
+
+
+
+    if(t->varname!=NULL) printf("%c ", *(t->varname));
+    else printf("%d ", t->val);
+    printf("\n");
+
+}
+
+
+void printInfix(struct expr_tree_node * t)
+{
+    if(t==NULL) return;
+    printInfix(t->left);
+    printNode(t);
+    printInfix(t->right);
+
+}
+
+
+void explInit(FILE * target_file)
+{
+    fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
+    fprintf(target_file, "MOV SP, 4095\n");
+    fprintf(target_file, "MOV BP, 4096\n");
+}
+
+void explEnd(FILE * target_file)
+{
+    if(LAST_USED_REGISTER!=-1)
+    {
+        printf("Warning: Register Leak! All registers are not freed.\n");
+    }
+    fprintf(target_file, "INT 10\n");
+
 }

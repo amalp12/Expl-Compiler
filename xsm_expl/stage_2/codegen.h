@@ -28,3 +28,13 @@ int getFreeReg(); // Allocate a free register
 void freeLastReg(); // Free the last used register
 
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) ;
+
+int getVarAddress(char c);
+
+void printInfix(struct expr_tree_node * t);
+
+void printNode(struct expr_tree_node * t);
+
+void explInit(FILE * target_file);
+
+void explEnd(FILE * target_file);

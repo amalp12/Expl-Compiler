@@ -8,7 +8,7 @@ struct expr_tree_node{
     int val;        // value of a number for NUM nodes.
     int type;       // type of variable
     char* varname;  // name of a variable for ID nodes
-    // int nodetype;   // information about non-leaf nodes - read/write/connector/+/* etc.
+    int nodetype;   // information about non-leaf nodes - read/write/connector/+/* etc.
     struct expr_tree_node * left, * right;     // left and right branches
 
 };
