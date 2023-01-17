@@ -114,6 +114,105 @@ int getVarAddress(char varname)
     return  4096+(varname-'a');
 }
 
+int evaluate( struct expr_tree_node *t, int * identifier) {
+    
+    // Corner null case
+    if(t==NULL) return -1;
+
+    // Evaluating the left and right trees respectively
+    // Note that the order is very important
+    int leftReg = evaluate(t->left, identifier);
+    int rightReg = evaluate(t->right, identifier);
+
+   
+    int return_val=-1;
+    switch (t->type)
+    {
+    
+        case(_TYPE_ID):
+        {
+            int index= *(t->varname)-'a';
+            return_val = identifier[index];
+            break;
+        }
+        case(_TYPE_NUM):
+        {
+            return_val =  t->val;
+            break;
+        }
+        // Addition
+        case (_TYPE_PLUS):
+        {
+
+            return_val =  leftReg+rightReg;
+            break;
+        }
+        // Subtraction
+        case(_TYPE_MINUS):
+        {
+
+            return_val =  leftReg-rightReg;
+            break;
+        }
+
+        // Muliplication
+        case(_TYPE_MUL):
+        {
+
+            return_val =  leftReg*rightReg;
+            break;
+        }
+
+        // Division
+        case(_TYPE_DIV):
+        {
+
+            return_val =  leftReg/rightReg;
+            break;
+        }
+
+        // EQUAL TO
+        case(_TYPE_EQUALS):
+        {
+            identifier[*(t->left->varname)-'a'] = rightReg;
+            return_val =  -1;
+            break;
+        }
+        case(_TYPE_CONNECTOR):
+        {
+            return_val =  -1;
+            break;
+        }
+        case(_TYPE_READ):
+        {
+            int index = *(t->left->varname)-'a';
+            scanf("%d", &identifier[index]);
+            return_val = -1;
+            break;
+        }
+        case(_TYPE_WRITE):
+        {    
+          
+            printf("%d\n", leftReg);
+            return_val = -1;
+            break;
+        }
+        default:
+        {
+            printf("Invalid type\n");
+            break;
+        }
+
+    }
+
+    
+
+    // the result is stored in the register used for left tree evaluation
+    // return register number storing result
+    return return_val;
+}
+
+
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     
     // Corner null case
@@ -197,14 +296,22 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case(_TYPE_CONNECTOR):
         {
+            if(leftReg!=-1)
+            {
+                freeLastReg();
+            }
+            if(rightReg!=-1)
+            {
+                freeLastReg();
+            }
             return_val =  -1;
             break;
         }
         case(_TYPE_READ):
         {
-            reg_index new_reg = getFreeReg();
-            fprintf(target_file, "MOV R%d, %d\n", new_reg, getVarAddress(*(t->left->varname)));
-            read(new_reg, target_file);
+
+            fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(*(t->left->varname)));
+            read(leftReg, target_file);
             freeLastReg();
             return_val = -1;
             break;
@@ -325,8 +432,8 @@ void printInfix(struct expr_tree_node * t)
 void explInit(FILE * target_file)
 {
     fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
-    fprintf(target_file, "MOV SP, 4095\n");
-    fprintf(target_file, "MOV BP, 4096\n");
+    fprintf(target_file, "MOV SP, %d\n",_STACK_POINTER);
+    fprintf(target_file, "MOV BP, %d\n", _BASE_POINTER);
 }
 
 void explEnd(FILE * target_file)

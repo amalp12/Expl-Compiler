@@ -23,6 +23,7 @@
 
 void yyerror(char const *s);
 extern FILE* yyin;
+int identifiers[26];
 
 int yylex(void);
 
@@ -70,10 +71,10 @@ program : START Slist END SEMICOLON
   
   // printInfix($<node>2);
 
-;
   printf("Generating Assembly Code... \n");
   explInit(target_file);
   codeGen($<node>2, target_file);
+  evaluate($<node>2, identifiers);
   explEnd(target_file);
   printf("Complete \n");
 

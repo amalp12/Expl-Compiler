@@ -38,3 +38,5 @@ void printNode(struct expr_tree_node * t);
 void explInit(FILE * target_file);
 
 void explEnd(FILE * target_file);
+
+int evaluate( struct expr_tree_node *t, int * identifier) ;

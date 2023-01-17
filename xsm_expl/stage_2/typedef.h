@@ -12,5 +12,12 @@
 #define _TYPE_EQUALS 9
 #define _NONE -1
 
+
 // codgen
 #define reg_index int
+
+
+// stack
+#define _STACK_POINTER 5096
+#define _BASE_POINTER 5097
+
