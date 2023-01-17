@@ -126,29 +126,29 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
 
    
     int return_val=-1;
-    switch (t->type)
+    switch (t->nodetype)
     {
     
-        case(_TYPE_ID):
+        case(_NODE_TYPE_ID):
         {
             int index= *(t->varname)-'a';
             return_val = identifier[index];
             break;
         }
-        case(_TYPE_NUM):
+        case(_NODE_TYPE_NUM):
         {
             return_val =  t->val;
             break;
         }
         // Addition
-        case (_TYPE_PLUS):
+        case (_NODE_TYPE_PLUS):
         {
 
             return_val =  leftReg+rightReg;
             break;
         }
         // Subtraction
-        case(_TYPE_MINUS):
+        case(_NODE_TYPE_MINUS):
         {
 
             return_val =  leftReg-rightReg;
@@ -156,7 +156,7 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         }
 
         // Muliplication
-        case(_TYPE_MUL):
+        case(_NODE_TYPE_MUL):
         {
 
             return_val =  leftReg*rightReg;
@@ -164,7 +164,7 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         }
 
         // Division
-        case(_TYPE_DIV):
+        case(_NODE_TYPE_DIV):
         {
 
             return_val =  leftReg/rightReg;
@@ -172,25 +172,25 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         }
 
         // EQUAL TO
-        case(_TYPE_EQUALS):
+        case(_NODE_TYPE_EQUALS):
         {
             identifier[*(t->left->varname)-'a'] = rightReg;
             return_val =  -1;
             break;
         }
-        case(_TYPE_CONNECTOR):
+        case(_NODE_TYPE_CONNECTOR):
         {
             return_val =  -1;
             break;
         }
-        case(_TYPE_READ):
+        case(_NODE_TYPE_READ):
         {
             int index = *(t->left->varname)-'a';
             scanf("%d", &identifier[index]);
             return_val = -1;
             break;
         }
-        case(_TYPE_WRITE):
+        case(_NODE_TYPE_WRITE):
         {    
           
             printf("%d\n", leftReg);
@@ -199,7 +199,7 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         }
         default:
         {
-            printf("Invalid type\n");
+            printf("Invalid Node Type\n");
             break;
         }
 
@@ -225,10 +225,10 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
    
     reg_index return_val;
-    switch (t->type)
+    switch (t->nodetype)
     {
     
-        case(_TYPE_ID):
+        case(_NODE_TYPE_ID):
         {
             reg_index newReg= getFreeReg();
             // if leaf is an identifier
@@ -236,7 +236,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val = newReg;
             break;
         }
-        case(_TYPE_NUM):
+        case(_NODE_TYPE_NUM):
         {
             reg_index newReg= getFreeReg();
             // if leaf is a number
@@ -245,7 +245,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             break;
         }
         // Addition
-        case (_TYPE_PLUS):
+        case (_NODE_TYPE_PLUS):
         {
 
             fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
@@ -255,7 +255,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             break;
         }
         // Subtraction
-        case(_TYPE_MINUS):
+        case(_NODE_TYPE_MINUS):
         {
             fprintf(target_file, "SUB R%d, R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
@@ -265,7 +265,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
 
         // Muliplication
-        case(_TYPE_MUL):
+        case(_NODE_TYPE_MUL):
         {
             fprintf(target_file, "MUL R%d, R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
@@ -275,7 +275,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
 
         // Division
-        case(_TYPE_DIV):
+        case(_NODE_TYPE_DIV):
         {
             fprintf(target_file, "DIV R%d, R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
@@ -285,7 +285,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
 
         // EQUAL TO
-        case(_TYPE_EQUALS):
+        case(_NODE_TYPE_EQUALS):
         {
             fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(*(t->left->varname)));
             fprintf(target_file, "MOV [R%d], R%d\n", leftReg, rightReg);
@@ -294,7 +294,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val =  leftReg;
             break;
         }
-        case(_TYPE_CONNECTOR):
+        case(_NODE_TYPE_CONNECTOR):
         {
             if(leftReg!=-1)
             {
@@ -307,7 +307,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val =  -1;
             break;
         }
-        case(_TYPE_READ):
+        case(_NODE_TYPE_READ):
         {
 
             fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(*(t->left->varname)));
@@ -316,7 +316,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val = -1;
             break;
         }
-        case(_TYPE_WRITE):
+        case(_NODE_TYPE_WRITE):
         {    
             write(leftReg, target_file);
             freeLastReg();
@@ -325,7 +325,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         default:
         {
-            printf("Invalid type\n");
+            printf("Invalid Node Type\n");
             break;
         }
 
@@ -341,63 +341,63 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 void printNode(struct expr_tree_node * t)
 {
     if(t==NULL) return;
-    switch (t->type)
+    switch (t->nodetype)
     {
     
         // Addition
-        case (_TYPE_PLUS):
+        case (_NODE_TYPE_PLUS):
         {
             printf("+ ");
             break;
         }
         // Subtraction
-        case(_TYPE_MINUS):
+        case(_NODE_TYPE_MINUS):
         {
             printf("- ");
             break;
         }
 
         // Muliplication
-        case(_TYPE_MUL):
+        case(_NODE_TYPE_MUL):
         {
             printf("* ");
             break;
         }
 
         // Division
-        case(_TYPE_DIV):
+        case(_NODE_TYPE_DIV):
         {
             printf("/ ");
             break;
         }
 
         // EQUAL TO
-        case(_TYPE_EQUALS):
+        case(_NODE_TYPE_EQUALS):
         {
             printf("= ");
             break;
         }
-        case(_TYPE_CONNECTOR):
+        case(_NODE_TYPE_CONNECTOR):
         {
             printf("conn ");
             break;
         }
-        case(_TYPE_READ):
+        case(_NODE_TYPE_READ):
         {
             printf("r ");
             break;
         }
-        case(_TYPE_WRITE):
+        case(_NODE_TYPE_WRITE):
         {
             printf("w ");
             break;
         }
-        case(_TYPE_ID):
+        case(_NODE_TYPE_ID):
         {
             printf("id ");
             break;
         }
-        case(_TYPE_NUM):
+        case(_NODE_TYPE_NUM):
         {
             printf("num ");
             break;

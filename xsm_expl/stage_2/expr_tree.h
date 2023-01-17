@@ -13,7 +13,7 @@ struct expr_tree_node{
 
 };
 
-struct expr_tree_node * makeNode(int val, int type, char* c, struct expr_tree_node *l, struct expr_tree_node *r);
+struct expr_tree_node * makeNode(int val, int nodetype, int type,  char* c, struct expr_tree_node *l, struct expr_tree_node *r);
 struct expr_tree_node * makeConnectorNode( struct expr_tree_node *l, struct expr_tree_node *r);
 
 struct expr_tree_node * makeReadNode(struct expr_tree_node *id);
