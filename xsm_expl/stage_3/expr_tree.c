@@ -1,0 +1,80 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+struct expr_tree_node * makeNode(int val, int nodetype, int type, char* c, struct expr_tree_node *l, struct expr_tree_node *r)
+{
+
+    struct expr_tree_node * new_node = (struct expr_tree_node *) malloc(sizeof(struct expr_tree_node));
+    new_node->left = l;
+    new_node->right = r;
+    new_node->nodetype = nodetype;
+    new_node->type = type;
+    new_node->val = val;
+    new_node->varname =c;
+
+    return new_node;
+
+
+}
+
+struct expr_tree_node* makeOperatorNode(int nodetype, struct expr_tree_node *l,struct expr_tree_node *r){
+	
+
+	return makeNode(-1,nodetype, _TYPE_INT, NULL, l, r);
+}
+
+
+struct expr_tree_node * makeRelopNode(int nodetype,struct expr_tree_node *l,struct expr_tree_node *r){
+	
+
+	return makeNode(-1,nodetype, _TYPE_BOOL, NULL, l, r);
+}
+
+struct expr_tree_node * makeIdNode(char c)
+{
+    char * id = (char *)(malloc(sizeof(char)));
+    (*id) = c;  
+
+    return makeNode(_NONE, _NODE_TYPE_ID,_TYPE_INT,id,NULL,NULL);
+}
+
+struct expr_tree_node * makeNumberNode(int num )
+{
+
+    return makeNode(num, _NODE_TYPE_NUM, _TYPE_INT,NULL,NULL,NULL);
+}
+
+struct expr_tree_node * makeWriteNode(struct expr_tree_node *expr)
+{
+    return makeNode(_NONE, _NODE_TYPE_WRITE, _TYPE_INT,NULL,expr,NULL);
+}
+
+struct expr_tree_node * makeReadNode(struct expr_tree_node *id)
+{
+    return makeNode(_NONE, _NODE_TYPE_READ,_TYPE_INT,NULL,id,NULL);
+}
+
+struct expr_tree_node * makeConnectorNode( struct expr_tree_node *l, struct expr_tree_node *r)
+{
+    return makeNode(_NONE, _NODE_TYPE_CONNECTOR,_TYPE_CONNECTOR, NULL, l,r);
+}
+
+struct expr_tree_node * makeIfElseNode( struct expr_tree_node *cond, struct expr_tree_node *thenCode, struct expr_tree_node * elseCode)
+{
+    struct expr_tree_node * thenNode =  makeNode(_NONE, _NODE_TYPE_THEN,_TYPE_KEYWORD, NULL, thenCode,elseCode);
+    struct expr_tree_node * ifNode =  makeNode(_NONE, _NODE_TYPE_IF_ELSE,_TYPE_KEYWORD, NULL, cond,thenNode);
+    
+    return ifNode;
+}
+
+

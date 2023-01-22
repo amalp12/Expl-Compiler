@@ -77,18 +77,20 @@ struct expr_tree_node* makeOperatorNode(char c,struct expr_tree_node *l,struct e
 	}
 	return makeNode(-1,num, _TYPE_OPERATOR, NULL, l, r);
 }
+
 struct expr_tree_node * makeIdNode(char c)
 {
     char * id = (char *)(malloc(sizeof(char)));
     (*id) = c;  
 
-    return makeNode(_NONE, _NODE_TYPE_ID,_TYPE_CHAR,id,NULL,NULL);
+    return makeNode(_NONE, _NODE_TYPE_ID,_NONE,id,NULL,NULL);
 }
+
 
 struct expr_tree_node * makeNumberNode(int num )
 {
 
-    return makeNode(num, _NODE_TYPE_NUM, _TYPE_NUMBER,NULL,NULL,NULL);
+    return makeNode(num, _NODE_TYPE_NUM, _TYPE_INT,NULL,NULL,NULL);
 }
 
 struct expr_tree_node * makeWriteNode(struct expr_tree_node *expr)

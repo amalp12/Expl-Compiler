@@ -25,6 +25,7 @@ int getFreeReg() // Allocate a free register
         return -1;
     }
     LAST_USED_REGISTER++;
+    printf("Allocated register R%d\n",LAST_USED_REGISTER);
     return LAST_USED_REGISTER;
 }
 

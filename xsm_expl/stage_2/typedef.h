@@ -13,7 +13,7 @@
 
 
 // Type
-#define _TYPE_NUMBER 0
+#define _TYPE_INT 0
 #define _TYPE_OPERATOR 1
 #define _TYPE_LIBRARY_FUNCTION 2
 #define _TYPE_STRING 3

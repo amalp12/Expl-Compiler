@@ -1203,7 +1203,7 @@ yyreduce:
 {
   FILE * target_file = fopen("assemblycode.xsm","w");
   
-  // printInfix($<node>2);
+  printInfix((yyvsp[-2].node));
 
   printf("Generating Assembly Code... \n");
   explInit(target_file);
