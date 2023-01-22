@@ -22,6 +22,7 @@
 
 
 int LAST_USED_REGISTER = -1;
+int LAST_USED_LABEL = -1;
 
 
 int getFreeReg(); // Allocate a free register
@@ -42,3 +43,4 @@ void explInit(FILE * target_file);
 void explEnd(FILE * target_file);
 
 int evaluate( struct expr_tree_node *t, int * identifier) ;
+int getNewLabel(); // Get a new label number

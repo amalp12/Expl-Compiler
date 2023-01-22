@@ -72,7 +72,7 @@ struct expr_tree_node * makeNode(int val, int type, char* c, struct expr_tree_no
 
 program : START Slist END SEMICOLON 
 {
-  FILE * target_file = fopen("assemblycode.xsm","w");
+  FILE * target_file = fopen("untranslated_assembly.xsm","w");
   
   // printInfix($<node>2);
 

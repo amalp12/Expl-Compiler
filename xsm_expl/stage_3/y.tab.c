@@ -1292,7 +1292,7 @@ yyreduce:
   case 2: /* program: START Slist END SEMICOLON  */
 #line 74 "expr_tree.y"
 {
-  FILE * target_file = fopen("assemblycode.xsm","w");
+  FILE * target_file = fopen("untranslated_assembly.xsm","w");
   
   // printInfix($<node>2);
 

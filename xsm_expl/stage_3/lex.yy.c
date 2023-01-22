@@ -1813,7 +1813,7 @@ void yyfree (void * ptr )
 int yywrap(void){
     if(firstParse)
     {
-        yyin =fopen("in.xsm", "r");
+        yyin =fopen("untranslated_assembly.xsm", "r");
         firstParse = 0;
         
         return 0;
@@ -1822,8 +1822,8 @@ int yywrap(void){
 }
 
 int main(){
-    yyin = fopen("in.xsm", "r");
-    out = fopen("out.xsm", "w");
+    yyin = fopen("untranslated_assembly.xsm", "r");
+    out = fopen("assemblycode.xsm", "w");
     yylex();
     printLabelList(labelLinkedList);
     fclose(out);

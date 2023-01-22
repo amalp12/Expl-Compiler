@@ -17,6 +17,12 @@
 */
 
 
+int getNewLabel() // Get a new label number
+{
+    LAST_USED_LABEL++;
+    return LAST_USED_LABEL;
+}
+
 int getFreeReg() // Allocate a free register
 {
     if(LAST_USED_REGISTER == 19)
@@ -218,11 +224,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     // Corner null case
     if(t==NULL) return -1;
 
-    // Evaluating the left and right trees respectively
-    // Note that the order is very important
-    reg_index leftReg = codeGen(t->left, target_file);
-    reg_index rightReg = codeGen(t->right, target_file);
-
+    
    
     reg_index return_val;
     switch (t->nodetype)
@@ -230,6 +232,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     
         case(_NODE_TYPE_ID):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             reg_index newReg= getFreeReg();
             // if leaf is an identifier
             fprintf(target_file, "MOV R%d, [%d]\n", newReg,  getVarAddress(*(t->varname)));
@@ -238,6 +245,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case(_NODE_TYPE_NUM):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             reg_index newReg= getFreeReg();
             // if leaf is a number
             fprintf(target_file, "MOV R%d, %d\n", newReg,  t->val);
@@ -247,6 +259,10 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Addition
         case (_NODE_TYPE_PLUS):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
 
             fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
@@ -257,6 +273,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Subtraction
         case(_NODE_TYPE_MINUS):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             fprintf(target_file, "SUB R%d, R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
             freeLastReg();
@@ -267,6 +288,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Muliplication
         case(_NODE_TYPE_MUL):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             fprintf(target_file, "MUL R%d, R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
             freeLastReg();
@@ -277,6 +303,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Division
         case(_NODE_TYPE_DIV):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             fprintf(target_file, "DIV R%d, R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
             freeLastReg();
@@ -287,6 +318,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // EQUAL TO
         case(_NODE_TYPE_EQUALS):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(*(t->left->varname)));
             fprintf(target_file, "MOV [R%d], R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
@@ -296,6 +332,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case(_NODE_TYPE_CONNECTOR):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             if(leftReg!=-1)
             {
                 freeLastReg();
@@ -309,6 +350,10 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case(_NODE_TYPE_READ):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
 
             fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(*(t->left->varname)));
             read(leftReg, target_file);
@@ -318,6 +363,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case(_NODE_TYPE_WRITE):
         {    
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             write(leftReg, target_file);
             freeLastReg();
             return_val = -1;
@@ -325,8 +375,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_IF_ELSE):
         {
+            // Evaluating the condtion
+            reg_index conditionReg = codeGen(t->left, target_file);
+
             int label1 = getNewLabel();
-            fprintf(target_file, "JZ R%d, _L%d\n", leftReg, label1);
+            fprintf(target_file, "JZ R%d, _L%d\n", conditionReg, label1);
             // generating code for if block
             codeGen(t->right->left, target_file);
 
@@ -336,10 +389,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // if else code exists
             if(t->right->right!=NULL)
             {
+                // end label
                 int label2 = getNewLabel();
+                // for jumping to end of if else block if  if code was executed
                 fprintf(target_file, "JMP _L%d\n", label2);
-                fprintf(target_file, "_L%d:\n", label1);
                 // generating code for else block
+                fprintf(target_file, "_L%d:\n", label1);
                 codeGen(t->right->right, target_file);
                 fprintf(target_file, "_L%d:\n", label2);
             
@@ -350,6 +405,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
                 // end of if block 
                 fprintf(target_file, "_L%d:\n", label1);
             }
+            freeLastReg();
+            return_val = -1;
 
             
         }
@@ -360,6 +417,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_LE):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             fprintf(target_file, "LE R%d, R%d\n", leftReg, rightReg);
             freeLastReg();
             return_val = leftReg;
@@ -367,6 +429,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_GE):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             fprintf(target_file, "GE R%d, R%d\n", leftReg, rightReg);
             freeLastReg();
             return_val = leftReg;
@@ -374,6 +441,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_LT):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             fprintf(target_file, "LT R%d, R%d\n", leftReg, rightReg);
             freeLastReg();
             return_val = leftReg;
@@ -381,6 +453,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_GT):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             fprintf(target_file, "GT R%d, R%d\n", leftReg, rightReg);
             freeLastReg();
             return_val = leftReg;
@@ -388,6 +465,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_EQ):
         {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
             fprintf(target_file, "EQ R%d, R%d\n", leftReg, rightReg);
             freeLastReg();
             return_val = leftReg;

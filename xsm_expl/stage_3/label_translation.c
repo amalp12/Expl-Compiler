@@ -1,15 +1,5 @@
-
-
-int getNewLabel() // Get a new label number
-{
-    LAST_USED_LABEL++;
-    return LAST_USED_LABEL;
-}
-
 struct labelNode * labelListAppend(struct labelNode * head, int lineNumber, char * labelName, int offset) {
     struct labelNode * new_label = (struct labelNode *) malloc(sizeof(struct labelNode));
-    int labelNumber = getNewLabel();
-    new_label->labelNumber = labelNumber;
     new_label->address = _CODE_START_ADDRESS +2*(lineNumber-1);
     new_label->next = NULL;
 
@@ -65,7 +55,7 @@ void printLabelList(struct labelNode * head) {
     struct labelNode * temp = head;
     while (temp != NULL)
     {
-        printf("Label Name: %s Label Number: %d, Address: %d Line Number: %d\n",temp->labelName, temp->labelNumber, temp->address, (temp->address-_CODE_START_ADDRESS)/2+1);
+        printf("Label Name: %s, Address: %d, Line Number: %d\n",temp->labelName, temp->address, (temp->address-_CODE_START_ADDRESS)/2+1);
         temp = temp->next;
     }
 }
