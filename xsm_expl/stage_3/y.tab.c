@@ -1298,8 +1298,8 @@ yyreduce:
 
   printf("Generating Assembly Code... \n");
   explInit(target_file);
-  codeGen((yyvsp[-2].node), target_file);
-  // evaluate($<node>2, identifiers);
+  // codeGen($<node>2, target_file);
+  evaluate((yyvsp[-2].node), identifiers);
   explEnd(target_file);
   printf("Complete \n");
 

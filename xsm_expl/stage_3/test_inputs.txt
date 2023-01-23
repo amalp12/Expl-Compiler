@@ -18,3 +18,18 @@ begin
 end;
 
 
+
+
+begin
+    read(a);
+    read(b);
+    while(a>0) do
+        write(a);
+        while(b>0) do
+            write(b);
+            b=b-1;
+        endwhile;
+        b=a;
+        a=a-1;
+    endwhile;
+end;
