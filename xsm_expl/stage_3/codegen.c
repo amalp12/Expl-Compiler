@@ -373,17 +373,41 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val = -1;
             break;
         }
+        case(_NODE_TYPE_WHILE):
+        {
+
+            // label for while block start
+            int whileStartLabel = getNewLabel();
+            fprintf(target_file, "_L%d:\n", whileStartLabel);
+            // Evaluating the condtion
+            reg_index conditionReg = codeGen(t->left, target_file);  
+            // label for while block end
+            int whileEndLabel = getNewLabel();
+            // jumping to end if condition is false
+            fprintf(target_file, "JZ R%d, _L%d\n", conditionReg, whileEndLabel);
+
+            // generating code for while block
+            codeGen(t->right, target_file);
+
+            // jumping back to condition evaluation
+            fprintf(target_file, "JMP _L%d\n", whileStartLabel);
+            // label for end of while block
+            fprintf(target_file, "_L%d:\n", whileEndLabel);
+
+            return_val = -1;
+
+
+        }
         case (_NODE_TYPE_IF_ELSE):
         {
             // Evaluating the condtion
             reg_index conditionReg = codeGen(t->left, target_file);
 
+            // label for if block
             int label1 = getNewLabel();
             fprintf(target_file, "JZ R%d, _L%d\n", conditionReg, label1);
             // generating code for if block
             codeGen(t->right->left, target_file);
-
-
             
 
             // if else code exists

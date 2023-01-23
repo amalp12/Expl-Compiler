@@ -737,18 +737,22 @@ case 1:
 YY_RULE_SETUP
 #line 16 "label_translation.l"
 {
-    //removing unessesary characters
+
+    // In the first parse we add all label declarations  to the linked list
     if(firstParse)
     {
         labelLinkedList = labelListAppend(labelLinkedList, getLineNumber(), yytext,2);
     }
+    // Note that we do not increment the line number for the label declaration in the first parse
+    // It is because in the final code we don't have the labels but the addresses of the labels in the Jump Instructions only
 }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 23 "label_translation.l"
+#line 26 "label_translation.l"
 {
+    // we increment the line number for the label reference in the first parse
     if(firstParse)
     {
         incrementLineNumber();
@@ -756,7 +760,8 @@ YY_RULE_SETUP
     }
     else
     {
-     
+        // in the second parse we search each text in  the code that resembles a label with the label list to check if it exists
+        // if it exits then we get the address of the label and replce the label name with the address of the label
         int address = getLabelAddress(labelLinkedList, yytext, 1);
         if(address!=_NONE)fprintf(out, "%d\n", address);
         else fprintf(out, "%s", yytext);
@@ -769,13 +774,15 @@ YY_RULE_SETUP
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 40 "label_translation.l"
+#line 45 "label_translation.l"
 {
+    // in the first parse we increment the line number for each new line
     if(firstParse)
     {
+
         incrementLineNumber();
     }
-    else
+    else // in the second parse we print the new line to the code file
     {
         fprintf(out, "%s", yytext);
     }
@@ -783,9 +790,9 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 50 "label_translation.l"
+#line 57 "label_translation.l"
 {
-    if(!firstParse)
+    if(!firstParse) // in the second pare we print the rest of the code to the code file
     {
         fprintf(out, "%s", yytext);
     }
@@ -793,10 +800,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 57 "label_translation.l"
+#line 64 "label_translation.l"
 ECHO;
 	YY_BREAK
-#line 799 "lex.yy.c"
+#line 806 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1801,25 +1808,33 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 57 "label_translation.l"
+#line 64 "label_translation.l"
 
 
 int yywrap(void){
+    // there are two parses, in the first parse we add all label declarations to the linked list and generate addresses for them
+    // in the second parse we replace the label names with the addresses of the labels
     if(firstParse)
     {
+        // we reset yyin to the beginning of the file for the next parse
         yyin =fopen("untranslated_assembly.xsm", "r");
         firstParse = 0;
-        
+        // return 0 to continue the parsing
         return 0;
     }
+    // return 1 to stop the parsing
     return 1;
 }
 
 int main(){
+    // open the file to be parsed
     yyin = fopen("untranslated_assembly.xsm", "r");
+    // open the file to write the translated code
     out = fopen("assemblycode.xsm", "w");
+    // parse the file
     yylex();
-    printLabelList(labelLinkedList);
+    // print the label list
+    // printLabelList(labelLinkedList);
     fclose(out);
     
     return 0;

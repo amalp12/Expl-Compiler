@@ -97,7 +97,7 @@ Slist : Slist Stmt {$<node>$ = makeConnectorNode($<node>1,$<node>2);}| Stmt {$<n
 Stmt : InputStmt | OutputStmt | AsgStmt |  Ifstmt | Whilestmt;
 Ifstmt : IF '('expr')' THEN Slist ELSE Slist ENDIF SEMICOLON {$<node>$ = makeIfElseNode($<node>3,$<node>6,$<node>8);}
 | IF '('expr')' THEN Slist ENDIF SEMICOLON {$<node>$ = makeIfElseNode($<node>3,$<node>6,NULL);};
-Whilestmt : WHILE '('expr')' DO Slist ENDWHILE SEMICOLON;
+Whilestmt : WHILE '('expr')' DO Slist ENDWHILE SEMICOLON{$<node>$ = makeWhileNode($<node>3,$<node>6);};
 InputStmt : READ '(' ID ')' SEMICOLON {$<node>$ = makeReadNode($<node>3);};
 OutputStmt : WRITE '(' expr ')' SEMICOLON {$<node>$ = makeWriteNode($<node>3);}; 
 AsgStmt :  ID EQUALS expr SEMICOLON {$<node>$ = makeOperatorNode(_NODE_TYPE_EQUALS,$<node>1,$<node>3) ;};

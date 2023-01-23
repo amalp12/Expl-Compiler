@@ -1,18 +1,13 @@
 begin
     read(a);
     read(b);
-    read(c);
-    if (a < b) then
-        if (b < c) then 
-            write(c);
-        else
+    while(a>0) do
+        write(a);
+        while(b>0) do
             write(b);
-        endif;
-    else
-        if (a < c) then
-            write(c);
-        else
-            write(a);
-        endif;
-    endif;
+            b=b-1;
+        endwhile;
+        b=a;
+        a=a-1;
+    endwhile;
 end;

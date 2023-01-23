@@ -77,4 +77,7 @@ struct expr_tree_node * makeIfElseNode( struct expr_tree_node *cond, struct expr
     return ifNode;
 }
 
-
+struct expr_tree_node * makeWhileNode( struct expr_tree_node *cond, struct expr_tree_node *body)
+{
+    return makeNode(_NONE, _NODE_TYPE_WHILE,_TYPE_KEYWORD, NULL, cond,body);
+}

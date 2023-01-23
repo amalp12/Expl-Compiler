@@ -29,3 +29,5 @@ struct expr_tree_node * makeOperatorNode(int nodetype,struct expr_tree_node *l,s
 struct expr_tree_node * makeRelopNode(int nodetype, struct expr_tree_node *l,struct expr_tree_node *r);
 
 struct expr_tree_node * makeIfElseNode( struct expr_tree_node *cond, struct expr_tree_node *thenCode, struct expr_tree_node * elseCode);
+
+struct expr_tree_node * makeWhileNode( struct expr_tree_node *cond, struct expr_tree_node *body);

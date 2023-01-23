@@ -1343,104 +1343,110 @@ yyreduce:
 #line 1344 "y.tab.c"
     break;
 
+  case 13: /* Whilestmt: WHILE '(' expr ')' DO Slist ENDWHILE SEMICOLON  */
+#line 100 "expr_tree.y"
+                                                        {(yyval.node) = makeWhileNode((yyvsp[-5].node),(yyvsp[-2].node));}
+#line 1350 "y.tab.c"
+    break;
+
   case 14: /* InputStmt: READ '(' ID ')' SEMICOLON  */
 #line 101 "expr_tree.y"
                                       {(yyval.node) = makeReadNode((yyvsp[-2].node));}
-#line 1350 "y.tab.c"
+#line 1356 "y.tab.c"
     break;
 
   case 15: /* OutputStmt: WRITE '(' expr ')' SEMICOLON  */
 #line 102 "expr_tree.y"
                                           {(yyval.node) = makeWriteNode((yyvsp[-2].node));}
-#line 1356 "y.tab.c"
+#line 1362 "y.tab.c"
     break;
 
   case 16: /* AsgStmt: ID EQUALS expr SEMICOLON  */
 #line 103 "expr_tree.y"
                                     {(yyval.node) = makeOperatorNode(_NODE_TYPE_EQUALS,(yyvsp[-3].node),(yyvsp[-1].node)) ;}
-#line 1362 "y.tab.c"
+#line 1368 "y.tab.c"
     break;
 
   case 17: /* expr: expr PLUS expr  */
 #line 104 "expr_tree.y"
                        {(yyval.node) = makeOperatorNode(_NODE_TYPE_PLUS,(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1368 "y.tab.c"
+#line 1374 "y.tab.c"
     break;
 
   case 18: /* expr: expr MINUS expr  */
 #line 105 "expr_tree.y"
                    { (yyval.node) = makeOperatorNode(_NODE_TYPE_MINUS,(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1374 "y.tab.c"
+#line 1380 "y.tab.c"
     break;
 
   case 19: /* expr: expr MUL expr  */
 #line 106 "expr_tree.y"
                 {(yyval.node) = makeOperatorNode(_NODE_TYPE_MUL,(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1380 "y.tab.c"
+#line 1386 "y.tab.c"
     break;
 
   case 20: /* expr: expr DIV expr  */
 #line 107 "expr_tree.y"
                 {(yyval.node) = makeOperatorNode(_NODE_TYPE_DIV,(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1386 "y.tab.c"
+#line 1392 "y.tab.c"
     break;
 
   case 21: /* expr: '(' expr ')'  */
 #line 108 "expr_tree.y"
               {(yyval.node) = (yyvsp[-1].node);}
-#line 1392 "y.tab.c"
+#line 1398 "y.tab.c"
     break;
 
   case 22: /* expr: NUMBER  */
 #line 109 "expr_tree.y"
          {(yyval.node) = (yyvsp[0].node);}
-#line 1398 "y.tab.c"
+#line 1404 "y.tab.c"
     break;
 
   case 23: /* expr: ID  */
 #line 110 "expr_tree.y"
      {(yyval.node) = (yyvsp[0].node);}
-#line 1404 "y.tab.c"
+#line 1410 "y.tab.c"
     break;
 
   case 24: /* expr: expr LT expr  */
 #line 111 "expr_tree.y"
                {(yyval.node) = makeRelopNode(_NODE_TYPE_LT,(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1410 "y.tab.c"
+#line 1416 "y.tab.c"
     break;
 
   case 25: /* expr: expr GT expr  */
 #line 112 "expr_tree.y"
                {(yyval.node) = makeRelopNode(_NODE_TYPE_GT,(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1416 "y.tab.c"
+#line 1422 "y.tab.c"
     break;
 
   case 26: /* expr: expr LTE expr  */
 #line 113 "expr_tree.y"
                  {(yyval.node) = makeRelopNode(_NODE_TYPE_LE,(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1422 "y.tab.c"
+#line 1428 "y.tab.c"
     break;
 
   case 27: /* expr: expr GTE expr  */
 #line 114 "expr_tree.y"
                 {(yyval.node) = makeRelopNode(_NODE_TYPE_GE,(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1428 "y.tab.c"
+#line 1434 "y.tab.c"
     break;
 
   case 28: /* expr: expr NE expr  */
 #line 115 "expr_tree.y"
                {(yyval.node) = makeRelopNode(_NODE_TYPE_NE,(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1434 "y.tab.c"
+#line 1440 "y.tab.c"
     break;
 
   case 29: /* expr: expr EQ expr  */
 #line 116 "expr_tree.y"
                {(yyval.node) = makeRelopNode(_NODE_TYPE_EQ,(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1440 "y.tab.c"
+#line 1446 "y.tab.c"
     break;
 
 
-#line 1444 "y.tab.c"
+#line 1450 "y.tab.c"
 
       default: break;
     }
