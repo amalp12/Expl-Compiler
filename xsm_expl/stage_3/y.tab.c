@@ -1299,7 +1299,7 @@ yyreduce:
   printf("Generating Assembly Code... \n");
   explInit(target_file);
   codeGen((yyvsp[-2].node), target_file);
-  evaluate((yyvsp[-2].node), identifiers);
+  // evaluate($<node>2, identifiers);
   explEnd(target_file);
   printf("Complete \n");
 

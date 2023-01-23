@@ -9,28 +9,22 @@ int firstParse = 1;
 FILE * out  ;
 %}
 
-label_decl [a-zA-Z][a-zA-Z0-9]+:\n
-label_ref [a-zA-Z][a-zA-Z0-9]+\n
+label_decl [_a-zA-Z][_a-zA-Z0-9]+:\n
+label_ref [_a-zA-Z][_a-zA-Z0-9]+\n
 %%
 
 {label_decl} {
     //removing unessesary characters
     if(firstParse)
     {
-        labelLinkedList = labelListAppend(labelLinkedList, LINE_NUMBER, yytext,2);
-        LINE_NUMBER++;
-    }
-    else
-    {
-        
-        fprintf(out, "%s", yytext);
-
+        labelLinkedList = labelListAppend(labelLinkedList, getLineNumber(), yytext,2);
     }
 }
 {label_ref} {
     if(firstParse)
     {
-        LINE_NUMBER++;
+        incrementLineNumber();
+
     }
     else
     {
@@ -46,7 +40,7 @@ label_ref [a-zA-Z][a-zA-Z0-9]+\n
 [\n] {
     if(firstParse)
     {
-        LINE_NUMBER++;
+        incrementLineNumber();
     }
     else
     {

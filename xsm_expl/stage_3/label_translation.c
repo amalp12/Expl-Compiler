@@ -1,6 +1,22 @@
+int lineNumberFromAddress(int address)
+{
+    return (address-_CODE_START_ADDRESS)/2+1;
+}
+int addressFromLineNumber(int lineNumber)
+{
+    return _CODE_START_ADDRESS +2*(lineNumber-1);
+}
+void incrementLineNumber()
+{
+    LINE_NUMBER++;
+}
+int getLineNumber()
+{
+    return LINE_NUMBER;
+}
 struct labelNode * labelListAppend(struct labelNode * head, int lineNumber, char * labelName, int offset) {
     struct labelNode * new_label = (struct labelNode *) malloc(sizeof(struct labelNode));
-    new_label->address = _CODE_START_ADDRESS +2*(lineNumber-1);
+    new_label->address = addressFromLineNumber(lineNumber);
     new_label->next = NULL;
 
     // copy label name
@@ -55,7 +71,7 @@ void printLabelList(struct labelNode * head) {
     struct labelNode * temp = head;
     while (temp != NULL)
     {
-        printf("Label Name: %s, Address: %d, Line Number: %d\n",temp->labelName, temp->address, (temp->address-_CODE_START_ADDRESS)/2+1);
+        printf("Label Name: %s, Address: %d, Line Number: %d\n",temp->labelName, temp->address, lineNumberFromAddress(temp->address));
         temp = temp->next;
     }
 }

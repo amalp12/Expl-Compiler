@@ -79,7 +79,7 @@ program : START Slist END SEMICOLON
   printf("Generating Assembly Code... \n");
   explInit(target_file);
   codeGen($<node>2, target_file);
-  evaluate($<node>2, identifiers);
+  // evaluate($<node>2, identifiers);
   explEnd(target_file);
   printf("Complete \n");
 

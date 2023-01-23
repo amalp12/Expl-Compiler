@@ -378,7 +378,7 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    5,    5,    5,    5,    5,    5,
         5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
         5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
-        1,    1,    1,    1,    1,    1,    5,    5,    5,    5,
+        1,    1,    1,    1,    5,    1,    5,    5,    5,    5,
 
         5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
         5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
@@ -740,25 +740,19 @@ YY_RULE_SETUP
     //removing unessesary characters
     if(firstParse)
     {
-        labelLinkedList = labelListAppend(labelLinkedList, LINE_NUMBER, yytext,2);
-        LINE_NUMBER++;
-    }
-    else
-    {
-        
-        fprintf(out, "%s", yytext);
-
+        labelLinkedList = labelListAppend(labelLinkedList, getLineNumber(), yytext,2);
     }
 }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 30 "label_translation.l"
+#line 23 "label_translation.l"
 {
     if(firstParse)
     {
-        LINE_NUMBER++;
+        incrementLineNumber();
+
     }
     else
     {
@@ -775,11 +769,11 @@ YY_RULE_SETUP
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 46 "label_translation.l"
+#line 40 "label_translation.l"
 {
     if(firstParse)
     {
-        LINE_NUMBER++;
+        incrementLineNumber();
     }
     else
     {
@@ -789,7 +783,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 56 "label_translation.l"
+#line 50 "label_translation.l"
 {
     if(!firstParse)
     {
@@ -799,10 +793,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 63 "label_translation.l"
+#line 57 "label_translation.l"
 ECHO;
 	YY_BREAK
-#line 805 "lex.yy.c"
+#line 799 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1807,7 +1801,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 63 "label_translation.l"
+#line 57 "label_translation.l"
 
 
 int yywrap(void){
