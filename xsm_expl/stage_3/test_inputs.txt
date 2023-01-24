@@ -33,3 +33,38 @@ begin
         a=a-1;
     endwhile;
 end;
+
+
+begin
+    read(a);
+    read(b);
+    while(a>0) do
+
+        write(a);
+        c = 1;
+        while(b>0) do
+            write(b);
+            if(c==0) then 
+
+                break;
+            endif;
+            c=0;
+            b=b-1;
+        endwhile;
+        a=a-1;
+    endwhile;
+end;
+
+
+begin
+    read(a);
+   
+
+    repeat
+        breakpoint;
+        write(a);
+        breakpoint;
+        a = a - 1;
+    until (a > 0);
+
+end;

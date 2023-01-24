@@ -81,6 +81,21 @@
 "endwhile" {
     return ENDWHILE;
 }
+"breakpoint" {
+    return BREAKPOINT;
+}
+"break" {
+    return BREAK;
+}
+"continue" {
+    return CONTINUE;
+}
+"repeat" {
+    return REPEAT;
+}
+"until" {
+    return UNTIL;
+}
 ">" {
     return GT;
 }

@@ -31,3 +31,11 @@ struct expr_tree_node * makeRelopNode(int nodetype, struct expr_tree_node *l,str
 struct expr_tree_node * makeIfElseNode( struct expr_tree_node *cond, struct expr_tree_node *thenCode, struct expr_tree_node * elseCode);
 
 struct expr_tree_node * makeWhileNode( struct expr_tree_node *cond, struct expr_tree_node *body);
+
+struct expr_tree_node * makeBreakNode();
+
+struct expr_tree_node * makeContinueNode();
+
+struct expr_tree_node * makeBreakpointNode();
+
+struct expr_tree_node * makeDoWhileNode( struct expr_tree_node *body, struct expr_tree_node *cond);

@@ -13,12 +13,17 @@
 #define _NODE_TYPE_IF_ELSE 10
 #define _NODE_TYPE_THEN 11
 #define _NODE_TYPE_WHILE 12
-#define _NODE_TYPE_LT 13
-#define _NODE_TYPE_GT 14
-#define _NODE_TYPE_LE 15
-#define _NODE_TYPE_GE 16
-#define _NODE_TYPE_NE 17
-#define _NODE_TYPE_EQ 18
+#define _NODE_TYPE_DO_WHILE 13
+#define _NODE_REPEATE_UNTIL 14
+#define _NODE_TYPE_LT 15
+#define _NODE_TYPE_GT 16
+#define _NODE_TYPE_LE 17
+#define _NODE_TYPE_GE 18
+#define _NODE_TYPE_NE 19
+#define _NODE_TYPE_EQ 20
+#define _NODE_TYPE_BREAK 21
+#define _NODE_TYPE_CONTINUE 22
+#define _NODE_TYPE_BREAKPOINT 23
 
 
 // Type

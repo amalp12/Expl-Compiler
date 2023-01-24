@@ -80,7 +80,12 @@ extern int yydebug;
     ENDIF = 281,                   /* ENDIF  */
     WHILE = 282,                   /* WHILE  */
     DO = 283,                      /* DO  */
-    ENDWHILE = 284                 /* ENDWHILE  */
+    ENDWHILE = 284,                /* ENDWHILE  */
+    REPEAT = 285,                  /* REPEAT  */
+    UNTIL = 286,                   /* UNTIL  */
+    BREAK = 287,                   /* BREAK  */
+    BREAKPOINT = 288,              /* BREAKPOINT  */
+    CONTINUE = 289                 /* CONTINUE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -116,6 +121,11 @@ extern int yydebug;
 #define WHILE 282
 #define DO 283
 #define ENDWHILE 284
+#define REPEAT 285
+#define UNTIL 286
+#define BREAK 287
+#define BREAKPOINT 288
+#define CONTINUE 289
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -126,7 +136,7 @@ union YYSTYPE
   struct expr_tree_node * node;
   char c;
 
-#line 130 "y.tab.h"
+#line 140 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

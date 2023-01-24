@@ -37,7 +37,8 @@ int yylex(void);
 
 %token NUMBER MUL DIV PLUS MINUS  ID READ WRITE SEMICOLON START END EQUALS
 %token GT LT GE LE NE EQ LTE GTE
-%token IF THEN ELSE ENDIF WHILE DO ENDWHILE
+%token IF THEN ELSE ENDIF WHILE DO ENDWHILE REPEAT UNTIL
+%token BREAK BREAKPOINT CONTINUE 
 %type <node> expr program
 %left PLUS MINUS
 %left MUL DIV
@@ -78,8 +79,8 @@ program : START Slist END SEMICOLON
 
   printf("Generating Assembly Code... \n");
   explInit(target_file);
-  // codeGen($<node>2, target_file);
-  evaluate($<node>2, identifiers);
+  codeGen($<node>2, target_file);
+  // evaluate($<node>2, identifiers);
   explEnd(target_file);
   printf("Complete \n");
 
@@ -94,10 +95,15 @@ program : START Slist END SEMICOLON
 };
 
 Slist : Slist Stmt {$<node>$ = makeConnectorNode($<node>1,$<node>2);}| Stmt {$<node>$ = $<node>1;};
-Stmt : InputStmt | OutputStmt | AsgStmt |  Ifstmt | Whilestmt;
+Stmt : InputStmt | OutputStmt | AsgStmt |  Ifstmt | Whilestmt | brkStmt | contStmt | brkpointStmt | RepeatStmt | DoWhileStmt;
+brkStmt : BREAK SEMICOLON {$<node>$ = makeBreakNode();};
+contStmt : CONTINUE SEMICOLON {$<node>$ = makeContinueNode();};
+brkpointStmt : BREAKPOINT SEMICOLON {$<node>$ = makeBreakpointNode();};
 Ifstmt : IF '('expr')' THEN Slist ELSE Slist ENDIF SEMICOLON {$<node>$ = makeIfElseNode($<node>3,$<node>6,$<node>8);}
 | IF '('expr')' THEN Slist ENDIF SEMICOLON {$<node>$ = makeIfElseNode($<node>3,$<node>6,NULL);};
 Whilestmt : WHILE '('expr')' DO Slist ENDWHILE SEMICOLON{$<node>$ = makeWhileNode($<node>3,$<node>6);};
+RepeatStmt : REPEAT Slist UNTIL '('expr')' SEMICOLON {$<node>$ = makeDoWhileNode($<node>2,$<node>5);};
+DoWhileStmt : DO Slist WHILE '('expr')' SEMICOLON {$<node>$ = makeDoWhileNode($<node>2,$<node>5);};
 InputStmt : READ '(' ID ')' SEMICOLON {$<node>$ = makeReadNode($<node>3);};
 OutputStmt : WRITE '(' expr ')' SEMICOLON {$<node>$ = makeWriteNode($<node>3);}; 
 AsgStmt :  ID EQUALS expr SEMICOLON {$<node>$ = makeOperatorNode(_NODE_TYPE_EQUALS,$<node>1,$<node>3) ;};

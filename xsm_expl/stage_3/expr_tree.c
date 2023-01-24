@@ -81,3 +81,24 @@ struct expr_tree_node * makeWhileNode( struct expr_tree_node *cond, struct expr_
 {
     return makeNode(_NONE, _NODE_TYPE_WHILE,_TYPE_KEYWORD, NULL, cond,body);
 }
+
+struct expr_tree_node * makeBreakNode()
+{
+    return makeNode(_NONE, _NODE_TYPE_BREAK,_TYPE_KEYWORD, NULL, NULL,NULL);
+}
+
+struct expr_tree_node * makeContinueNode()
+{
+    return makeNode(_NONE, _NODE_TYPE_CONTINUE,_TYPE_KEYWORD, NULL, NULL,NULL);
+}
+
+struct expr_tree_node * makeBreakpointNode()
+{
+    return makeNode(_NONE, _NODE_TYPE_BREAKPOINT,_TYPE_KEYWORD, NULL, NULL,NULL);
+}
+
+// make do while node
+struct expr_tree_node * makeDoWhileNode( struct expr_tree_node *body, struct expr_tree_node *cond)
+{
+    return makeNode(_NONE, _NODE_TYPE_DO_WHILE,_TYPE_KEYWORD, NULL, body,cond);
+}

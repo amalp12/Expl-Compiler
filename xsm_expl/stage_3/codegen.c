@@ -352,6 +352,44 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
     return return_val;
 }
 
+void loopStackPush( int start, int end)
+{
+    struct loopStack * newLoop = (struct loopStack *)malloc(sizeof(struct loopStack));
+    newLoop->startLabel = start;
+    newLoop->endLabel = end;
+    newLoop->prev = NULL;
+    if(LOOP_STACK== NULL) LOOP_STACK = newLoop;
+    else
+    {
+        newLoop->prev = LOOP_STACK;
+        LOOP_STACK = newLoop;
+    }
+
+  
+}
+
+void  loopStackPop()
+{
+    if(LOOP_STACK==NULL) 
+    {
+        printf("Loop Stack Empty\n");
+        return;
+    }
+    struct loopStack * temp = LOOP_STACK;
+    LOOP_STACK=LOOP_STACK->prev;
+    free(temp);
+}
+
+int getTopLoopStartLabel()
+{
+    if(LOOP_STACK==NULL) return -1;
+    return LOOP_STACK->startLabel;
+}
+int getTopLoopEndLabel()
+{
+    if(LOOP_STACK==NULL) return -1;
+    return LOOP_STACK->endLabel;
+}
 
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     
@@ -513,11 +551,15 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
             // label for while block start
             int whileStartLabel = getNewLabel();
+            // label for while block end
+            int whileEndLabel = getNewLabel();
+            // adding to loop stack
+            loopStackPush(whileStartLabel, whileEndLabel);
+
             fprintf(target_file, "_L%d:\n", whileStartLabel);
             // Evaluating the condtion
             reg_index conditionReg = codeGen(t->left, target_file);  
-            // label for while block end
-            int whileEndLabel = getNewLabel();
+
             // jumping to end if condition is false
             fprintf(target_file, "JZ R%d, _L%d\n", conditionReg, whileEndLabel);
 
@@ -530,9 +572,39 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             fprintf(target_file, "_L%d:\n", whileEndLabel);
             // freeing the register used by the condition evaluation
             freeLastReg();
+            // popping from loop stack
+            loopStackPop();
             return_val = -1;
+            break;
 
 
+        }
+        case (_NODE_TYPE_DO_WHILE ):
+        {
+            // label for do while block start
+            int doWhileStartLabel = getNewLabel();
+            // label for do while block end
+            int doWhileEndLabel = getNewLabel();
+            // adding to loop stack
+            loopStackPush(doWhileStartLabel, doWhileEndLabel);
+
+            fprintf(target_file, "_L%d:\n", doWhileStartLabel);
+            // generating code for do while block
+            codeGen(t->left, target_file);
+
+            // Evaluating the condtion
+            reg_index conditionReg = codeGen(t->right, target_file);  
+
+            // jumping to end if condition is false
+            fprintf(target_file, "JNZ R%d, _L%d\n", conditionReg, doWhileStartLabel);
+            // label for end of do while block
+            fprintf(target_file, "_L%d:\n", doWhileEndLabel);
+            // freeing the register used by the condition evaluation
+            freeLastReg();
+            // popping from loop stack
+            loopStackPop();
+            return_val = -1;
+            break;
         }
         case (_NODE_TYPE_IF_ELSE):
         {
@@ -567,6 +639,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             }
             freeLastReg();
             return_val = -1;
+            break;
 
             
         }
@@ -647,6 +720,33 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val = leftReg;
             break;
         }
+        case (_NODE_TYPE_BREAK):
+        {
+            // getting the label of the loop to break
+            int loopEndLabel = getTopLoopEndLabel();
+            // jumping to the end of the loop
+            fprintf(target_file, "JMP _L%d\n", loopEndLabel);
+            return_val = -1;
+            break;
+        }
+        case (_NODE_TYPE_CONTINUE):
+        {
+            // getting the label of the loop to continue
+            int loopStartLabel = getTopLoopStartLabel();
+            // jumping to the start of the loop
+            fprintf(target_file, "JMP _L%d\n", loopStartLabel);
+            return_val = -1;
+            break;
+        }
+        case (_NODE_TYPE_BREAKPOINT):
+        {
+            // generating code for breakpoint
+            fprintf(target_file, "BRKP\n");
+            return_val = -1;
+            break;
+        }
+
+
         default:
         {
             printf("Codegen : Invalid Node Type : %d\n", t->nodetype);
