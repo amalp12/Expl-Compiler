@@ -46,7 +46,7 @@ void freeLastReg(); // Free the last used register
 
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) ;
 
-int getVarAddress(char * varname);
+// int getVarAddress(char * varname);
 
 void printInfix(struct expr_tree_node * t);
 

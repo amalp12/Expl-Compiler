@@ -1,11 +1,12 @@
 begin
     
 decl
-  int num, sum;
+  int num, sum, test[10][4];
   str mesg;
 enddecl
-
 read(num);
+test[1][2] = num;
+write(test[1][2]);
 sum = 0;
 while (num != 0) do
   sum = sum + num;

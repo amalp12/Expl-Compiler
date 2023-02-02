@@ -15,17 +15,22 @@
 #include <string.h>
 #endif
 
+extern struct Gsymbol * GSTLookup(char * name);
+
+
 struct expr_tree_node{
 
     int val;        // value of a number for NUM nodes.
     int type;       // type of variable
     char* varname;  // name of a variable for ID nodes
     int nodetype;   // information about non-leaf nodes - read/write/connector/+/* etc.
+    struct Gsymbol *GSTEntry;     // pointer to GST entry for global variables and functions
     struct expr_tree_node * left, * right;     // left and right branches
+    int rows, cols; // for arrays
 
 };
 
-struct expr_tree_node * makeNode(int val, int nodetype, int type,  char* c, struct expr_tree_node *l, struct expr_tree_node *r);
+struct expr_tree_node * makeNode(int val, int nodetype, int type,  char* varname, struct Gsymbol * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r);
 struct expr_tree_node * makeConnectorNode( struct expr_tree_node *l, struct expr_tree_node *r);
 
 struct expr_tree_node * makeReadNode(struct expr_tree_node *id);

@@ -113,11 +113,11 @@ numbers [0-9]+
 }
 "int" {
     yylval.integer = _TYPE_INT;
-    return INT;
+    return INT_DECL;
 }
 "str" {
     yylval.integer = _TYPE_STRING;
-    return STR;
+    return STRING_DECL;
 }
 ">" {
     return GT;
@@ -141,7 +141,7 @@ numbers [0-9]+
 
 [\t] {}
     
-[(),] {
+[(),\[\]] {
     return *yytext;
 }
 

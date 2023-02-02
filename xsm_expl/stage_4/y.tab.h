@@ -86,10 +86,11 @@ extern int yydebug;
     UNTIL = 287,                   /* UNTIL  */
     DECL = 288,                    /* DECL  */
     ENDDECL = 289,                 /* ENDDECL  */
-    STR = 290,                     /* STR  */
-    BREAK = 291,                   /* BREAK  */
-    BREAKPOINT = 292,              /* BREAKPOINT  */
-    CONTINUE = 293                 /* CONTINUE  */
+    INT_DECL = 290,                /* INT_DECL  */
+    STRING_DECL = 291,             /* STRING_DECL  */
+    BREAK = 292,                   /* BREAK  */
+    BREAKPOINT = 293,              /* BREAKPOINT  */
+    CONTINUE = 294                 /* CONTINUE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -130,10 +131,11 @@ extern int yydebug;
 #define UNTIL 287
 #define DECL 288
 #define ENDDECL 289
-#define STR 290
-#define BREAK 291
-#define BREAKPOINT 292
-#define CONTINUE 293
+#define INT_DECL 290
+#define STRING_DECL 291
+#define BREAK 292
+#define BREAKPOINT 293
+#define CONTINUE 294
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -146,7 +148,7 @@ union YYSTYPE
   int integer;
   struct declaration_node * decl_node;
 
-#line 150 "y.tab.h"
+#line 152 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

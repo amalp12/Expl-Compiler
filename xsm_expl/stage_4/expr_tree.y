@@ -57,7 +57,7 @@ int yylex(void);
 %token INT MUL DIV PLUS MINUS  ID READ WRITE SEMICOLON START END EQUALS STRING
 %token GT LT GE LE NE EQ LTE GTE
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE REPEAT UNTIL
-%token DECL ENDDECL  STR
+%token DECL ENDDECL INT_DECL STRING_DECL 
 %token BREAK BREAKPOINT CONTINUE 
 %type <node> expr program
 %left PLUS MINUS
@@ -125,17 +125,35 @@ DeclList :
   | Decl
 ;
 Decl : 
-    Type VarList SEMICOLON {popAllAndCreateEntry($<integer>1, 1);}
+    Type VarList SEMICOLON {popAllAndCreateEntry($<integer>1);}
 ;
 Type : 
-    INT
-  | STR
+    INT_DECL
+  | STRING_DECL
 ;
 VarList : 
-    VarList ',' ID {pushDeclaration($<node>3->varname);} 
-  | ID {pushDeclaration($<node>1->varname);}  
-  | VarList ',' ID '[' INT ']'
-  | ID '['INT ']'
+    VarList ',' identifierDecl {pushDeclaration($<node>3);} 
+  | identifierDecl {pushDeclaration($<node>1);}  
+;
+
+identifierDecl : 
+    ID 
+    {
+      $<node>$ = $<node>1;
+    }
+  | ID '[' INT ']' 
+    {
+        $<node>1->rows = $<node>3->val;
+        $<node>$ = $<node>1;
+    }
+  | ID '[' INT ']' '[' INT ']'
+    { 
+
+      $<node>1->rows = $<node>3->val; 
+      $<node>1->cols = $<node>6->val; 
+      $<node>$ = $<node>1;
+    }
+
 ;
 brkStmt : 
     BREAK SEMICOLON {$<node>$ = makeBreakNode();}
@@ -160,13 +178,13 @@ DoWhileStmt :
     DO Slist WHILE '('expr')' SEMICOLON {$<node>$ = makeDoWhileNode($<node>2,$<node>5);}
 ;
 InputStmt : 
-    READ '(' ID ')' SEMICOLON {$<node>$ = makeReadNode($<node>3);}
+    READ '(' identifierDecl ')' SEMICOLON {$<node>$ = makeReadNode($<node>3);}
 ;
 OutputStmt : 
     WRITE '(' expr ')' SEMICOLON {$<node>$ = makeWriteNode($<node>3);}
 ; 
 AsgStmt :  
-    ID EQUALS expr SEMICOLON {$<node>$ = makeOperatorNode(_NODE_TYPE_EQUALS,$<node>1,$<node>3) ;}
+    identifierDecl EQUALS expr SEMICOLON {$<node>$ = makeOperatorNode(_NODE_TYPE_EQUALS,$<node>1,$<node>3) ;}
 ;
 expr : 
     expr PLUS expr  {$<node>$ = makeOperatorNode(_NODE_TYPE_PLUS,$<node>1,$<node>3);}
@@ -175,7 +193,7 @@ expr :
   | expr DIV expr {$<node>$ = makeOperatorNode(_NODE_TYPE_DIV,$<node>1,$<node>3);}
   |'(' expr ')' {$<node>$ = $<node>2;}
   | INT {$<node>$ = $<node>1;}
-  | ID {$<node>$ = $<node>1;}
+  | identifierDecl {$<node>$ = $<node>1;}
   | STRING {$<node>$ = $<node>1;}
   | expr LT expr {$<node>$ = makeRelopNode(_NODE_TYPE_LT,$<node>1,$<node>3);}
   | expr GT expr {$<node>$ = makeRelopNode(_NODE_TYPE_GT,$<node>1,$<node>3);}

@@ -112,18 +112,18 @@ void read(reg_index reg_number, FILE * target_file)
 
 }
 
-int getVarAddress(char * varname)
-{
-    struct Gsymbol * entry = GSTLookup(varname);
+// int getVarAddress(char * varname)
+// {
+//     struct Gsymbol * entry = GSTLookup(varname);
 
-    if(entry==NULL)
-    {
-        printf("Variable Doesn't Exist!");
-        exit(1);
-    }
-    return entry -> binding; 
+//     if(entry==NULL)
+//     {
+//         printf("Variable Doesn't Exist!");
+//         exit(1);
+//     }
+//     return entry -> binding; 
 
-}
+// }
 
 int evaluate( struct expr_tree_node *t, int * identifier) {
     
@@ -414,8 +414,21 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index rightReg = codeGen(t->right, target_file);
 
             reg_index newReg= getFreeReg();
+
+            // checking if the variable has been declared or not
+            if(t->GSTEntry==NULL)
+            {
+                printf("Variable %s not declared\n", t->varname);
+                exit(1);
+            }
+            // total number of rows in the matrix
+            int totalRows = t->GSTEntry->rows;
+            // row index
+            int row_index = t->rows;
+            // column index
+            int col_index = t->cols;
             // if leaf is an identifier
-            fprintf(target_file, "MOV R%d, [%d]\n", newReg,  getVarAddress(t->varname));
+            fprintf(target_file, "MOV R%d, [%d]\n", newReg,  t->GSTEntry->binding+ row_index*totalRows + col_index);
             return_val = newReg;
             break;
         }
@@ -512,7 +525,20 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(t->left->varname));
+            // checking if the variable has been declared or not
+            if(t->left->GSTEntry==NULL)
+            {
+                printf("Variable %s not declared\n", t->varname);
+                exit(1);
+            }
+            // total number of rows in the matrix
+            int totalRows = t->left->GSTEntry->rows;
+            // row index
+            int row_index = t->left->rows;
+            // column index
+            int col_index = t->left->cols;
+
+            fprintf(target_file, "MOV R%d, %d\n", leftReg, t->left->GSTEntry->binding+ row_index*totalRows + col_index);
             fprintf(target_file, "MOV [R%d], R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
             freeLastReg();
@@ -545,7 +571,20 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(t->left->varname));
+            // checking if the variable has been declared or not
+            if(t->left->GSTEntry==NULL)
+            {
+                printf("Variable %s not declared\n", t->varname);
+                exit(1);
+            }
+            // total number of rows in the matrix
+            int totalRows = t->left->GSTEntry->rows;
+            // row index
+            int row_index = t->left->rows;
+            // column index
+            int col_index = t->left->cols;
+
+            fprintf(target_file, "MOV R%d, %d\n", leftReg, t->left->GSTEntry->binding+ row_index*totalRows + col_index);
             read(leftReg, target_file);
             freeLastReg();
             return_val = -1;

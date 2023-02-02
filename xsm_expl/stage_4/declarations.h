@@ -10,16 +10,16 @@
 #endif
 
 struct declaration_node {
-    char *varname;
+    struct expr_tree_node *node;
     struct declaration_node *next;
 };
 
 struct declaration_node * _DECLARATION_STACK_HEAD = NULL;
 
-void pushDeclaration( char *varname);
+void pushDeclaration( struct expr_tree_node * node);
 
 struct declaration_node * popDeclaration();
 
 int isDeclarationStackEmpty();
 
-void popAllAndCreateEntry(int type, int array_size);
+void popAllAndCreateEntry(int type);

@@ -1,26 +1,25 @@
-void pushDeclaration( char *varname)
+void pushDeclaration( struct expr_tree_node * node)
 {
     // see if declaration already exists in GST
-    struct Gsymbol *temp1 = GSTLookup(varname);
+    struct Gsymbol *temp1 = GSTLookup(node->varname);
     if (temp1 != NULL) {
-        printf("Error: Redeclaration of variable %s\n", varname);
+        printf("Error: Redeclaration of variable %s\n", node->varname);
         exit(1);
     }
-    free(temp1);
 
     // check if declaration already exists in stack
     struct declaration_node *temp2 = _DECLARATION_STACK_HEAD;
     while (temp2 != NULL) {
-        if (strcmp(temp2->varname, varname) == 0) {
-            printf("Error: Redeclaration of variable %s\n", varname);
+        if (strcmp(temp2->node->varname, node->varname) == 0) {
+            printf("Error: Redeclaration of variable %s\n", node->varname);
             exit(1);
         }
         temp2 = temp2->next;
     }
-    free(temp2);
+  
 
     struct declaration_node *newNode = (struct declaration_node *) malloc(sizeof(struct declaration_node));
-    newNode->varname = varname;
+    newNode->node = node;
     newNode->next = _DECLARATION_STACK_HEAD;
     _DECLARATION_STACK_HEAD = newNode;
 }
@@ -43,7 +42,7 @@ int isDeclarationStackEmpty()
     return _DECLARATION_STACK_HEAD == NULL;
 }
 
-void popAllAndCreateEntry(int type, int array_size)
+void popAllAndCreateEntry(int type)
 {
     int size ;
     switch (type)
@@ -71,7 +70,7 @@ void popAllAndCreateEntry(int type, int array_size)
     {
         // void GSTInstall(char *name, int type, int size, int offset)   // Creates a symbol table entry.
 
-        GSTInstall(temp->varname, type, size*array_size, 0);
+        GSTInstall(temp->node->varname, type, 0, temp->node->rows*size, temp->node->cols*size);
         free(temp);
         temp = popDeclaration();
 
