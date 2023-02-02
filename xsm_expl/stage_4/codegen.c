@@ -1,7 +1,4 @@
-#ifndef TYPEDEF_H
-#define TYPEDEF_H
-#include "typedef.h"
-#endif
+
 /*
 1.    At the leaf nodes of the tree (corresponding to a NUM), Allocate a new register and store the number to the register.
 
@@ -115,9 +112,17 @@ void read(reg_index reg_number, FILE * target_file)
 
 }
 
-int getVarAddress(char varname)
+int getVarAddress(char * varname)
 {
-    return  4096+(varname-'a');
+    struct Gsymbol * entry = GSTLookup(varname);
+
+    if(entry==NULL)
+    {
+        printf("Variable Doesn't Exist!");
+        exit(1);
+    }
+    return entry -> binding; 
+
 }
 
 int evaluate( struct expr_tree_node *t, int * identifier) {
@@ -397,7 +402,6 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     if(t==NULL) return -1;
 
     
-   
     reg_index return_val=-1;
     switch (t->nodetype)
     {
@@ -411,7 +415,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
             reg_index newReg= getFreeReg();
             // if leaf is an identifier
-            fprintf(target_file, "MOV R%d, [%d]\n", newReg,  getVarAddress(*(t->varname)));
+            fprintf(target_file, "MOV R%d, [%d]\n", newReg,  getVarAddress(t->varname));
             return_val = newReg;
             break;
         }
@@ -495,7 +499,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(*(t->left->varname)));
+            fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(t->left->varname));
             fprintf(target_file, "MOV [R%d], R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
             freeLastReg();
@@ -528,7 +532,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(*(t->left->varname)));
+            fprintf(target_file, "MOV R%d, %d\n", leftReg, getVarAddress(t->left->varname));
             read(leftReg, target_file);
             freeLastReg();
             return_val = -1;

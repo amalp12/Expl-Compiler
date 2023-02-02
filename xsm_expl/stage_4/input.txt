@@ -1,12 +1,18 @@
 begin
     
-    read(a);
-    s=0;
-    while(a!=0) do
-        s=s+a;
+decl
+  int num;
+      int sum;
+  str mesg;
+enddecl;
 
-        read(a); 
-    endwhile;
-    write(s);
+read(num);
+sum = 0;
+while (num != 0) do
+  sum = sum + num;
+  read(num);
+endwhile;
+write(sum);
+write(mesg);
 
 end;

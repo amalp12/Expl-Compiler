@@ -3,6 +3,18 @@
 #include "typedef.h"
 #endif
 
+
+#ifndef STARTER_H
+#define STARTER_H
+#include <stdio.h>
+#include <stdlib.h>
+#endif
+
+#ifndef STRING_H
+#define STRING_H
+#include <string.h>
+#endif
+
 struct expr_tree_node{
 
     int val;        // value of a number for NUM nodes.
@@ -20,9 +32,11 @@ struct expr_tree_node * makeReadNode(struct expr_tree_node *id);
 
 struct expr_tree_node * makeWriteNode(struct expr_tree_node *expr);
 
-struct expr_tree_node * makeIdNode(char c);
+struct expr_tree_node * makeIdNode(char * varname);
 
 struct expr_tree_node * makeNumberNode(int num );
+
+struct expr_tree_node * makeStringNode(char * string);
 
 struct expr_tree_node * makeOperatorNode(int nodetype,struct expr_tree_node *l,struct expr_tree_node *r);
 

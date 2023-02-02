@@ -1,4 +1,7 @@
+#ifndef TYPEDEF_H
+#define TYPE_DEF_H
 #include "typedef.h"
+#endif
 
 struct labelNode{
     int address; // address of the label in the code segment

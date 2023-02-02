@@ -11,14 +11,23 @@
 #include "expr_tree.c"
 #endif
 
+#ifndef TYPEDEF_H
+#define TYPE_DEF_H
+#include "typedef.h"
+#endif
+
 %}
 
+identifier ([a-zA-Z]|_[a-zA-Z])[a-zA-Z0-9_]*
+strings \"((\\\")|[^"])*\"
+numbers [0-9]+
 
 %%
 
-[0-9]+ {
+
+{numbers} {
     yylval.node = makeNumberNode(atoi((yytext)));
-    return NUMBER;
+    return INT;
 }
     
 "+" {
@@ -96,6 +105,20 @@
 "until" {
     return UNTIL;
 }
+"decl" {
+    return DECL;
+}
+"enddecl" {
+    return ENDDECL;
+}
+"int" {
+    yylval.integer = _TYPE_INT;
+    return INT;
+}
+"str" {
+    yylval.integer = _TYPE_STRING;
+    return STR;
+}
 ">" {
     return GT;
 }
@@ -126,9 +149,13 @@
     
 }
     
-[a-z] {
-    yylval.node = makeIdNode(*yytext);
+{identifier} {
+    yylval.node = makeIdNode(yytext);
     return ID;
+}
+{strings} {
+    yylval.node = makeStringNode(yytext);
+    return STRING;
 }
 
 %%

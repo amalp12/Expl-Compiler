@@ -1,16 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct expr_tree_node * makeNode(int val, int nodetype, int type, char* c, struct expr_tree_node *l, struct expr_tree_node *r)
 {
 
@@ -40,12 +27,16 @@ struct expr_tree_node * makeRelopNode(int nodetype,struct expr_tree_node *l,stru
 	return makeNode(-1,nodetype, _TYPE_BOOL, NULL, l, r);
 }
 
-struct expr_tree_node * makeIdNode(char c)
+struct expr_tree_node * makeIdNode(char * varname)
 {
-    char * id = (char *)(malloc(sizeof(char)));
-    (*id) = c;  
+    char * dupString = strdup(varname);   
+    return makeNode(_NONE, _NODE_TYPE_ID,_NONE, dupString, NULL, NULL);
+}
+struct expr_tree_node * makeStringNode(char * string)
+{
+    char * dupString = strdup(string);
+    return makeNode(_NONE, _NODE_TYPE_STRING, _TYPE_STRING, dupString, NULL, NULL);
 
-    return makeNode(_NONE, _NODE_TYPE_ID,_TYPE_INT,id,NULL,NULL);
 }
 
 struct expr_tree_node * makeNumberNode(int num )

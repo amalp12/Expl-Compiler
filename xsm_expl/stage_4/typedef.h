@@ -24,7 +24,7 @@
 #define _NODE_TYPE_BREAK 21
 #define _NODE_TYPE_CONTINUE 22
 #define _NODE_TYPE_BREAKPOINT 23
-
+#define _NODE_TYPE_STRING 24
 
 // Type
 #define _TYPE_INT 0
@@ -35,6 +35,7 @@
 #define _TYPE_CONNECTOR 5
 #define _TYPE_BOOL 6
 #define _TYPE_KEYWORD 7
+#define _TYPE_DECLARATION
 
 // Bool
 #define _TRUE 1
@@ -43,13 +44,18 @@
 // codgen
 #define reg_index int
 
-
-// stack
-#define _STACK_POINTER 5096
-#define _BASE_POINTER 5097
-
-
 // Label Translation
 #define _CODE_START_ADDRESS 2056
+
+// Sizes
+#define _INT_SIZE 1
+#define _STRING_SIZE 1
+
+#define _INITIAL_STACK_POINTER 4096
+// stack
+int _STACK_POINTER;
+int _BASE_POINTER;
+
+
 
 

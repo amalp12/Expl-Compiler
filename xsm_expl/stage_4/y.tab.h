@@ -54,7 +54,7 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    NUMBER = 258,                  /* NUMBER  */
+    INT = 258,                     /* INT  */
     MUL = 259,                     /* MUL  */
     DIV = 260,                     /* DIV  */
     PLUS = 261,                    /* PLUS  */
@@ -66,26 +66,30 @@ extern int yydebug;
     START = 267,                   /* START  */
     END = 268,                     /* END  */
     EQUALS = 269,                  /* EQUALS  */
-    GT = 270,                      /* GT  */
-    LT = 271,                      /* LT  */
-    GE = 272,                      /* GE  */
-    LE = 273,                      /* LE  */
-    NE = 274,                      /* NE  */
-    EQ = 275,                      /* EQ  */
-    LTE = 276,                     /* LTE  */
-    GTE = 277,                     /* GTE  */
-    IF = 278,                      /* IF  */
-    THEN = 279,                    /* THEN  */
-    ELSE = 280,                    /* ELSE  */
-    ENDIF = 281,                   /* ENDIF  */
-    WHILE = 282,                   /* WHILE  */
-    DO = 283,                      /* DO  */
-    ENDWHILE = 284,                /* ENDWHILE  */
-    REPEAT = 285,                  /* REPEAT  */
-    UNTIL = 286,                   /* UNTIL  */
-    BREAK = 287,                   /* BREAK  */
-    BREAKPOINT = 288,              /* BREAKPOINT  */
-    CONTINUE = 289                 /* CONTINUE  */
+    STRING = 270,                  /* STRING  */
+    GT = 271,                      /* GT  */
+    LT = 272,                      /* LT  */
+    GE = 273,                      /* GE  */
+    LE = 274,                      /* LE  */
+    NE = 275,                      /* NE  */
+    EQ = 276,                      /* EQ  */
+    LTE = 277,                     /* LTE  */
+    GTE = 278,                     /* GTE  */
+    IF = 279,                      /* IF  */
+    THEN = 280,                    /* THEN  */
+    ELSE = 281,                    /* ELSE  */
+    ENDIF = 282,                   /* ENDIF  */
+    WHILE = 283,                   /* WHILE  */
+    DO = 284,                      /* DO  */
+    ENDWHILE = 285,                /* ENDWHILE  */
+    REPEAT = 286,                  /* REPEAT  */
+    UNTIL = 287,                   /* UNTIL  */
+    DECL = 288,                    /* DECL  */
+    ENDDECL = 289,                 /* ENDDECL  */
+    STR = 290,                     /* STR  */
+    BREAK = 291,                   /* BREAK  */
+    BREAKPOINT = 292,              /* BREAKPOINT  */
+    CONTINUE = 293                 /* CONTINUE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -94,7 +98,7 @@ extern int yydebug;
 #define YYEOF 0
 #define YYerror 256
 #define YYUNDEF 257
-#define NUMBER 258
+#define INT 258
 #define MUL 259
 #define DIV 260
 #define PLUS 261
@@ -106,37 +110,43 @@ extern int yydebug;
 #define START 267
 #define END 268
 #define EQUALS 269
-#define GT 270
-#define LT 271
-#define GE 272
-#define LE 273
-#define NE 274
-#define EQ 275
-#define LTE 276
-#define GTE 277
-#define IF 278
-#define THEN 279
-#define ELSE 280
-#define ENDIF 281
-#define WHILE 282
-#define DO 283
-#define ENDWHILE 284
-#define REPEAT 285
-#define UNTIL 286
-#define BREAK 287
-#define BREAKPOINT 288
-#define CONTINUE 289
+#define STRING 270
+#define GT 271
+#define LT 272
+#define GE 273
+#define LE 274
+#define NE 275
+#define EQ 276
+#define LTE 277
+#define GTE 278
+#define IF 279
+#define THEN 280
+#define ELSE 281
+#define ENDIF 282
+#define WHILE 283
+#define DO 284
+#define ENDWHILE 285
+#define REPEAT 286
+#define UNTIL 287
+#define DECL 288
+#define ENDDECL 289
+#define STR 290
+#define BREAK 291
+#define BREAKPOINT 292
+#define CONTINUE 293
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 32 "expr_tree.y"
+#line 49 "expr_tree.y"
 
   struct expr_tree_node * node;
-  char c;
+  char * string;
+  int integer;
+  struct declaration_node * decl_node;
 
-#line 140 "y.tab.h"
+#line 150 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -14,9 +14,16 @@
 #include "expr_tree.h"
 #endif
 
+
 #ifndef TYPEDEF_H
 #define TYPEDEF_H
 #include "typedef.h"
+#endif
+
+#ifndef SYMBOL_TABLE_H
+#define SYMBOL_TABLE_H
+#include "symbolTable.h"
+#include "symbolTable.c"
 #endif
 
 struct loopStack{
@@ -39,7 +46,7 @@ void freeLastReg(); // Free the last used register
 
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) ;
 
-int getVarAddress(char c);
+int getVarAddress(char * varname);
 
 void printInfix(struct expr_tree_node * t);
 
