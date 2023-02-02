@@ -118,8 +118,8 @@ Stmt :
   | DeclStmt
 ;
 DeclStmt : 
-    DECL DeclList ENDDECL SEMICOLON 
-  | DECL ENDDECL SEMICOLON;
+    DECL DeclList ENDDECL  
+  | DECL ENDDECL ;
 DeclList : 
     DeclList Decl 
   | Decl
@@ -176,6 +176,7 @@ expr :
   |'(' expr ')' {$<node>$ = $<node>2;}
   | INT {$<node>$ = $<node>1;}
   | ID {$<node>$ = $<node>1;}
+  | STRING {$<node>$ = $<node>1;}
   | expr LT expr {$<node>$ = makeRelopNode(_NODE_TYPE_LT,$<node>1,$<node>3);}
   | expr GT expr {$<node>$ = makeRelopNode(_NODE_TYPE_GT,$<node>1,$<node>3);}
   | expr LTE expr  {$<node>$ = makeRelopNode(_NODE_TYPE_LE,$<node>1,$<node>3);}

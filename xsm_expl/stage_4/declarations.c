@@ -1,5 +1,24 @@
 void pushDeclaration( char *varname)
 {
+    // see if declaration already exists in GST
+    struct Gsymbol *temp1 = GSTLookup(varname);
+    if (temp1 != NULL) {
+        printf("Error: Redeclaration of variable %s\n", varname);
+        exit(1);
+    }
+    free(temp1);
+
+    // check if declaration already exists in stack
+    struct declaration_node *temp2 = _DECLARATION_STACK_HEAD;
+    while (temp2 != NULL) {
+        if (strcmp(temp2->varname, varname) == 0) {
+            printf("Error: Redeclaration of variable %s\n", varname);
+            exit(1);
+        }
+        temp2 = temp2->next;
+    }
+    free(temp2);
+
     struct declaration_node *newNode = (struct declaration_node *) malloc(sizeof(struct declaration_node));
     newNode->varname = varname;
     newNode->next = _DECLARATION_STACK_HEAD;

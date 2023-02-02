@@ -36,7 +36,7 @@ struct expr_tree_node * makeIdNode(char * varname);
 
 struct expr_tree_node * makeNumberNode(int num );
 
-struct expr_tree_node * makeStringNode(char * string);
+struct expr_tree_node * makeStringNode(char * string, int offset);
 
 struct expr_tree_node * makeOperatorNode(int nodetype,struct expr_tree_node *l,struct expr_tree_node *r);
 

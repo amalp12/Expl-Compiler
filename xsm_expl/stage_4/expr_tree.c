@@ -32,9 +32,9 @@ struct expr_tree_node * makeIdNode(char * varname)
     char * dupString = strdup(varname);   
     return makeNode(_NONE, _NODE_TYPE_ID,_NONE, dupString, NULL, NULL);
 }
-struct expr_tree_node * makeStringNode(char * string)
+struct expr_tree_node * makeStringNode(char * string, int offset)
 {
-    char * dupString = strdup(string);
+    char * dupString = strndup(string, strlen(string)-1);
     return makeNode(_NONE, _NODE_TYPE_STRING, _TYPE_STRING, dupString, NULL, NULL);
 
 }

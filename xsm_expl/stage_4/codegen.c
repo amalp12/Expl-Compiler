@@ -432,6 +432,19 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val =  newReg;
             break;
         }
+        case (_NODE_TYPE_STRING):
+        {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
+            reg_index newReg= getFreeReg();
+            // if leaf is a number
+            fprintf(target_file, "MOV R%d, \"%s\"\n", newReg,  t->varname);
+            return_val =  newReg;
+            break;   
+        }
         // Addition
         case (_NODE_TYPE_PLUS):
         {
@@ -749,6 +762,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val = -1;
             break;
         }
+
 
 
         default:

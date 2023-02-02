@@ -141,7 +141,7 @@ numbers [0-9]+
 
 [\t] {}
     
-[()] {
+[(),] {
     return *yytext;
 }
 
@@ -154,7 +154,8 @@ numbers [0-9]+
     return ID;
 }
 {strings} {
-    yylval.node = makeStringNode(yytext);
+    // removing double quotes at either end
+    yylval.node = makeStringNode(yytext+1,1);
     return STRING;
 }
 
