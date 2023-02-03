@@ -1,18 +1,19 @@
 begin
     
 decl
-   int n,arr[50],i,j,dup;
+   int n,arr[10],i;
 enddecl
-read(n);
+n=5;
 i=0;
 while(i<n) do
-    arr[i] = i;
+    arr[i]=i;
     i=i+1;
 endwhile;
 
-while(i>=0) do
+i=0;
+while(i<n) do
     write(arr[i]);
-    i=i-1;
+    i=i+1;
 endwhile;
 
 

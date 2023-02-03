@@ -435,6 +435,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
+           
 
             fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation

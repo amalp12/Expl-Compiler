@@ -35,7 +35,7 @@ struct expr_tree_node * makeIdNode(char * varname)
     
 
     char * dupString = strdup(varname);   
-    return makeNode(_NONE, _NODE_TYPE_ID,_NONE, dupString, GSTEntry, NULL, NULL);
+    return makeNode(_NONE, _NODE_TYPE_ID,_TYPE_ID, dupString, GSTEntry, NULL, NULL);
 }
 struct expr_tree_node * makeStringNode(char * string, int offset)
 {

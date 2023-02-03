@@ -413,7 +413,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            reg_index newReg;
+    
+            /*
+            If array is declared by a[m][n] where m is the number of rows while n is the number of columns,
+            then address of an element a[i][j] of the array stored in row major order is calculated as,
+            Address(a[i][j]) = B + (i * n + j) * size   
+            where, B is the base address or the address of the first element of the array a[0][0] .
+            */
 
 
             // checking if the variable has been declared or not
@@ -422,33 +428,67 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
                 printf("Variable %s not declared\n", t->varname);
                 exit(1);
             }
-            // total number of rows in the matrix
-            int totalRows = t->GSTEntry->rows;
-            // check if row index exists
-            if(leftReg!=-1)
+            // for variable
+            if(leftReg==-1 && rightReg==-1)
             {
-                newReg = leftReg;
-                // multiply row index by total number of rows
-                fprintf(target_file, "MUL R%d, %d\n", newReg, totalRows);
-            } 
-            else
+                reg_index newReg = getFreeReg();
+                // Address of the variable
+                fprintf(target_file, "MOV R%d, %d\n", newReg, t->GSTEntry->binding);
+                return_val = newReg;
+            }  
+            // for 1D array
+            else if(leftReg!=-1 && rightReg==-1)
             {
-                newReg = getFreeReg();
-                // initalizeing the register with 0
-                fprintf(target_file, "MOV R%d, 0\n", newReg);
+                // if index is an identifier
+                if(t->left->nodetype==_NODE_TYPE_ID)
+                {
+                    // load the value of the index into a register
+                    fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
+                }
+                 
+                // Address of the variable
+                fprintf(target_file, "ADD R%d, %d\n", leftReg, t->GSTEntry->binding);
+                return_val = leftReg;
+            }
+            // for 2D array
+            else if(leftReg!=-1 && rightReg!=-1)
+            {
+                // total number of rows in the matrix
+                int totalCols = t->GSTEntry->cols;
+                
+
+                // if row index is an identifier
+                if(t->left->nodetype==_NODE_TYPE_ID)
+                {
+                    // load the value of the row index into a register
+                    fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
+                }
+
+                // multiply row index by total number of cols
+                fprintf(target_file, "MUL R%d, %d\n", leftReg, totalCols);
+                
+
+              
+                // if column index is an identifier
+                if(t->right->nodetype==_NODE_TYPE_ID)
+                {
+                    // load the value of the column index into a register
+                    fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
+                }
+                // add column index to row index
+                fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
+                freeLastReg();
+                // Address of the variable
+                fprintf(target_file, "ADD R%d, %d\n", leftReg, t->GSTEntry->binding);
+                return_val = leftReg;
                 
             }
-            // if column index exists
-            if(rightReg!=-1)
+            else
             {
-                // add column index to row index
-                fprintf(target_file, "ADD R%d, R%d\n", newReg, rightReg);
-                freeLastReg();
+                //error
+                printf("Invalid array declaration\n");
+                exit(1);
             }
-            // adding the base address of the matrix to above sum
-            fprintf(target_file, "ADD R%d, %d\n", newReg, t->GSTEntry->binding);
-
-            return_val = newReg;
             break;
         }
         case(_NODE_TYPE_NUM):

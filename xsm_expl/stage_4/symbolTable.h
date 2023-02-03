@@ -5,7 +5,7 @@
 
 
 struct Gsymbol {
-    char* name;       // name of the variable
+    char* name;         // name of the variable
     int type;         // type of the variable
     int size;         // size of the type of the variable
     int binding;      // stores the static memory address allocated to the variable

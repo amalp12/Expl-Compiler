@@ -14,7 +14,7 @@
 #define _NODE_TYPE_THEN 11
 #define _NODE_TYPE_WHILE 12
 #define _NODE_TYPE_DO_WHILE 13
-#define _NODE_REPEATE_UNTIL 14
+#define _NODE_REPEAT_UNTIL 14
 #define _NODE_TYPE_LT 15
 #define _NODE_TYPE_GT 16
 #define _NODE_TYPE_LE 17
@@ -35,7 +35,8 @@
 #define _TYPE_CONNECTOR 5
 #define _TYPE_BOOL 6
 #define _TYPE_KEYWORD 7
-#define _TYPE_DECLARATION
+#define _TYPE_DECLARATION 8
+#define _TYPE_ID 9
 
 // Bool
 #define _TRUE 1

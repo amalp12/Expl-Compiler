@@ -73,24 +73,22 @@ extern int yydebug;
     LE = 274,                      /* LE  */
     NE = 275,                      /* NE  */
     EQ = 276,                      /* EQ  */
-    LTE = 277,                     /* LTE  */
-    GTE = 278,                     /* GTE  */
-    IF = 279,                      /* IF  */
-    THEN = 280,                    /* THEN  */
-    ELSE = 281,                    /* ELSE  */
-    ENDIF = 282,                   /* ENDIF  */
-    WHILE = 283,                   /* WHILE  */
-    DO = 284,                      /* DO  */
-    ENDWHILE = 285,                /* ENDWHILE  */
-    REPEAT = 286,                  /* REPEAT  */
-    UNTIL = 287,                   /* UNTIL  */
-    DECL = 288,                    /* DECL  */
-    ENDDECL = 289,                 /* ENDDECL  */
-    INT_DECL = 290,                /* INT_DECL  */
-    STRING_DECL = 291,             /* STRING_DECL  */
-    BREAK = 292,                   /* BREAK  */
-    BREAKPOINT = 293,              /* BREAKPOINT  */
-    CONTINUE = 294                 /* CONTINUE  */
+    IF = 277,                      /* IF  */
+    THEN = 278,                    /* THEN  */
+    ELSE = 279,                    /* ELSE  */
+    ENDIF = 280,                   /* ENDIF  */
+    WHILE = 281,                   /* WHILE  */
+    DO = 282,                      /* DO  */
+    ENDWHILE = 283,                /* ENDWHILE  */
+    REPEAT = 284,                  /* REPEAT  */
+    UNTIL = 285,                   /* UNTIL  */
+    DECL = 286,                    /* DECL  */
+    ENDDECL = 287,                 /* ENDDECL  */
+    INT_DECL = 288,                /* INT_DECL  */
+    STRING_DECL = 289,             /* STRING_DECL  */
+    BREAK = 290,                   /* BREAK  */
+    BREAKPOINT = 291,              /* BREAKPOINT  */
+    CONTINUE = 292                 /* CONTINUE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -118,24 +116,22 @@ extern int yydebug;
 #define LE 274
 #define NE 275
 #define EQ 276
-#define LTE 277
-#define GTE 278
-#define IF 279
-#define THEN 280
-#define ELSE 281
-#define ENDIF 282
-#define WHILE 283
-#define DO 284
-#define ENDWHILE 285
-#define REPEAT 286
-#define UNTIL 287
-#define DECL 288
-#define ENDDECL 289
-#define INT_DECL 290
-#define STRING_DECL 291
-#define BREAK 292
-#define BREAKPOINT 293
-#define CONTINUE 294
+#define IF 277
+#define THEN 278
+#define ELSE 279
+#define ENDIF 280
+#define WHILE 281
+#define DO 282
+#define ENDWHILE 283
+#define REPEAT 284
+#define UNTIL 285
+#define DECL 286
+#define ENDDECL 287
+#define INT_DECL 288
+#define STRING_DECL 289
+#define BREAK 290
+#define BREAKPOINT 291
+#define CONTINUE 292
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -148,7 +144,7 @@ union YYSTYPE
   int integer;
   struct declaration_node * decl_node;
 
-#line 152 "y.tab.h"
+#line 148 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

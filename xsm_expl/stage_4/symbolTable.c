@@ -36,14 +36,11 @@ void GSTInstall(struct expr_tree_node * node, int type, int offset)   // Creates
     if(node->left != NULL) rows = node->left->val;
     if(node->right != NULL) cols = node->right->val;
 
-    if(cols==0 && rows==0) temp->size = _INT_SIZE;
-    else if(cols==0) temp->size = rows*_INT_SIZE;
-    else temp->size = rows*cols*_INT_SIZE;
-    temp->size = max(temp->size, _INT_SIZE);
     
     temp->rows = rows;
     temp->cols = cols;
     temp->binding = _STACK_POINTER;
+    temp->size = max(rows*cols, max(rows, max(cols, _INT_SIZE)));
     _STACK_POINTER += temp->size;
     _BASE_POINTER += temp->size;
     temp->next = _GLOBAL_SYMBOL_TABLE;

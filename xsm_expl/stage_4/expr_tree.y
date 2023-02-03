@@ -55,15 +55,16 @@ int yylex(void);
 
 
 %token INT MUL DIV PLUS MINUS  ID READ WRITE SEMICOLON START END EQUALS STRING
-%token GT LT GE LE NE EQ LTE GTE
+%token GT LT GE LE NE EQ 
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE REPEAT UNTIL
 %token DECL ENDDECL INT_DECL STRING_DECL 
 %token BREAK BREAKPOINT CONTINUE 
 %type <node> expr program
 %left PLUS MINUS
 %left MUL DIV
-%left GTE LTE NE
-%left GT LT EQ
+%left NE EQ
+%left GT LT 
+%left GE LE
 
 
 %%
@@ -225,8 +226,8 @@ expr :
   | STRING {$<node>$ = $<node>1;}
   | expr LT expr {$<node>$ = makeRelopNode(_NODE_TYPE_LT,$<node>1,$<node>3);}
   | expr GT expr {$<node>$ = makeRelopNode(_NODE_TYPE_GT,$<node>1,$<node>3);}
-  | expr LTE expr  {$<node>$ = makeRelopNode(_NODE_TYPE_LE,$<node>1,$<node>3);}
-  | expr GTE expr {$<node>$ = makeRelopNode(_NODE_TYPE_GE,$<node>1,$<node>3);}
+  | expr LE expr  {$<node>$ = makeRelopNode(_NODE_TYPE_LE,$<node>1,$<node>3);}
+  | expr GE expr {$<node>$ = makeRelopNode(_NODE_TYPE_GE,$<node>1,$<node>3);}
   | expr NE expr {$<node>$ = makeRelopNode(_NODE_TYPE_NE,$<node>1,$<node>3);}
   | expr EQ expr {$<node>$ = makeRelopNode(_NODE_TYPE_EQ,$<node>1,$<node>3);}
 ;
