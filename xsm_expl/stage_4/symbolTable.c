@@ -18,19 +18,24 @@ int max(int a, int b)
     if(a>b) return a;
     return b;
 }
-void GSTInstall(char *name, int type, int offset, int rows, int cols)   // Creates a symbol table entry.
+void GSTInstall(struct expr_tree_node * node, int type, int offset)   // Creates a symbol table entry.
 {
-    struct Gsymbol *temp = GSTLookup(name);
+    struct Gsymbol *temp = GSTLookup(node->varname);
     if(temp != NULL)
     {
-        printf("Variable %s already declared\n", name);
+        printf("Variable %s already declared\n", node->varname);
         exit(1);
     }
     temp = (struct Gsymbol *)malloc(sizeof(struct Gsymbol));
 
-    temp->name  = strndup(name, strlen(name)-offset);
+    temp->name  = strndup(node->varname, strlen(node->varname)-offset);
 
     temp->type = type;
+
+    int rows =0, cols = 0; 
+    if(node->left != NULL) rows = node->left->val;
+    if(node->right != NULL) cols = node->right->val;
+
     if(cols==0 && rows==0) temp->size = _INT_SIZE;
     else if(cols==0) temp->size = rows*_INT_SIZE;
     else temp->size = rows*cols*_INT_SIZE;

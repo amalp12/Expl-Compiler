@@ -26,7 +26,7 @@ struct expr_tree_node{
     int nodetype;   // information about non-leaf nodes - read/write/connector/+/* etc.
     struct Gsymbol *GSTEntry;     // pointer to GST entry for global variables and functions
     struct expr_tree_node * left, * right;     // left and right branches
-    int rows, cols; // for arrays
+
 
 };
 

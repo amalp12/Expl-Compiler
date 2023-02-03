@@ -1,20 +1,19 @@
 begin
     
 decl
-  int num, sum, test[10][4];
-  str mesg;
+   int n,arr[50],i,j,dup;
 enddecl
-read(num);
-test[1][2] = num;
-write(test[1][2]);
-sum = 0;
-while (num != 0) do
-  sum = sum + num;
-  read(num);
+read(n);
+i=0;
+while(i<n) do
+    arr[i] = i;
+    i=i+1;
 endwhile;
-write("sum is:");
-write(sum);
-mesg = "good bye";
-write(mesg);
+
+while(i>=0) do
+    write(arr[i]);
+    i=i-1;
+endwhile;
+
 
 end;

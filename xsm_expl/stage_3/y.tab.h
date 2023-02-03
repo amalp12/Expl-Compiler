@@ -72,20 +72,18 @@ extern int yydebug;
     LE = 273,                      /* LE  */
     NE = 274,                      /* NE  */
     EQ = 275,                      /* EQ  */
-    LTE = 276,                     /* LTE  */
-    GTE = 277,                     /* GTE  */
-    IF = 278,                      /* IF  */
-    THEN = 279,                    /* THEN  */
-    ELSE = 280,                    /* ELSE  */
-    ENDIF = 281,                   /* ENDIF  */
-    WHILE = 282,                   /* WHILE  */
-    DO = 283,                      /* DO  */
-    ENDWHILE = 284,                /* ENDWHILE  */
-    REPEAT = 285,                  /* REPEAT  */
-    UNTIL = 286,                   /* UNTIL  */
-    BREAK = 287,                   /* BREAK  */
-    BREAKPOINT = 288,              /* BREAKPOINT  */
-    CONTINUE = 289                 /* CONTINUE  */
+    IF = 276,                      /* IF  */
+    THEN = 277,                    /* THEN  */
+    ELSE = 278,                    /* ELSE  */
+    ENDIF = 279,                   /* ENDIF  */
+    WHILE = 280,                   /* WHILE  */
+    DO = 281,                      /* DO  */
+    ENDWHILE = 282,                /* ENDWHILE  */
+    REPEAT = 283,                  /* REPEAT  */
+    UNTIL = 284,                   /* UNTIL  */
+    BREAK = 285,                   /* BREAK  */
+    BREAKPOINT = 286,              /* BREAKPOINT  */
+    CONTINUE = 287                 /* CONTINUE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -112,20 +110,18 @@ extern int yydebug;
 #define LE 273
 #define NE 274
 #define EQ 275
-#define LTE 276
-#define GTE 277
-#define IF 278
-#define THEN 279
-#define ELSE 280
-#define ENDIF 281
-#define WHILE 282
-#define DO 283
-#define ENDWHILE 284
-#define REPEAT 285
-#define UNTIL 286
-#define BREAK 287
-#define BREAKPOINT 288
-#define CONTINUE 289
+#define IF 276
+#define THEN 277
+#define ELSE 278
+#define ENDIF 279
+#define WHILE 280
+#define DO 281
+#define ENDWHILE 282
+#define REPEAT 283
+#define UNTIL 284
+#define BREAK 285
+#define BREAKPOINT 286
+#define CONTINUE 287
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -136,7 +132,7 @@ union YYSTYPE
   struct expr_tree_node * node;
   char c;
 
-#line 140 "y.tab.h"
+#line 136 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

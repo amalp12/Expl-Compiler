@@ -560,6 +560,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // Evaluating the condtion
             reg_index conditionReg = codeGen(t->left, target_file);  
 
+            // type of condition should be boolean
+            if(t->left->type != _TYPE_BOOL)
+            {
+                printf("Error: Condition should be boolean\n");
+                exit(1);
+            }
+
             // jumping to end if condition is false
             fprintf(target_file, "JZ R%d, _L%d\n", conditionReg, whileEndLabel);
 
@@ -655,6 +662,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
+            // both left and right nodes should be integers
+            if (t->left->type != _TYPE_INT || t->right->type != _TYPE_INT)
+            {
+                printf("Error: Both left and right nodes should be integers");
+                exit(1);
+            }
+
             fprintf(target_file, "LE R%d, R%d\n", leftReg, rightReg);
             freeLastReg();
             return_val = leftReg;
@@ -666,6 +680,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
+
+            if (t->left->type != _TYPE_INT || t->right->type != _TYPE_INT)
+            {
+                printf("Error: Both left and right nodes should be integers");
+                exit(1);
+            }
 
             fprintf(target_file, "GE R%d, R%d\n", leftReg, rightReg);
             freeLastReg();
@@ -679,6 +699,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
+            if (t->left->type != _TYPE_INT || t->right->type != _TYPE_INT)
+            {
+                printf("Error: Both left and right nodes should be integers");
+                exit(1);
+            }
+
             fprintf(target_file, "LT R%d, R%d\n", leftReg, rightReg);
             freeLastReg();
             return_val = leftReg;
@@ -690,6 +716,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
+
+            if (t->left->type != _TYPE_INT || t->right->type != _TYPE_INT)
+            {
+                printf("Error: Both left and right nodes should be integers");
+                exit(1);
+            }
 
             fprintf(target_file, "GT R%d, R%d\n", leftReg, rightReg);
             freeLastReg();
@@ -703,6 +735,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
+            if (t->left->type != _TYPE_INT || t->right->type != _TYPE_INT)
+            {
+                printf("Error: Both left and right nodes should be integers");
+                exit(1);
+            }
+
             fprintf(target_file, "NE R%d, R%d\n", leftReg, rightReg);
             freeLastReg();
             return_val = leftReg;
@@ -714,6 +752,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
+
+            if (t->left->type != _TYPE_INT || t->right->type != _TYPE_INT)
+            {
+                printf("Error: Both left and right nodes should be integers");
+                exit(1);
+            }
 
             fprintf(target_file, "EQ R%d, R%d\n", leftReg, rightReg);
             freeLastReg();

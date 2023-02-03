@@ -143,16 +143,44 @@ identifierDecl :
     }
   | ID '[' INT ']' 
     {
-        $<node>1->rows = $<node>3->val;
+        $<node>1->left = $<node>3;
         $<node>$ = $<node>1;
     }
   | ID '[' INT ']' '[' INT ']'
     { 
 
-      $<node>1->rows = $<node>3->val; 
-      $<node>1->cols = $<node>6->val; 
+      $<node>1->left = $<node>3; 
+      $<node>1->right = $<node>6; 
       $<node>$ = $<node>1;
     }
+  | ID '[' ID ']' '[' INT ']'
+    { 
+
+      $<node>1->left = $<node>3; 
+      $<node>1->right = $<node>6; 
+      $<node>$ = $<node>1;
+    }
+  | ID '[' INT ']' '[' ID ']'
+    { 
+
+      $<node>1->left = $<node>3; 
+      $<node>1->right = $<node>6; 
+      $<node>$ = $<node>1;
+    }
+  | ID '[' ID ']' '[' ID ']'
+    { 
+
+      $<node>1->left = $<node>3; 
+      $<node>1->right = $<node>6; 
+      $<node>$ = $<node>1;
+    }
+  | ID '[' ID ']'
+    { 
+
+      $<node>1->left = $<node>3; 
+      $<node>$ = $<node>1;
+    }
+  
 
 ;
 brkStmt : 

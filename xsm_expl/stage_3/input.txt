@@ -2,7 +2,7 @@ begin
     
     read(a);
     s=0;
-    while(a!=0) do
+    while(a>=0) do
         s=s+a;
 
         read(a); 

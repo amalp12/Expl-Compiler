@@ -9,8 +9,6 @@ struct expr_tree_node * makeNode(int val, int nodetype, int type, char* varname,
     new_node->val = val;
     new_node->varname =varname;
     new_node->GSTEntry = GSTEntry;
-    new_node->rows = 0;
-    new_node->cols = 0;
 
     return new_node;
 
