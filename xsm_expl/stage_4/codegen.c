@@ -415,10 +415,10 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
     
             /*
-            If array is declared by a[m][n] where m is the number of rows while n is the number of columns,
-            then address of an element a[i][j] of the array stored in row major order is calculated as,
-            Address(a[i][j]) = B + (i * n + j) * size   
-            where, B is the base address or the address of the first element of the array a[0][0] .
+                If array is declared by a[m][n] where m is the number of rows while n is the number of columns,
+                then address of an element a[i][j] of the array stored in row major order is calculated as,
+                Address(a[i][j]) = B + (i * n + j) * size   
+                where, B is the base address or the address of the first element of the array a[0][0] .
             */
 
 
@@ -613,6 +613,31 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             }
 
             fprintf(target_file, "DIV R%d, R%d\n", leftReg, rightReg);
+            // freeing the register used by the right tree evaluation
+            freeLastReg();
+            return_val =  leftReg;
+            break;
+        }
+        // MOD
+        case(_NODE_TYPE_MOD):
+        {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
+            // if left is a variable take the value
+            if(t->left->nodetype == _NODE_TYPE_ID)
+            {
+                fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
+            }
+            // if right is a variable take the value
+            if(t->right->nodetype == _NODE_TYPE_ID)
+            {
+                fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
+            }
+
+            fprintf(target_file, "MOD R%d, R%d\n", leftReg, rightReg);
             // freeing the register used by the right tree evaluation
             freeLastReg();
             return_val =  leftReg;

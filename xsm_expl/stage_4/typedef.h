@@ -25,6 +25,7 @@
 #define _NODE_TYPE_CONTINUE 22
 #define _NODE_TYPE_BREAKPOINT 23
 #define _NODE_TYPE_STRING 24
+#define _NODE_TYPE_MOD 25
 
 // Type
 #define _TYPE_INT 0

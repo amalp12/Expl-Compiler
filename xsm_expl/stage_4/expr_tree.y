@@ -54,17 +54,17 @@ int yylex(void);
 }
 
 
-%token INT MUL DIV PLUS MINUS  ID READ WRITE SEMICOLON START END EQUALS STRING
+%token INT MUL DIV PLUS MINUS  ID READ WRITE SEMICOLON START END EQUALS STRING MOD
 %token GT LT GE LE NE EQ 
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE REPEAT UNTIL
 %token DECL ENDDECL INT_DECL STRING_DECL 
 %token BREAK BREAKPOINT CONTINUE 
 %type <node> expr program
-%left PLUS MINUS
-%left MUL DIV
-%left NE EQ
 %left GT LT 
+%left NE EQ
 %left GE LE
+%left PLUS MINUS
+%left MUL DIV MOD
 
 
 %%
@@ -220,6 +220,7 @@ expr :
   | expr MINUS expr  { $<node>$ = makeOperatorNode(_NODE_TYPE_MINUS,$<node>1,$<node>3);}
   | expr MUL expr {$<node>$ = makeOperatorNode(_NODE_TYPE_MUL,$<node>1,$<node>3);}
   | expr DIV expr {$<node>$ = makeOperatorNode(_NODE_TYPE_DIV,$<node>1,$<node>3);}
+  | expr MOD expr {$<node>$ = makeOperatorNode(_NODE_TYPE_MOD,$<node>1,$<node>3);}
   |'(' expr ')' {$<node>$ = $<node>2;}
   | INT {$<node>$ = $<node>1;}
   | identifierDecl {$<node>$ = $<node>1;}

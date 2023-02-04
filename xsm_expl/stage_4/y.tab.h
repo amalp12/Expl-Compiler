@@ -67,28 +67,29 @@ extern int yydebug;
     END = 268,                     /* END  */
     EQUALS = 269,                  /* EQUALS  */
     STRING = 270,                  /* STRING  */
-    GT = 271,                      /* GT  */
-    LT = 272,                      /* LT  */
-    GE = 273,                      /* GE  */
-    LE = 274,                      /* LE  */
-    NE = 275,                      /* NE  */
-    EQ = 276,                      /* EQ  */
-    IF = 277,                      /* IF  */
-    THEN = 278,                    /* THEN  */
-    ELSE = 279,                    /* ELSE  */
-    ENDIF = 280,                   /* ENDIF  */
-    WHILE = 281,                   /* WHILE  */
-    DO = 282,                      /* DO  */
-    ENDWHILE = 283,                /* ENDWHILE  */
-    REPEAT = 284,                  /* REPEAT  */
-    UNTIL = 285,                   /* UNTIL  */
-    DECL = 286,                    /* DECL  */
-    ENDDECL = 287,                 /* ENDDECL  */
-    INT_DECL = 288,                /* INT_DECL  */
-    STRING_DECL = 289,             /* STRING_DECL  */
-    BREAK = 290,                   /* BREAK  */
-    BREAKPOINT = 291,              /* BREAKPOINT  */
-    CONTINUE = 292                 /* CONTINUE  */
+    MOD = 271,                     /* MOD  */
+    GT = 272,                      /* GT  */
+    LT = 273,                      /* LT  */
+    GE = 274,                      /* GE  */
+    LE = 275,                      /* LE  */
+    NE = 276,                      /* NE  */
+    EQ = 277,                      /* EQ  */
+    IF = 278,                      /* IF  */
+    THEN = 279,                    /* THEN  */
+    ELSE = 280,                    /* ELSE  */
+    ENDIF = 281,                   /* ENDIF  */
+    WHILE = 282,                   /* WHILE  */
+    DO = 283,                      /* DO  */
+    ENDWHILE = 284,                /* ENDWHILE  */
+    REPEAT = 285,                  /* REPEAT  */
+    UNTIL = 286,                   /* UNTIL  */
+    DECL = 287,                    /* DECL  */
+    ENDDECL = 288,                 /* ENDDECL  */
+    INT_DECL = 289,                /* INT_DECL  */
+    STRING_DECL = 290,             /* STRING_DECL  */
+    BREAK = 291,                   /* BREAK  */
+    BREAKPOINT = 292,              /* BREAKPOINT  */
+    CONTINUE = 293                 /* CONTINUE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -110,28 +111,29 @@ extern int yydebug;
 #define END 268
 #define EQUALS 269
 #define STRING 270
-#define GT 271
-#define LT 272
-#define GE 273
-#define LE 274
-#define NE 275
-#define EQ 276
-#define IF 277
-#define THEN 278
-#define ELSE 279
-#define ENDIF 280
-#define WHILE 281
-#define DO 282
-#define ENDWHILE 283
-#define REPEAT 284
-#define UNTIL 285
-#define DECL 286
-#define ENDDECL 287
-#define INT_DECL 288
-#define STRING_DECL 289
-#define BREAK 290
-#define BREAKPOINT 291
-#define CONTINUE 292
+#define MOD 271
+#define GT 272
+#define LT 273
+#define GE 274
+#define LE 275
+#define NE 276
+#define EQ 277
+#define IF 278
+#define THEN 279
+#define ELSE 280
+#define ENDIF 281
+#define WHILE 282
+#define DO 283
+#define ENDWHILE 284
+#define REPEAT 285
+#define UNTIL 286
+#define DECL 287
+#define ENDDECL 288
+#define INT_DECL 289
+#define STRING_DECL 290
+#define BREAK 291
+#define BREAKPOINT 292
+#define CONTINUE 293
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -144,7 +146,7 @@ union YYSTYPE
   int integer;
   struct declaration_node * decl_node;
 
-#line 148 "y.tab.h"
+#line 150 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

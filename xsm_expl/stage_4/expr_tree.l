@@ -137,11 +137,14 @@ numbers [0-9]+
 "<=" {
     return LE;
 }  
+"%" {
+    return MOD;
+}
 
 
 [\t] {}
     
-[(),\[\]] {
+[(),\[\]%] {
     return *yytext;
 }
 
