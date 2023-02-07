@@ -26,6 +26,8 @@
 #define _NODE_TYPE_BREAKPOINT 23
 #define _NODE_TYPE_STRING 24
 #define _NODE_TYPE_MOD 25
+#define _NODE_TYPE_PARAMETER 26 
+#define _NODE_TYPE_FUNCTION 27
 
 // Type
 #define _TYPE_INT 0
@@ -38,7 +40,7 @@
 #define _TYPE_KEYWORD 7
 #define _TYPE_DECLARATION 8
 #define _TYPE_ID 9
-
+#define _TYPE_VOID 10
 // Bool
 #define _TRUE 1
 #define _FALSE 0

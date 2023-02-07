@@ -58,3 +58,5 @@ struct expr_tree_node * makeContinueNode();
 struct expr_tree_node * makeBreakpointNode();
 
 struct expr_tree_node * makeDoWhileNode( struct expr_tree_node *body, struct expr_tree_node *cond);
+
+struct expr_tree_node * makeFunctionCallNode(struct expr_tree_node *parameters,  struct expr_tree_node *code, char* name, int type);

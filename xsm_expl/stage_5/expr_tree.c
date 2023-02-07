@@ -98,3 +98,14 @@ struct expr_tree_node * makeDoWhileNode( struct expr_tree_node *body, struct exp
 {
     return makeNode(_NONE, _NODE_TYPE_DO_WHILE,_TYPE_KEYWORD, NULL, NULL, body,cond);
 }
+
+struct expr_tree_node * makeFunctionCallNode(struct expr_tree_node *parameters)
+{
+    // check if the variable is declared
+    struct Gsymbol * GSTEntry = GSTLookup(name);
+
+    return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,type, name, GSTEntry, parameters,code);
+
+};
+
+

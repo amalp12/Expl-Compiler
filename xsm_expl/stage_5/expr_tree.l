@@ -141,6 +141,10 @@ numbers [0-9]+
     return MOD;
 }
 
+"return" {
+    return RETURN;
+}
+
 
 [\t] {}
     

@@ -9,17 +9,30 @@
 #include "symbolTable.c"
 #endif
 
-struct declaration_node {
+struct declaration_node 
+{
     struct expr_tree_node *node;
     struct declaration_node *next;
 };
 
-struct declaration_node * _DECLARATION_STACK_HEAD = NULL;
+struct declaration_node * _GLOBAL_DECLARATION_STACK_HEAD = NULL;
+struct declaration_node * _LOCAL_DECLARATION_STACK_HEAD = NULL;
 
-void pushDeclaration( struct expr_tree_node * node);
+// Global Declaration Helper Functions
+void pushGlobalDeclaration( struct expr_tree_node * node); 
 
-struct declaration_node * popDeclaration();
+struct declaration_node * popGlobalDeclaration();
 
-int isDeclarationStackEmpty();
+int isGlobalDeclarationStackEmpty();
 
-void popAllAndCreateEntry(int type);
+void popAllGlobalDeclarationsAndCreateEntry(int type);
+
+
+// Local Declaration Helper Functions
+void pushLocalDeclaration( struct expr_tree_node * node);
+
+struct declaration_node * popLocalDeclaration();
+
+int isLocalDeclarationStackEmpty();
+
+void popAllLocalDeclarationsAndCreateEntry(int type);

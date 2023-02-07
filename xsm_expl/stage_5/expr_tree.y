@@ -41,7 +41,6 @@
 void yyerror(char const *s);
 extern FILE* yyin;
 int identifiers[26];
-
 int yylex(void);
 
 %}
@@ -59,6 +58,7 @@ int yylex(void);
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE REPEAT UNTIL
 %token DECL ENDDECL INT_DECL STRING_DECL 
 %token BREAK BREAKPOINT CONTINUE 
+%token RETURN 
 %type <node> expr program
 %left GT LT 
 %left NE EQ
@@ -100,6 +100,146 @@ program :
     }
 ;
 
+Program : 
+    GDeclBlock FDefBlock MainBlock
+  | GDeclBlock MainBlock
+  | MainBlock
+;
+
+MainBlock :
+    START Slist ReturnStmt END SEMICOLON 
+  | START ReturnStmt END SEMICOLON
+;
+
+GDeclBlock :
+    DECL GDeclList ENDDECL 
+  | DECL ENDDECL
+;
+
+GDeclList : 
+    GDeclList GDecl 
+  | GDecl
+;
+
+GDecl : 
+    Type GidList 
+;
+
+GidList : 
+    GidList ',' Gid 
+  | Gid
+;
+
+Gid :
+     ID 
+    {
+      $<node>$ = $<node>1;
+    }
+  | ID '[' INT ']' 
+    {
+        $<node>1->left = $<node>3;
+        $<node>$ = $<node>1;
+    }
+  | ID '[' INT ']' '[' INT ']'
+    { 
+
+      $<node>1->left = $<node>3; 
+      $<node>1->right = $<node>6; 
+      $<node>$ = $<node>1;
+    }
+  | ID '[' ID ']' '[' INT ']'
+    { 
+
+      $<node>1->left = $<node>3; 
+      $<node>1->right = $<node>6; 
+      $<node>$ = $<node>1;
+    }
+  | ID '[' INT ']' '[' ID ']'
+    { 
+
+      $<node>1->left = $<node>3; 
+      $<node>1->right = $<node>6; 
+      $<node>$ = $<node>1;
+    }
+  | ID '[' ID ']' '[' ID ']'
+    { 
+
+      $<node>1->left = $<node>3; 
+      $<node>1->right = $<node>6; 
+      $<node>$ = $<node>1;
+    }
+  | ID '[' ID ']'
+    { 
+
+      $<node>1->left = $<node>3; 
+      $<node>$ = $<node>1;
+    }
+  
+  | ID '(' ParamList ')'
+    {
+      
+    }
+;
+
+
+
+   
+// --------------------------------------------------------------------------------------
+
+FDefBlock :
+    FDefBlock FDef 
+    | FDef
+;
+
+FDef :
+    Type ID '(' ParamList ')' '{' LDeclBlock Body '}'
+;
+
+Body :
+    START Slist ReturnStmt END SEMICOLON 
+  | START ReturnStmt END SEMICOLON
+;
+
+ParamList :
+    ParamList ',' Param 
+  | Param
+  | 
+;
+
+Param :
+  Type ID
+;
+Type : 
+    INT_DECL
+  | STRING_DECL
+;
+// -----------------------------------------------------------------------------------------
+LDeclBlock :
+    DECL LDecList ENDDECL 
+  | DECL ENDDECL
+;
+
+LDecList : 
+    LDecList LDecl 
+  | LDecl
+;
+LDecl :
+    Type IdList 
+;
+
+IdList : 
+    IdList ',' ID 
+  | ID
+;
+
+// Since a function call is treated as an expression (whose value is the return value of the function), the following rules must be added:
+
+
+ArgList : 
+    ArgList ',' expr
+  | expr
+;
+// -----------------------------------------------------------------------------------------
 
 Slist : 
     Slist Stmt {$<node>$ = makeConnectorNode($<node>1,$<node>2);}
@@ -117,7 +257,19 @@ Stmt :
   | RepeatStmt 
   | DoWhileStmt 
   | DeclStmt
+  | ReturnStmt
 ;
+ReturnStmt : 
+    RETURN expr SEMICOLON 
+    {
+      $<node>$ = makeReturnNode($<node>2);
+    }
+  | RETURN SEMICOLON 
+    {
+      $<node>$ = makeReturnNode(NULL);
+    }
+;
+
 DeclStmt : 
     DECL DeclList ENDDECL  
   | DECL ENDDECL ;
@@ -126,15 +278,15 @@ DeclList :
   | Decl
 ;
 Decl : 
-    Type VarList SEMICOLON {popAllAndCreateEntry($<integer>1);}
+    Type VarList SEMICOLON {popAllGlobalDeclarationsAndCreateEntry($<integer>1);}
 ;
 Type : 
     INT_DECL
   | STRING_DECL
 ;
 VarList : 
-    VarList ',' identifierDecl {pushDeclaration($<node>3);} 
-  | identifierDecl {pushDeclaration($<node>1);}  
+    VarList ',' identifierDecl {pushGlobalDeclaration($<node>3);} 
+  | identifierDecl {pushGlobalDeclaration($<node>1);}  
 ;
 
 identifierDecl : 
@@ -231,7 +383,10 @@ expr :
   | expr GE expr {$<node>$ = makeRelopNode(_NODE_TYPE_GE,$<node>1,$<node>3);}
   | expr NE expr {$<node>$ = makeRelopNode(_NODE_TYPE_NE,$<node>1,$<node>3);}
   | expr EQ expr {$<node>$ = makeRelopNode(_NODE_TYPE_EQ,$<node>1,$<node>3);}
+  | ID '(' ')' {$<node>$ = makeFuncCallNode($<node>1,NULL);}
+  | ID '(' ArgList ')' {$<node>$ = makeFuncCallNode($<node>1,$<node>3);}
 ;
+
 
 %%
 

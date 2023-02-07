@@ -89,7 +89,8 @@ extern int yydebug;
     STRING_DECL = 290,             /* STRING_DECL  */
     BREAK = 291,                   /* BREAK  */
     BREAKPOINT = 292,              /* BREAKPOINT  */
-    CONTINUE = 293                 /* CONTINUE  */
+    CONTINUE = 293,                /* CONTINUE  */
+    RETURN = 294                   /* RETURN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -134,19 +135,20 @@ extern int yydebug;
 #define BREAK 291
 #define BREAKPOINT 292
 #define CONTINUE 293
+#define RETURN 294
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 49 "expr_tree.y"
+#line 48 "expr_tree.y"
 
   struct expr_tree_node * node;
   char * string;
   int integer;
   struct declaration_node * decl_node;
 
-#line 150 "y.tab.h"
+#line 152 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
