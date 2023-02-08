@@ -1,30 +1,34 @@
-
-
-#ifndef STARTER_H
-#define STARTER_H
+#ifndef _STDIO_H
+#define _STDIO_H
 #include <stdio.h>
+#endif
+
+#ifndef _STDLIB_H
+#define _STDLIB_H
 #include <stdlib.h>
+#endif
+
+#ifndef _STRING_H
+#define _STRING_H
 #include <string.h>
 #endif
 
-
-
-#ifndef EXPR_TREE_H
-#define EXPR_TREE_H
+#ifndef _EXPR_TREE_H
+#define _EXPR_TREE_H
 #include "expr_tree.h"
 #endif
 
-
-#ifndef TYPEDEF_H
-#define TYPEDEF_H
+#ifndef _TYPEDEF_H
+#define _TYPEDEF_H
 #include "typedef.h"
 #endif
 
-#ifndef SYMBOL_TABLE_H
-#define SYMBOL_TABLE_H
+
+#ifndef _SYMBOL_TABLE_H
+#define _SYMBOL_TABLE_H
 #include "symbolTable.h"
-#include "symbolTable.c"
 #endif
+
 
 struct loopStack{
     int startLabel;

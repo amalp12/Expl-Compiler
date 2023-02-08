@@ -1,38 +1,57 @@
 %{  
 
-
-#ifndef STARTER_H
-#define STARTER_H
+#ifndef _STDIO_H
+#define _STDIO_H
 #include <stdio.h>
+#endif
+
+#ifndef _STDLIB_H
+#define _STDLIB_H
 #include <stdlib.h>
 #endif
 
-#ifndef STRING_H
-#define STRING_H
+#ifndef _STRING_H
+#define _STRING_H
 #include <string.h>
 #endif
 
-#ifndef CODEGEN_H
-#define CODEGEN_H
+#ifndef _CODEGEN_H
+#define _CODEGEN_H
 #include "codegen.h"
+#endif
+
+#ifndef _CODEGEN_C
+#define _CODEGEN_C
 #include "codegen.c"
 #endif
 
-#ifndef EXPR_TREE_H
-#define EXPR_TREE_H
+#ifndef _EXPR_TREE_H
+#define _EXPR_TREE_H
 #include "expr_tree.h"
+#endif
+
+#ifndef _EXPR_TREE_C
+#define _EXPR_TREE_C
 #include "expr_tree.c"
 #endif
 
-#ifndef SYMBOL_TABLE_H
-#define SYMBOL_TABLE_H
+#ifndef _SYMBOL_TABLE_H
+#define _SYMBOL_TABLE_H
 #include "symbolTable.h"
+#endif
+
+#ifndef _SYMBOL_TABLE_C
+#define _SYMBOL_TABLE_C
 #include "symbolTable.c"
 #endif
 
-#ifndef DECLARATIONS_H
-#define DECLARATIONS_H
+#ifndef _DECLARATIONS_H
+#define _DECLARATIONS_H
 #include "declarations.h"
+#endif
+
+#ifndef _DECLARATIONS_C
+#define _DECLARATIONS_C
 #include "declarations.c"
 #endif
 
@@ -383,11 +402,11 @@ expr :
   | expr GE expr {$<node>$ = makeRelopNode(_NODE_TYPE_GE,$<node>1,$<node>3);}
   | expr NE expr {$<node>$ = makeRelopNode(_NODE_TYPE_NE,$<node>1,$<node>3);}
   | expr EQ expr {$<node>$ = makeRelopNode(_NODE_TYPE_EQ,$<node>1,$<node>3);}
-  | ID '(' ')' {$<node>$ = makeFuncCallNode($<node>1,NULL);}
-  | ID '(' ArgList ')' {$<node>$ = makeFuncCallNode($<node>1,$<node>3);}
+  | ID '(' ')' {$<node>$ = makeFunctionCallNode($<node>1->varname,NULL);}
+  | ID '(' ArgList ')' {$<node>$ = makeFunctionCallNode($<node>1->varname,$<node>3);}
 ;
 
-
+// makeFunctionCallNode(struct expr_tree_node *parameters,  struct expr_tree_node *code, char* name, int type)
 %%
 
 void yyerror(char const *s)

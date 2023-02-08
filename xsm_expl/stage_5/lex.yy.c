@@ -512,25 +512,24 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "expr_tree.l"
 #line 2 "expr_tree.l"
-#ifndef YTAB_H
-#define YTAB_H
+#ifndef _YTAB_H
+#define _YTAB_H
 #include "y.tab.h"
 #endif
 
-
-#ifndef EXPR_TREE_H
-#define EXPR_TREE_H
-#include "expr_tree.h"
-#include "expr_tree.c"
-#endif
-
-#ifndef TYPEDEF_H
-#define TYPE_DEF_H
+#ifndef _TYPEDEF_H
+#define _TYPE_DEF_H
 #include "typedef.h"
 #endif
 
+extern struct expr_tree_node * makeStringNode(char * string, int offset);
+
+extern struct expr_tree_node * makeIdNode(char * varname);
+
+extern struct expr_tree_node * makeNumberNode(int num );
+
+#line 531 "lex.yy.c"
 #line 532 "lex.yy.c"
-#line 533 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -747,11 +746,11 @@ YY_DECL
 		}
 
 	{
-#line 25 "expr_tree.l"
+#line 24 "expr_tree.l"
 
 
 
-#line 754 "lex.yy.c"
+#line 753 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -810,7 +809,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 28 "expr_tree.l"
+#line 27 "expr_tree.l"
 {
     yylval.node = makeNumberNode(atoi((yytext)));
     return INT;
@@ -818,175 +817,175 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 33 "expr_tree.l"
+#line 32 "expr_tree.l"
 {
     return PLUS;
 }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 37 "expr_tree.l"
+#line 36 "expr_tree.l"
 {
     return MINUS;
 }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 41 "expr_tree.l"
+#line 40 "expr_tree.l"
 {
     return MUL;
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 45 "expr_tree.l"
+#line 44 "expr_tree.l"
 {
     return DIV;
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 49 "expr_tree.l"
+#line 48 "expr_tree.l"
 {
     return EQUALS;
 }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 53 "expr_tree.l"
+#line 52 "expr_tree.l"
 {
     return SEMICOLON;
 }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 57 "expr_tree.l"
+#line 56 "expr_tree.l"
 {
     return READ;
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 61 "expr_tree.l"
+#line 60 "expr_tree.l"
 {
     return WRITE;
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 65 "expr_tree.l"
+#line 64 "expr_tree.l"
 {
     return START;
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 69 "expr_tree.l"
+#line 68 "expr_tree.l"
 {
     return END;
 }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 72 "expr_tree.l"
+#line 71 "expr_tree.l"
 {
     return IF;
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 75 "expr_tree.l"
+#line 74 "expr_tree.l"
 {
     return ELSE;
 }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 78 "expr_tree.l"
+#line 77 "expr_tree.l"
 {
     return THEN;
 }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 81 "expr_tree.l"
+#line 80 "expr_tree.l"
 {
     return ENDIF;
 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 84 "expr_tree.l"
+#line 83 "expr_tree.l"
 {
     return WHILE;
 }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 87 "expr_tree.l"
+#line 86 "expr_tree.l"
 {
     return DO;
 }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 90 "expr_tree.l"
+#line 89 "expr_tree.l"
 {
     return ENDWHILE;
 }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 93 "expr_tree.l"
+#line 92 "expr_tree.l"
 {
     return BREAKPOINT;
 }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 96 "expr_tree.l"
+#line 95 "expr_tree.l"
 {
     return BREAK;
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 99 "expr_tree.l"
+#line 98 "expr_tree.l"
 {
     return CONTINUE;
 }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 102 "expr_tree.l"
+#line 101 "expr_tree.l"
 {
     return REPEAT;
 }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 105 "expr_tree.l"
+#line 104 "expr_tree.l"
 {
     return UNTIL;
 }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 108 "expr_tree.l"
+#line 107 "expr_tree.l"
 {
     return DECL;
 }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 111 "expr_tree.l"
+#line 110 "expr_tree.l"
 {
     return ENDDECL;
 }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 114 "expr_tree.l"
+#line 113 "expr_tree.l"
 {
     yylval.integer = _TYPE_INT;
     return INT_DECL;
@@ -994,7 +993,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 118 "expr_tree.l"
+#line 117 "expr_tree.l"
 {
     yylval.integer = _TYPE_STRING;
     return STRING_DECL;
@@ -1002,68 +1001,68 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 122 "expr_tree.l"
+#line 121 "expr_tree.l"
 {
     return GT;
 }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 125 "expr_tree.l"
+#line 124 "expr_tree.l"
 {
     return LT;
 }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 128 "expr_tree.l"
+#line 127 "expr_tree.l"
 {
     return EQ;
 }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 131 "expr_tree.l"
+#line 130 "expr_tree.l"
 {
     return NE;
 }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 134 "expr_tree.l"
+#line 133 "expr_tree.l"
 {
     return GE;
 }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 137 "expr_tree.l"
+#line 136 "expr_tree.l"
 {
     return LE;
 }  
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 140 "expr_tree.l"
+#line 139 "expr_tree.l"
 {
     return MOD;
 }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 144 "expr_tree.l"
+#line 143 "expr_tree.l"
 {
     return RETURN;
 }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 149 "expr_tree.l"
+#line 148 "expr_tree.l"
 {}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 151 "expr_tree.l"
+#line 150 "expr_tree.l"
 {
     return *yytext;
 }
@@ -1071,14 +1070,14 @@ YY_RULE_SETUP
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 155 "expr_tree.l"
+#line 154 "expr_tree.l"
 {
     
 }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 159 "expr_tree.l"
+#line 158 "expr_tree.l"
 {
     yylval.node = makeIdNode(yytext);
     return ID;
@@ -1087,7 +1086,7 @@ YY_RULE_SETUP
 case 40:
 /* rule 40 can match eol */
 YY_RULE_SETUP
-#line 163 "expr_tree.l"
+#line 162 "expr_tree.l"
 {
     // removing double quotes at either end
     yylval.node = makeStringNode(yytext+1,1);
@@ -1096,10 +1095,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 169 "expr_tree.l"
+#line 168 "expr_tree.l"
 ECHO;
 	YY_BREAK
-#line 1102 "lex.yy.c"
+#line 1101 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2104,7 +2103,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 169 "expr_tree.l"
+#line 168 "expr_tree.l"
 
 
 int yywrap(void){

@@ -1,4 +1,4 @@
-struct expr_tree_node * makeNode(int val, int nodetype, int type, char* varname, struct Gsymbol * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r)
+struct expr_tree_node * makeNode(int val, int nodetype, int type, char* varname, struct GlobalSymbolTable * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r)
 {
 
     struct expr_tree_node * new_node = (struct expr_tree_node *) malloc(sizeof(struct expr_tree_node));
@@ -31,7 +31,7 @@ struct expr_tree_node * makeRelopNode(int nodetype,struct expr_tree_node *l,stru
 struct expr_tree_node * makeIdNode(char * varname)
 {
     // check if the variable is declared
-    struct Gsymbol * GSTEntry = GSTLookup(varname);
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(varname);
     
 
     char * dupString = strdup(varname);   
@@ -99,13 +99,32 @@ struct expr_tree_node * makeDoWhileNode( struct expr_tree_node *body, struct exp
     return makeNode(_NONE, _NODE_TYPE_DO_WHILE,_TYPE_KEYWORD, NULL, NULL, body,cond);
 }
 
-struct expr_tree_node * makeFunctionCallNode(struct expr_tree_node *parameters)
+struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node *parameters)
 {
     // check if the variable is declared
-    struct Gsymbol * GSTEntry = GSTLookup(name);
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(name);
 
-    return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,type, name, GSTEntry, parameters,code);
+    // typechecking parameters
+    struct expr_tree_node * temp = parameters;
+    struct parameter_node * temp2 = GSTEntry -> paramList;
+
+    while(temp != NULL && temp2 != NULL){
+        if(temp->type != temp2->type)
+        {
+            printf("Error: Type mismatch in function call %s", name);
+            exit(1);
+        }
+        temp = temp->left;
+        temp2 = temp2->next;
+    }
+   
+    return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,_TYPE_KEYWORD, name, GSTEntry, parameters,NULL);
 
 };
 
+
+struct expr_tree_node * makeReturnNode (struct expr_tree_node *expr)
+{
+    return makeNode(_NONE, _NODE_TYPE_RETURN,_TYPE_KEYWORD, NULL, NULL, expr,NULL);
+}
 

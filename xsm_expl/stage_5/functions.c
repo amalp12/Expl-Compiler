@@ -10,12 +10,12 @@ struct parameter_node * createParameterNode(char * name, int  type)
     new_parameter_node->next = NULL;
     return new_parameter_node;
 }
-struct parameter_node * AddToParameterList(struct parameter_node * parameter_list, struct expr_tree_node * parameter)
+struct parameter_node * AddToParameterList(struct parameter_node * parameter_list, char * varname, int type)
 {
-    struct parameter_node * parameter = createParameterNode(parameter->varname, parameter->type);
+    struct parameter_node * parameter_node = createParameterNode(varname, type);
     if (parameter_list == NULL)
     {
-       return parameter;
+       return parameter_node;
     } 
     else 
     {
@@ -23,7 +23,7 @@ struct parameter_node * AddToParameterList(struct parameter_node * parameter_lis
         while (temp->next != NULL) {
             temp = temp->next;
         }
-        temp->next = parameter;
+        temp->next = parameter_node;
     }
     return parameter_list;
 }

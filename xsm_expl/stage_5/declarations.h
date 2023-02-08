@@ -1,12 +1,26 @@
-#ifndef TYPEDEF_H
-#define TYPE_DEF_H
+#ifndef _TYPEDEF_H
+#define _TYPEDEF_H
 #include "typedef.h"
 #endif
 
-#ifndef SYMBOL_TABLE_H
-#define SYMBOL_TABLE_H
+#ifndef _SYMBOL_TABLE_H
+#define _SYMBOL_TABLE_H
 #include "symbolTable.h"
+#endif
+
+#ifndef _SYMBOL_TABLE_C
+#define _SYMBOL_TABLE_C
 #include "symbolTable.c"
+#endif
+
+#ifndef _FUNCTIONS_H
+#define _FUNCTIONS_H
+#include "functions.h"
+#endif
+
+#ifndef _FUNCTIONS_C
+#define _FUNCTIONS_C
+#include "functions.c"
 #endif
 
 struct declaration_node 

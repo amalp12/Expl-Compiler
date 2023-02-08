@@ -9,8 +9,7 @@ struct parameter_node {
 int _LAST_USED_FUNCTION_LABEL = -1;
 // Creates a new parameter list with the given parameter as head if the list is empty
 // if the list is not empty, it adds the parameter to the end of the list
-struct parameter_node * AddToParameterList(struct parameter_node * parameter_list, struct expr_tree_node * parameter);
-
+struct parameter_node * AddToParameterList(struct parameter_node * parameter_list, char * varname, int type);
 // Creates a new parameter node with the given name and type and returns it 
 struct parameter_node * createParameterNode(char * name, int type);
 

@@ -1,5 +1,5 @@
-#ifndef TYPEDEF_H
-#define TYPE_DEF_H
+#ifndef _TYPEDEF_H
+#define _TYPEDEF_H
 #include "typedef.h"
 #endif
 

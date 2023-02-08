@@ -1,20 +1,19 @@
 %{
-#ifndef YTAB_H
-#define YTAB_H
+#ifndef _YTAB_H
+#define _YTAB_H
 #include "y.tab.h"
 #endif
 
-
-#ifndef EXPR_TREE_H
-#define EXPR_TREE_H
-#include "expr_tree.h"
-#include "expr_tree.c"
-#endif
-
-#ifndef TYPEDEF_H
-#define TYPE_DEF_H
+#ifndef _TYPEDEF_H
+#define _TYPE_DEF_H
 #include "typedef.h"
 #endif
+
+extern struct expr_tree_node * makeStringNode(char * string, int offset);
+
+extern struct expr_tree_node * makeIdNode(char * varname);
+
+extern struct expr_tree_node * makeNumberNode(int num );
 
 %}
 

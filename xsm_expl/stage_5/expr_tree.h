@@ -1,36 +1,44 @@
-#ifndef TYPEDEF_H
-#define TYPEDEF_H
+#ifndef _TYPEDEF_H
+#define _TYPEDEF_H
 #include "typedef.h"
 #endif
 
-
-#ifndef STARTER_H
-#define STARTER_H
+#ifndef _STDIO_H
+#define _STDIO_H
 #include <stdio.h>
+#endif
+
+#ifndef _STDLIB_H
+#define _STDLIB_H
 #include <stdlib.h>
 #endif
 
-#ifndef STRING_H
-#define STRING_H
+#ifndef _STRING_H
+#define _STRING_H
 #include <string.h>
 #endif
 
-extern struct Gsymbol * GSTLookup(char * name);
+
+#ifndef _SYMBOL_TABLE_H
+#define _SYMBOL_TABLE_H
+#include "symbolTable.h"
+#endif
 
 
-struct expr_tree_node{
+struct expr_tree_node
+{
 
     int val;        // value of a number for NUM nodes.
     int type;       // type of variable
     char* varname;  // name of a variable for ID nodes
     int nodetype;   // information about non-leaf nodes - read/write/connector/+/* etc.
-    struct Gsymbol *GSTEntry;     // pointer to GST entry for global variables and functions
+    struct GlobalSymbolTable * GSTEntry;     // pointer to GST entry for global variables and functions
     struct expr_tree_node * left, * right;     // left and right branches
 
 
 };
 
-struct expr_tree_node * makeNode(int val, int nodetype, int type,  char* varname, struct Gsymbol * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r);
+struct expr_tree_node * makeNode(int val, int nodetype, int type,  char* varname, struct GlobalSymbolTable * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r);
 struct expr_tree_node * makeConnectorNode( struct expr_tree_node *l, struct expr_tree_node *r);
 
 struct expr_tree_node * makeReadNode(struct expr_tree_node *id);
@@ -59,4 +67,7 @@ struct expr_tree_node * makeBreakpointNode();
 
 struct expr_tree_node * makeDoWhileNode( struct expr_tree_node *body, struct expr_tree_node *cond);
 
-struct expr_tree_node * makeFunctionCallNode(struct expr_tree_node *parameters,  struct expr_tree_node *code, char* name, int type);
+struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node *parameters);
+
+struct expr_tree_node * makeReturnNode (struct expr_tree_node *expr);
+

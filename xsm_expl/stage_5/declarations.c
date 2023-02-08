@@ -1,7 +1,7 @@
 void pushGlobalDeclaration( struct expr_tree_node * node)
 {
     // see if declaration already exists in GST
-    struct Gsymbol *temp1 = GSTLookup(node->varname);
+    struct GlobalSymbolTable *temp1 = GSTLookup(node->varname);
     if (temp1 != NULL) {
         printf("Error: Redeclaration of variable %s\n", node->varname);
         exit(1);
@@ -68,9 +68,25 @@ void popAllGlobalDeclarationsAndCreateEntry(int type)
     struct declaration_node * temp = popGlobalDeclaration();
     while(temp!=NULL)
     {
-        // void LSTInstall(char *name, int type, int size, int offset)   // Creates a local symbol table entry.
+        // void GSTInstall(char *name, int type, int size, int offset)   // Creates a local symbol table entry.
+        // get rows and cols
+        int rows = 0, cols = 0;
+        if(temp->node->left != NULL) rows = temp->node->left->val;
+        if(temp->node->right != NULL) cols = temp->node->right->val;
+        
+        GSTInstall(temp->node->varname, type, 0,temp->node->nodetype, rows, cols);
+        // getting the enty
+        struct GlobalSymbolTable *entry = GSTLookup(temp->node->varname);
+        // adding the parameters
+        struct expr_tree_node *param = temp->node->left;
 
-        GSTInstall(temp->node, type, 0);
+        while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
+        {
+            entry->paramList = AddToParameterList(entry->paramList, param->varname, param->type);
+            param = param->left;
+        }
+
+
         free(temp);
         temp = popGlobalDeclaration();
 
@@ -81,7 +97,7 @@ void popAllGlobalDeclarationsAndCreateEntry(int type)
 void pushLocalDeclaration( struct expr_tree_node * node)
 {
     // see if declaration already exists in GST
-    struct Gsymbol *temp1 = LSTLookup(node->varname);
+    struct LocalSymbolTable *temp1 = LSTLookup(node->varname);
     if (temp1 != NULL) 
     {
         printf("Error: Redeclaration of variable %s\n", node->varname);
@@ -149,12 +165,22 @@ void popAllLocalDeclarationsAndCreateEntry(int type)
             break;
         }
     }
+
     struct declaration_node * temp = popLocalDeclaration();
     while(temp!=NULL)
     {
-        // void LSTInstall(char *name, int type, int size, int offset)   // Creates a Local symbol table entry.
 
-        LSTInstall(temp->node, type, 0);
+
+
+        int rows = 0, cols = 0;
+        if(temp->node->left != NULL) rows = temp->node->left->val;
+        if(temp->node->right != NULL) cols = temp->node->right->val;
+        LSTInstall(temp->node->varname, type, 0, rows, cols);
+        // getting the enty
+        struct LocalSymbolTable *entry = LSTLookup(temp->node->varname);
+        // no parameters to add in LST
+    
+        
         free(temp);
         temp = popLocalDeclaration();
 

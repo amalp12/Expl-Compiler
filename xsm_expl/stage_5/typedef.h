@@ -27,7 +27,8 @@
 #define _NODE_TYPE_STRING 24
 #define _NODE_TYPE_MOD 25
 #define _NODE_TYPE_PARAMETER 26 
-#define _NODE_TYPE_FUNCTION 27
+#define _NODE_TYPE_FUNCTION_CALL 27
+#define _NODE_TYPE_RETURN 28
 
 // Type
 #define _TYPE_INT 0
