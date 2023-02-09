@@ -74,7 +74,7 @@ void popAllGlobalDeclarationsAndCreateEntry(int type)
         if(temp->node->left != NULL) rows = temp->node->left->val;
         if(temp->node->right != NULL) cols = temp->node->right->val;
         
-        GSTInstall(temp->node->varname, type, 0,temp->node->nodetype, rows, cols);
+        GSTInstall(temp->node->varname, type,temp->node->nodetype, 0,rows, cols);
         // getting the enty
         struct GlobalSymbolTable *entry = GSTLookup(temp->node->varname);
         // adding the parameters
@@ -82,7 +82,7 @@ void popAllGlobalDeclarationsAndCreateEntry(int type)
 
         while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
         {
-            entry->paramList = AddToParameterList(entry->paramList, param->varname, param->type);
+            entry->paramList = AddToParameterList(entry->paramList, param->varname, param->type, rows, cols);
             param = param->left;
         }
 
@@ -175,9 +175,10 @@ void popAllLocalDeclarationsAndCreateEntry(int type)
         int rows = 0, cols = 0;
         if(temp->node->left != NULL) rows = temp->node->left->val;
         if(temp->node->right != NULL) cols = temp->node->right->val;
-        LSTInstall(temp->node->varname, type, 0, rows, cols);
+       
+        LSTInstall(temp->node->varname, type, 0,rows, cols);
         // getting the enty
-        struct LocalSymbolTable *entry = LSTLookup(temp->node->varname);
+        // struct LocalSymbolTable *entry = LSTLookup(temp->node->varname);
         // no parameters to add in LST
     
         

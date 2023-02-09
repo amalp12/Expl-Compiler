@@ -19,6 +19,7 @@ int max(int a, int b)
     if(a>b) return a;
     return b;
 }
+
 void GSTInstall(char * varname,int type,int nodetype, int offset, int rows, int cols)   // Creates a symbol table entry.
 {
     // see if declaration already exists in GST
@@ -112,4 +113,34 @@ void LSTInstall(char * varname, int type, int offset, int rows, int cols)   // C
     _LOCAL_SYMBOL_TABLE = temp;
 }
 
+// print  GST Node
+void printGSTNode(struct GlobalSymbolTable * gst_node)
+{
+    printf("Name: %s\t", gst_node->name);
+    printf("Type: %s\t", gst_node->type == _TYPE_INT ? "int" : "matrix");
+    printf("Rows: %d\t", gst_node->rows);
+    printf("Cols: %d\t", gst_node->cols);
+    printf("Binding: %d\t", gst_node->binding);
+    printf("Size: %d\t", gst_node->size);
+    printf("Function Label Number: %d\t", gst_node->functionLabelNumber);
+    printf("Param List: ");
+    struct parameter_node * temp = gst_node->paramList;
+    while(temp != NULL)
+    {
+        printf("%s, ", temp->name);
+        temp = temp->next;
+    }
+    printf("\n");
+}
 
+// print GST
+void printGST()
+{
+    printf("Printing GST\n");
+    struct GlobalSymbolTable * temp = _GLOBAL_SYMBOL_TABLE;
+    while(temp != NULL)
+    {
+        printGSTNode(temp);
+        temp = temp->next;
+    }
+}

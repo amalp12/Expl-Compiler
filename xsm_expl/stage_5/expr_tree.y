@@ -59,6 +59,7 @@
 
 void yyerror(char const *s);
 extern FILE* yyin;
+extern char * yytext;
 int identifiers[26];
 int yylex(void);
 
@@ -77,14 +78,14 @@ int yylex(void);
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE REPEAT UNTIL
 %token DECL ENDDECL INT_DECL STRING_DECL 
 %token BREAK BREAKPOINT CONTINUE 
-%token RETURN 
-%type <node> expr program
+%token RETURN MAIN
+%type <node> expr Program
 %left GT LT 
 %left NE EQ
 %left GE LE
 %left PLUS MINUS
 %left MUL DIV MOD
-
+%left STRING_DECL INT_DECL
 
 %%
 
@@ -94,40 +95,74 @@ Each node can be opertator node or a leaf Node
 */
 
 
-program : 
-    START Slist END SEMICOLON 
+// program : 
+//     START Slist END SEMICOLON 
+//     {
+//       FILE * target_file = fopen("untranslated_assembly.xsm","w");
+      
+//       // printInfix($<node>2);
+
+//       printf("Generating Assembly Code... \n");
+//       explInit(target_file);
+//       codeGen($<node>2, target_file);
+//       // evaluate($<node>2, identifiers);
+//       explEnd(target_file);
+//       printf("Complete \n");
+
+//       if(target_file) fclose(target_file);
+
+//       exit(1);
+
+//     }
+//   | START END SEMICOLON
+//     {
+//         exit(1);
+//     }
+// ;
+
+Program : 
+    GDeclBlock FDefBlock MainBlock
     {
+      exit(1);
+    }
+  | GDeclBlock MainBlock
+    {
+      exit(1);
+    }
+  | MainBlock
+    {
+
+      exit(1);
+    }
+
+;
+
+MainBlock :
+    Type MAIN '(' ')' '{' LDeclBlock Body '}'
+    {
+  
+      // printGST();
+      // declare main function
+      declareMain();
+      defineFunction($<integer>1, "main", $<node>4, $<node>8);
+    
       FILE * target_file = fopen("untranslated_assembly.xsm","w");
       
       // printInfix($<node>2);
 
       printf("Generating Assembly Code... \n");
       explInit(target_file);
-      codeGen($<node>2, target_file);
+      // codeGen($<node>2, target_file);
       // evaluate($<node>2, identifiers);
       explEnd(target_file);
       printf("Complete \n");
 
       if(target_file) fclose(target_file);
 
-      exit(1);
 
+    
     }
-  | START END SEMICOLON
-    {
-        exit(1);
-    }
-;
 
-Program : 
-    GDeclBlock FDefBlock MainBlock
-  | GDeclBlock MainBlock
-  | MainBlock
-;
-
-MainBlock :
-    START Slist ReturnStmt END SEMICOLON 
-  | START ReturnStmt END SEMICOLON
 ;
 
 GDeclBlock :
@@ -141,65 +176,151 @@ GDeclList :
 ;
 
 GDecl : 
-    Type GidList 
+    Type GidList SEMICOLON
+    {
+      popAllGlobalDeclarationsAndCreateEntry($<integer>1);
+    }
 ;
 
 GidList : 
     GidList ',' Gid 
+    {
+      pushGlobalDeclaration($<node>3);
+    }
   | Gid
+    {
+      pushGlobalDeclaration($<node>1);
+    }
 ;
 
 Gid :
-     ID 
+    identifierDecl {$<node>$ = $<node>1;}
+  | ID '(' GParamList ')'
+    {
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      idNode->left = $<node>3;
+      $<node>$ = idNode; 
+    }
+
+;
+GParamList :
+    GParamList ',' Param 
+    {
+
+      $<node>1->left = $<node>3;
+      $<node>$ = $<node>1;
+    }
+  | Param
     {
       $<node>$ = $<node>1;
     }
-  | ID '[' INT ']' 
+  | 
     {
-        $<node>1->left = $<node>3;
-        $<node>$ = $<node>1;
+      $<node>$ = NULL;
+    }
+;
+identifierDecl:
+     ID 
+    {
+      $<node>$ = makeDeclareIdNode($<string>1, _NONE);
+    }
+  | ID '[' INT ']' 
+    {  
+        struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+        idNode->left = $<node>3;
+        $<node>$ = idNode;
     }
   | ID '[' INT ']' '[' INT ']'
     { 
-
-      $<node>1->left = $<node>3; 
-      $<node>1->right = $<node>6; 
-      $<node>$ = $<node>1;
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      idNode->left = $<node>3; 
+      idNode->right = $<node>6; 
+      $<node>$ = idNode;
     }
   | ID '[' ID ']' '[' INT ']'
     { 
 
-      $<node>1->left = $<node>3; 
-      $<node>1->right = $<node>6; 
-      $<node>$ = $<node>1;
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      idNode->left = $<node>3; 
+      idNode->right = $<node>6; 
+      $<node>$ = idNode;
     }
   | ID '[' INT ']' '[' ID ']'
     { 
 
-      $<node>1->left = $<node>3; 
-      $<node>1->right = $<node>6; 
-      $<node>$ = $<node>1;
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      idNode->left = $<node>3; 
+      idNode->right = $<node>6; 
+      $<node>$ = idNode;
     }
   | ID '[' ID ']' '[' ID ']'
     { 
 
-      $<node>1->left = $<node>3; 
-      $<node>1->right = $<node>6; 
-      $<node>$ = $<node>1;
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      idNode->left = $<node>3; 
+      idNode->right = $<node>6; 
+      $<node>$ = idNode;
     }
   | ID '[' ID ']'
     { 
-
-      $<node>1->left = $<node>3; 
-      $<node>$ = $<node>1;
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      idNode->left = $<node>3; 
+      $<node>$ = idNode;
     }
   
-  | ID '(' ParamList ')'
-    {
-      
-    }
 ;
 
+
+identifierUse:
+     ID 
+    {
+      $<node>$ = makeIdNode($<string>1);
+    }
+  | ID '[' INT ']' 
+    {
+        struct expr_tree_node * idNode = makeIdNode($<string>1);
+        idNode->left = $<node>3;
+        $<node>$ = idNode;
+    }
+  | ID '[' INT ']' '[' INT ']'
+    { 
+      struct expr_tree_node * idNode = makeIdNode($<string>1);
+      idNode->left = $<node>3;
+      idNode->right = $<node>6; 
+      $<node>$ = idNode;
+    }
+  | ID '[' ID ']' '[' INT ']'
+    { 
+
+      struct expr_tree_node * idNode = makeIdNode($<string>1);
+      idNode->left = $<node>3;
+      idNode->right = $<node>6; 
+      $<node>$ = idNode;
+    }
+  | ID '[' INT ']' '[' ID ']'
+    { 
+
+      struct expr_tree_node * idNode = makeIdNode($<string>1);
+      idNode->left = $<node>3;
+      idNode->right = $<node>6; 
+      $<node>$ = idNode;
+    }
+  | ID '[' ID ']' '[' ID ']'
+    { 
+
+      struct expr_tree_node * idNode = makeIdNode($<string>1);
+      idNode->left = $<node>3;
+      idNode->right = $<node>6; 
+      $<node>$ = idNode;
+    }
+  | ID '[' ID ']'
+    { 
+      struct expr_tree_node * idNode = makeIdNode($<string>1);
+      idNode->left = $<node>3;
+      $<node>$ = idNode;
+    }
+  
+;
 
 
    
@@ -212,26 +333,49 @@ FDefBlock :
 
 FDef :
     Type ID '(' ParamList ')' '{' LDeclBlock Body '}'
+    {
+      defineFunction($<integer>1, $<string>2, $<node>4, $<node>8);
+    }
 ;
 
 Body :
-    START Slist ReturnStmt END SEMICOLON 
-  | START ReturnStmt END SEMICOLON
+    START Slist ReturnStmt END  
+    {
+      $<node>$ = $<node>2;
+
+    }
+  | START ReturnStmt END 
+    {
+      $<node>$ = NULL;
+    }
 ;
 
 ParamList :
     ParamList ',' Param 
+    {
+      pushLocalDeclaration($<node>3);
+
+      $<node>1->left = $<node>3;
+      $<node>$ = $<node>1;
+    }
   | Param
+    {
+      pushLocalDeclaration($<node>1);
+      $<node>$ = $<node>1;
+    }
   | 
+    {
+      $<node>$ = NULL;
+    }
 ;
 
 Param :
   Type ID
+  {
+    $<node>$ = makeParameterNode($<integer>1, $<string>2);
+  }
 ;
-Type : 
-    INT_DECL
-  | STRING_DECL
-;
+
 // -----------------------------------------------------------------------------------------
 LDeclBlock :
     DECL LDecList ENDDECL 
@@ -243,12 +387,23 @@ LDecList :
   | LDecl
 ;
 LDecl :
-    Type IdList 
+    Type LIdList SEMICOLON
+    {
+      popAllLocalDeclarationsAndCreateEntry($<integer>1);
+    }
 ;
 
-IdList : 
-    IdList ',' ID 
+LIdList : 
+    LIdList ',' ID 
+    {
+      pushLocalDeclaration( makeLocalIdNode($<string>3));
+      
+    }
   | ID
+    {
+    
+      pushLocalDeclaration( makeLocalIdNode($<string>1));
+    }
 ;
 
 // Since a function call is treated as an expression (whose value is the return value of the function), the following rules must be added:
@@ -256,7 +411,14 @@ IdList :
 
 ArgList : 
     ArgList ',' expr
+    {
+      $<node>1->left = $<node>3;
+      $<node>$ = $<node>1;
+    }
   | expr
+    {
+      $<node>$ = $<node>1;
+    }
 ;
 // -----------------------------------------------------------------------------------------
 
@@ -278,6 +440,7 @@ Stmt :
   | DeclStmt
   | ReturnStmt
 ;
+
 ReturnStmt : 
     RETURN expr SEMICOLON 
     {
@@ -308,53 +471,6 @@ VarList :
   | identifierDecl {pushGlobalDeclaration($<node>1);}  
 ;
 
-identifierDecl : 
-    ID 
-    {
-      $<node>$ = $<node>1;
-    }
-  | ID '[' INT ']' 
-    {
-        $<node>1->left = $<node>3;
-        $<node>$ = $<node>1;
-    }
-  | ID '[' INT ']' '[' INT ']'
-    { 
-
-      $<node>1->left = $<node>3; 
-      $<node>1->right = $<node>6; 
-      $<node>$ = $<node>1;
-    }
-  | ID '[' ID ']' '[' INT ']'
-    { 
-
-      $<node>1->left = $<node>3; 
-      $<node>1->right = $<node>6; 
-      $<node>$ = $<node>1;
-    }
-  | ID '[' INT ']' '[' ID ']'
-    { 
-
-      $<node>1->left = $<node>3; 
-      $<node>1->right = $<node>6; 
-      $<node>$ = $<node>1;
-    }
-  | ID '[' ID ']' '[' ID ']'
-    { 
-
-      $<node>1->left = $<node>3; 
-      $<node>1->right = $<node>6; 
-      $<node>$ = $<node>1;
-    }
-  | ID '[' ID ']'
-    { 
-
-      $<node>1->left = $<node>3; 
-      $<node>$ = $<node>1;
-    }
-  
-
-;
 brkStmt : 
     BREAK SEMICOLON {$<node>$ = makeBreakNode();}
 ;
@@ -378,13 +494,13 @@ DoWhileStmt :
     DO Slist WHILE '('expr')' SEMICOLON {$<node>$ = makeDoWhileNode($<node>2,$<node>5);}
 ;
 InputStmt : 
-    READ '(' identifierDecl ')' SEMICOLON {$<node>$ = makeReadNode($<node>3);}
+    READ '(' identifierUse ')' SEMICOLON {$<node>$ = makeReadNode($<node>3);}
 ;
 OutputStmt : 
     WRITE '(' expr ')' SEMICOLON {$<node>$ = makeWriteNode($<node>3);}
 ; 
 AsgStmt :  
-    identifierDecl EQUALS expr SEMICOLON {$<node>$ = makeOperatorNode(_NODE_TYPE_EQUALS,$<node>1,$<node>3) ;}
+    identifierUse EQUALS expr SEMICOLON {$<node>$ = makeOperatorNode(_NODE_TYPE_EQUALS,$<node>1,$<node>3) ;}
 ;
 expr : 
     expr PLUS expr  {$<node>$ = makeOperatorNode(_NODE_TYPE_PLUS,$<node>1,$<node>3);}
@@ -394,7 +510,7 @@ expr :
   | expr MOD expr {$<node>$ = makeOperatorNode(_NODE_TYPE_MOD,$<node>1,$<node>3);}
   |'(' expr ')' {$<node>$ = $<node>2;}
   | INT {$<node>$ = $<node>1;}
-  | identifierDecl {$<node>$ = $<node>1;}
+  | identifierUse {$<node>$ = $<node>1;}
   | STRING {$<node>$ = $<node>1;}
   | expr LT expr {$<node>$ = makeRelopNode(_NODE_TYPE_LT,$<node>1,$<node>3);}
   | expr GT expr {$<node>$ = makeRelopNode(_NODE_TYPE_GT,$<node>1,$<node>3);}
@@ -402,8 +518,8 @@ expr :
   | expr GE expr {$<node>$ = makeRelopNode(_NODE_TYPE_GE,$<node>1,$<node>3);}
   | expr NE expr {$<node>$ = makeRelopNode(_NODE_TYPE_NE,$<node>1,$<node>3);}
   | expr EQ expr {$<node>$ = makeRelopNode(_NODE_TYPE_EQ,$<node>1,$<node>3);}
-  | ID '(' ')' {$<node>$ = makeFunctionCallNode($<node>1->varname,NULL);}
-  | ID '(' ArgList ')' {$<node>$ = makeFunctionCallNode($<node>1->varname,$<node>3);}
+  | ID '(' ')' {$<node>$ = makeFunctionCallNode($<string>1,NULL);}
+  | ID '(' ArgList ')' {$<node>$ = makeFunctionCallNode($<string>1,$<node>3);}
 ;
 
 // makeFunctionCallNode(struct expr_tree_node *parameters,  struct expr_tree_node *code, char* name, int type)
@@ -411,7 +527,7 @@ expr :
 
 void yyerror(char const *s)
 {
-    printf("yyerror %s",s);
+    printf("yyerror %s : %s\n",s, yytext);
 }
 
 int main()

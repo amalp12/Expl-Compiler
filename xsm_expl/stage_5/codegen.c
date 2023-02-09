@@ -1097,6 +1097,16 @@ void explInit(FILE * target_file)
     fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
     fprintf(target_file, "MOV SP, %d\n",_STACK_POINTER);
     fprintf(target_file, "MOV BP, %d\n", _BASE_POINTER);
+
+    // pushing the return address of the main function
+    fprintf(target_file, "PUSH R0\n");
+    fprintf(target_file, "CALL _F0\n");
+    
+    // exit label
+    fprintf(target_file, "_EXIT:\n");
+    // calling int 10
+    fprintf(target_file, "INT 10\n");
+    
 }
 
 void explEnd(FILE * target_file)
@@ -1105,6 +1115,42 @@ void explEnd(FILE * target_file)
     {
         printf("Warning: Register Leak! All registers are not freed.\n");
     }
-    fprintf(target_file, "INT 10\n");
+
+
+}
+
+void funtionInit(FILE * target_file)
+{
+    // pushing previous BP to the stack
+    fprintf(target_file, "PUSH BP\n");
+    // setting BP to SP
+
+}
+
+void funcCodegen(struct expr_tree_node * t, FILE * target_file)
+{
+    // if the node is null return
+    if(t==NULL) return;
+
+    switch(t->nodetype)
+    {
+        case(_NODE_TYPE_FUNCTION_CALL)
+        {
+            // fetch the number of parameters from the GSTEntry of the function
+            struct GlobalSymbolTable* gstEntry = GSTLookup(t->varname);
+
+            // if the function is not found in the GST
+            if(gstEntry==NULL)
+            {
+                printf("Error: Function %s not found!\n", t->varname);
+                exit(1);
+            }
+
+            // Push the return address to the stack
+            fprintf(target_file, "PUSH IP\n");
+
+            break;
+        }
+    }
 
 }

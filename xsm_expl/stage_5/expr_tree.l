@@ -144,10 +144,13 @@ numbers [0-9]+
     return RETURN;
 }
 
+"main" {
+    return MAIN;
+}
 
 [\t] {}
     
-[(),\[\]%] {
+[(),\[\]%\{\}] {
     return *yytext;
 }
 
@@ -156,7 +159,8 @@ numbers [0-9]+
 }
     
 {identifier} {
-    yylval.node = makeIdNode(yytext);
+    //yylval.node = makeIdNode(yytext);
+    yylval.string = strdup(yytext);
     return ID;
 }
 {strings} {

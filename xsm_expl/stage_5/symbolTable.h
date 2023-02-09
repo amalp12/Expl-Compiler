@@ -42,10 +42,13 @@ int max(int a, int  b);
 int min(int a, int b);
 
 
+void GSTInstall(char * varname,int type,int nodetype, int offset, int rows, int cols);   // Creates a symbol table entry.
 
-
-void GSTInstall(char * varname, int type, int nodetype, int offset, int rows, int cols);   // Creates a symbol table entry.
-void LSTInstall(char * varname, int type, int offset, int rows, int cols);   // Creates a symbol table entry.
+void LSTInstall(char * varname, int type, int offset, int rows, int cols) ;  // Creates a symbol table entry.
 
 void clearLST(); // Clears the local symbol table
 
+
+void printGSTNode(struct GlobalSymbolTable * gst_node);
+
+void printGST();

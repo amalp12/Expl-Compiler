@@ -71,3 +71,10 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
 
 struct expr_tree_node * makeReturnNode (struct expr_tree_node *expr);
 
+struct expr_tree_node * makeParameterNode(int type, char * name);
+
+void defineFunction(int type, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body);
+
+void declareMain();
+
+struct expr_tree_node * makeLocalIdNode(char * varname);

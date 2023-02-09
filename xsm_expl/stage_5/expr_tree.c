@@ -33,9 +33,65 @@ struct expr_tree_node * makeIdNode(char * varname)
     // check if the variable is declared
     struct GlobalSymbolTable * GSTEntry = GSTLookup(varname);
     
+    struct LocalSymbolTable * LSTEntry = LSTLookup(varname);
+
+    int type ;
+
+    if(LSTEntry != NULL)
+    {
+        type = LSTEntry->type;
+    }
+    else if(GSTEntry != NULL)
+    {
+        type = GSTEntry->type;
+    }
+    else
+    {
+        printf("Error: Undeclared variable %s\n", varname);
+        exit(1);
+    }
 
     char * dupString = strdup(varname);   
-    return makeNode(_NONE, _NODE_TYPE_ID,_TYPE_ID, dupString, GSTEntry, NULL, NULL);
+    return makeNode(_NONE, _NODE_TYPE_ID,type, dupString, GSTEntry, NULL, NULL);
+}
+
+// make local id node
+struct expr_tree_node * makeLocalIdNode(char * varname)
+{
+    // check if the variable is declared
+    struct LocalSymbolTable * LSTEntry = LSTLookup(varname);
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(varname);
+
+    if(LSTEntry != NULL || GSTEntry != NULL)
+    {
+        printf("Error: Redeclaration of variable %s\n", varname);
+        exit(1);
+    }
+
+    char * dupString = strdup(varname);   
+    return makeNode(_NONE, _NODE_TYPE_ID,_NONE, dupString, NULL, NULL, NULL);
+}
+
+// decare id node
+struct expr_tree_node * makeDeclareIdNode(char * varname, int type)
+{
+    // check if the variable is declared
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(varname);
+    struct LocalSymbolTable * LSTEntry = LSTLookup(varname);
+
+    if(LSTEntry != NULL)
+    {
+        printf("Error: Redeclaration of variable %s\n", varname);
+        exit(1);
+    }
+    else if(GSTEntry != NULL)
+    {
+        printf("Error: Redeclaration of variable %s\n", varname);
+        exit(1);
+    }
+
+    char * dupString = strdup(varname);   
+    return makeNode(_NONE, _NODE_TYPE_ID,type, dupString, NULL, NULL, NULL);
 }
 struct expr_tree_node * makeStringNode(char * string, int offset)
 {
@@ -128,3 +184,61 @@ struct expr_tree_node * makeReturnNode (struct expr_tree_node *expr)
     return makeNode(_NONE, _NODE_TYPE_RETURN,_TYPE_KEYWORD, NULL, NULL, expr,NULL);
 }
 
+
+//  make parameter node
+struct expr_tree_node * makeParameterNode(int type, char * name)
+{
+  
+    
+    
+    return makeNode(_NONE, _NODE_TYPE_PARAMETER,type, name, NULL, NULL,NULL);
+}
+
+// make function definition node
+//    Type ID '(' ParamList ')' '{' LDeclBlock Body '}'
+void defineFunction(int type, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body)
+{
+   
+    
+    // get the GST entry
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(name);
+
+    // if the function is not declared
+    if(GSTEntry == NULL)
+    {
+        printf("Error: Function %s not declared", name);
+        exit(1);
+    }
+
+    // compare if the parameters are same
+    struct expr_tree_node * temp = parameters;
+    struct parameter_node * temp2 = GSTEntry -> paramList;
+    while(temp != NULL && temp2 != NULL){
+        if(temp->type != temp2->type)
+        {
+            printf("Error: Type mismatch in function definition %s", name);
+            exit(1);
+        }
+        temp = temp->left;
+        temp2 = temp2->next;
+    }
+
+  
+}
+
+//declare main function
+void declareMain()
+{
+    // check if main is declared
+    struct GlobalSymbolTable * GSTEntry = GSTLookup("main");
+    if(GSTEntry != NULL)
+    {
+        printf("Error: Main function already declared!\n");
+        exit(1);
+    }
+    // declare main
+    GSTInstall("main", _TYPE_INT, _NODE_TYPE_FUNCTION_DEFINITION, 0,0, 0);
+
+
+
+}
