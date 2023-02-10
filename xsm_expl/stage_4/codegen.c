@@ -809,6 +809,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case(_NODE_TYPE_WHILE):
         {
+            if(t->left->type != _TYPE_BOOL)
+            {
+                printf("Error! Condtion is not a boolean!\n");
+                exit(1);
+            }
 
             // label for while block start
             int whileStartLabel = getNewLabel();
@@ -844,6 +849,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_DO_WHILE ):
         {
+            if(t->left->type != _TYPE_BOOL)
+            {
+                printf("Error! Condtion is not a boolean!\n");
+                exit(1);
+            }
             // label for do while block start
             int doWhileStartLabel = getNewLabel();
             // label for do while block end
@@ -871,6 +881,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_IF_ELSE):
         {
+            // if the left node is not a boolean expression, throw an error
+            if(t->left->type != _TYPE_BOOL)
+            {
+                printf("Error! Condtion is not a boolean!\n");
+                exit(1);
+            }
             // Evaluating the condtion
             reg_index conditionReg = codeGen(t->left, target_file);
 

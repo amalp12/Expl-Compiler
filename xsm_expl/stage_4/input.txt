@@ -6,18 +6,23 @@ read(n);
 i=0;
 while(i<n) do
     read(arr[i]);
+
     i = i+1;
 endwhile;
 i=0;
 while(i<n) do
     j=i;
-    while(j<n) do
+    while(1<2) do
+        
         if(arr[i]>arr[j]) then
             dup = arr[i];
             arr[i] = arr[j];
             arr[j] = dup;
         endif;
         j = j + 1;
+        if(j>=n) then
+            break;
+        endif;
     endwhile;
     i = i+1;
 endwhile;
