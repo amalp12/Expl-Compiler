@@ -16,6 +16,8 @@
 #endif
 
 extern struct Gsymbol * GSTLookup(char * name);
+extern int getTypeFromGST(char * name);
+
 
 
 struct expr_tree_node{

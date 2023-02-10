@@ -8,6 +8,26 @@ struct Gsymbol *GSTLookup(char * name)            // Returns a pointer to the sy
     }
     return NULL;
 }
+
+int getTypeFromGST(char * name)
+{
+    struct Gsymbol *temp = _GLOBAL_SYMBOL_TABLE;
+    struct Gsymbol * found = NULL ;
+    while(temp != NULL)
+    {
+        if(strcmp(temp->name, name) == 0)
+        {
+            found = temp;
+            break;
+        }
+        temp = temp->next;
+    }
+    if(found!=NULL)
+    {
+        return found->type;
+    }
+    return _NONE;
+}
 int min(int a, int b)
 {
     if(a<b) return a;

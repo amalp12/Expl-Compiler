@@ -206,6 +206,7 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         // EQUAL TO
         case(_NODE_TYPE_EQUALS):
         {
+            
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             int leftReg = evaluate(t->left, identifier);
@@ -283,6 +284,14 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         }
         case (_NODE_TYPE_LE):
         {
+            // check the types of the left and right trees
+            // if they are not the same, throw an error
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                printf("1\n");
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             int leftReg = evaluate(t->left, identifier);
@@ -293,6 +302,15 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         }
         case (_NODE_TYPE_GE):
         {
+            // check the types of the left and right trees
+            // if they are not the same, throw an error
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             int leftReg = evaluate(t->left, identifier);
@@ -303,6 +321,16 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         }
         case (_NODE_TYPE_LT):
         {
+            
+            // check the types of the left and right trees
+            // if they are not the same, throw an error
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                printf("3\n");
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             int leftReg = evaluate(t->left, identifier);
@@ -313,6 +341,15 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         }
         case (_NODE_TYPE_GT):
         {
+            // check the types of the left and right trees
+            // if they are not the same, throw an error
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                printf("4\n");
+            
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             int leftReg = evaluate(t->left, identifier);
@@ -323,6 +360,15 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         }
         case (_NODE_TYPE_NE):
         {
+            // check the types of the left and right trees
+            // if they are not the same, throw an error
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                printf("5\n");
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             int leftReg = evaluate(t->left, identifier);
@@ -333,6 +379,14 @@ int evaluate( struct expr_tree_node *t, int * identifier) {
         }
         case (_NODE_TYPE_EQ):
         {
+            // check the types of the left and right trees
+            // if they are not the same, throw an error
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                printf("6\n");
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             int leftReg = evaluate(t->left, identifier);
@@ -520,6 +574,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Addition
         case (_NODE_TYPE_PLUS):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -545,6 +605,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Subtraction
         case(_NODE_TYPE_MINUS):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -570,6 +636,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Muliplication
         case(_NODE_TYPE_MUL):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -596,6 +668,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Division
         case(_NODE_TYPE_DIV):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -621,6 +699,12 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // MOD
         case(_NODE_TYPE_MOD):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -647,6 +731,14 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // EQUAL TO
         case(_NODE_TYPE_EQUALS):
         {
+            // check the types of the left and right trees
+            // if they are not the same, throw an error
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                printf("7\n");
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -821,6 +913,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_LE):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -844,6 +943,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_GE):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -867,6 +973,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_LT):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -890,6 +1003,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_GT):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -913,6 +1033,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_NE):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -936,6 +1063,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_EQ):
         {
+            if(t->left->type != t->right->type)
+            {
+                printf("Type mismatch error\n");
+                
+
+                exit(1);
+            }
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);

@@ -69,7 +69,7 @@ void popAllAndCreateEntry(int type)
     while(temp!=NULL)
     {
         // void GSTInstall(char *name, int type, int size, int offset)   // Creates a symbol table entry.
-
+        temp->node->type = type;
         GSTInstall(temp->node, type, 0);
         free(temp);
         temp = popDeclaration();

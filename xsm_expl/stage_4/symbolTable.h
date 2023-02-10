@@ -21,3 +21,4 @@ void GSTInstall(struct expr_tree_node * node, int type, int offset);   // Create
 int max(int a, int  b);
 
 int min(int a, int b);
+int getTypeFromGST(char * name);
