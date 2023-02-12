@@ -91,7 +91,10 @@ extern int yydebug;
     BREAKPOINT = 292,              /* BREAKPOINT  */
     CONTINUE = 293,                /* CONTINUE  */
     RETURN = 294,                  /* RETURN  */
-    MAIN = 295                     /* MAIN  */
+    MAIN = 295,                    /* MAIN  */
+    AND = 296,                     /* AND  */
+    OR = 297,                      /* OR  */
+    NOT = 298                      /* NOT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -138,6 +141,9 @@ extern int yydebug;
 #define CONTINUE 293
 #define RETURN 294
 #define MAIN 295
+#define AND 296
+#define OR 297
+#define NOT 298
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -150,7 +156,7 @@ union YYSTYPE
   int integer;
   struct declaration_node * decl_node;
 
-#line 154 "y.tab.h"
+#line 160 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

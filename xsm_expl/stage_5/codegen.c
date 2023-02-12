@@ -1044,6 +1044,89 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val = leftReg;
             break;
         }
+        case(_NODE_TYPE_AND):
+        {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
+            // both the left and right trees should be of type boolean
+            if(t->left->type != _TYPE_BOOL || t->right->type != _TYPE_BOOL)
+            {
+                printf("Error: AND operator can only be applied on boolean values");
+                exit(1);
+            }
+
+            //mulipling the left and right values and table
+            fprintf(target_file, "MUL R%d, R%d\n", leftReg, rightReg);
+            // freeing rightReg
+            freeLastReg();
+            return_val = leftReg;
+            break;
+        }
+        case(_NODE_TYPE_OR):
+        {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
+            // both the left and right trees should be of type boolean
+            if(t->left->type != _TYPE_BOOL || t->right->type != _TYPE_BOOL)
+            {
+                printf("Error: OR operator can only be applied on boolean values");
+                exit(1);
+            }
+            //mulipling the left and right values and table
+            fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
+            // freeing rightReg
+            freeLastReg();
+            // if the value in leftReg is 2 then make it 1
+            
+            // checking if the value is 2
+            reg_index tempReg = getFreeReg();
+            int codeSkipLabel = getNewLabel();
+            fprintf(target_file, "MOV R%d, 2\n", tempReg);
+            fprintf(target_file, "EQ R%d, R%d\n", tempReg,leftReg);
+            // if the value is not 2 theb skip the code to make it 1
+            fprintf(target_file, "JZ R%d, _L%d\n",tempReg, codeSkipLabel);
+            // freeing tempReg
+            freeLastReg();
+            // if the value is 2 then make it 1
+            fprintf(target_file, "MOV R%d, 1\n", leftReg);
+            
+            // print label 
+            fprintf(target_file, "_L%d:\n",codeSkipLabel);
+            return_val = leftReg;
+
+            break;
+        }
+        case(_NODE_TYPE_NOT):
+        {
+            // Evaluating the left  tree 
+            reg_index leftReg = codeGen(t->left, target_file);
+
+            // both the left and right trees should be of type boolean
+            if(t->left->type != _TYPE_BOOL)
+            {
+                printf("Error: NOT operator can only be applied on boolean values");
+                exit(1);
+            }
+            /* 
+                xor gate with 1 will give the opposite value
+                A is variable x and B is always 1
+                A B OUT
+                0 1  1
+                1 1  0
+            
+                xor is implemented by boolean addition mod 2
+            */
+            fprintf(target_file, "ADD R%d, 1\n", leftReg);
+            fprintf(target_file, "MOD R%d, 2\n", leftReg);
+            return_val = leftReg;
+            break;
+        }
         case (_NODE_TYPE_BREAK):
         {
             // getting the label of the loop to break

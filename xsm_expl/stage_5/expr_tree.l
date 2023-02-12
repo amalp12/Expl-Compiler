@@ -147,10 +147,19 @@ numbers [0-9]+
 "main" {
     return MAIN;
 }
+"AND"|"&&" {
+    return AND;
+}
+"OR"|"||" {
+    return OR;
+}
+"NOT" {
+    return NOT;
+}
 
 [\t] {}
     
-[(),\[\]%\{\}] {
+[(),\[\]%\{\}\|\&] {
     return *yytext;
 }
 

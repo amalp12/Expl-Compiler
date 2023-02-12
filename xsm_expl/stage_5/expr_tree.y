@@ -82,7 +82,9 @@ int yylex(void);
 %token DECL ENDDECL INT_DECL STRING_DECL 
 %token BREAK BREAKPOINT CONTINUE 
 %token RETURN MAIN
+%token AND OR NOT
 %type <node> expr Program
+%left AND OR NOT
 %left GT LT 
 %left NE EQ
 %left GE LE
@@ -533,6 +535,9 @@ expr :
   | expr GE expr {$<node>$ = makeRelopNode(_NODE_TYPE_GE,$<node>1,$<node>3);}
   | expr NE expr {$<node>$ = makeRelopNode(_NODE_TYPE_NE,$<node>1,$<node>3);}
   | expr EQ expr {$<node>$ = makeRelopNode(_NODE_TYPE_EQ,$<node>1,$<node>3);}
+  | expr AND expr {$<node>$ = makeRelopNode(_NODE_TYPE_AND,$<node>1,$<node>3);}
+  | expr OR expr {$<node>$ = makeRelopNode(_NODE_TYPE_OR,$<node>1,$<node>3);}
+  | NOT expr {$<node>$ = makeRelopNode(_NODE_TYPE_NOT,$<node>2,NULL);}
   | ID '(' ')' {$<node>$ = makeFunctionCallNode($<string>1,NULL);}
   | ID '(' ArgList ')' {$<node>$ = makeFunctionCallNode($<string>1,$<node>3);}
 ;
