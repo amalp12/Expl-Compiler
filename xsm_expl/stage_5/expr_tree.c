@@ -182,7 +182,7 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
         temp2 = temp2->prev;
     }
    
-    return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,_TYPE_KEYWORD, name, GSTEntry, parameters,NULL);
+    return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,GSTEntry->type, name, GSTEntry, parameters,NULL);
 
 }
 

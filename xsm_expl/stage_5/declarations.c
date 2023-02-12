@@ -157,7 +157,11 @@ void popAllLocalDeclarationsAndCreateEntry(int type)
                 size = _STRING_SIZE;
                 break;
         }
-        
+        case(_NONE):
+        {
+            size = _STACK_UNIT_SIZE;
+            break;
+        }
         default:
         {
             printf("Null Size Error!\n");
@@ -175,6 +179,12 @@ void popAllLocalDeclarationsAndCreateEntry(int type)
         int rows = 0, cols = 0;
         if(temp->node->left != NULL) rows = temp->node->left->val;
         if(temp->node->right != NULL) cols = temp->node->right->val;
+
+        // for arguements with types already declared
+        if(temp->node->type!=_NONE)
+        {
+            type = temp->node->type;
+        }
        
         LSTInstall(temp->node->varname, type, 0,rows, cols);
     

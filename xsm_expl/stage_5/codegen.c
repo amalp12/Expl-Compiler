@@ -1328,12 +1328,25 @@ void funcCodegen(struct expr_tree_node * t, FILE * target_file)
     // set the function label
     fprintf(target_file, "_F%d:\n", GSTEntry->functionLabelNumber);
 
+    int currentBindingAddress = _FUNCTION_ARGUMENT_OFFSET*_STACK_UNIT_SIZE;
+    struct LocalSymbolTable * LSTEntry;
     // get the number of parameters
-    int num_params = 0;
     struct parameter_node * paramList = GSTEntry->paramList;
     while(paramList!=NULL)
     {
-        num_params++;
+        //get the LST entry of the parameter
+        LSTEntry = LSTLookup(paramList->name);
+
+        // if the LST entry is null, then the parameter is not declared
+        if(LSTEntry==NULL)
+        {
+            printf("Error: Parameter %s not declared.\n", paramList->name);
+            exit(1);
+        }
+
+        // set the binding of the parameter
+        LSTEntry->binding = currentBindingAddress;
+        currentBindingAddress-=_STACK_UNIT_SIZE;
         paramList = paramList->next;
     }
     // pushing previous BP to the stack
@@ -1341,33 +1354,27 @@ void funcCodegen(struct expr_tree_node * t, FILE * target_file)
     // setting BP to SP
     fprintf(target_file, "MOV BP, SP\n");
 
-    int currentBindingAddress = -3*_STACK_UNIT_SIZE;
-    struct LocalSymbolTable * LSTEntry = _LOCAL_SYMBOL_TABLE;
-    // set the binding of the parameter variables
-    while((num_params--)>0)
-    {
+    currentBindingAddress = _FUNCTION_LOCAL_VARIABLE_OFFSET*_STACK_UNIT_SIZE;
+    LSTEntry = _LOCAL_SYMBOL_TABLE;
 
-        // set binding of the parameters relative to BP
-        LSTEntry->binding = currentBindingAddress;
-        currentBindingAddress-=(1*_STACK_UNIT_SIZE);
-        LSTEntry = LSTEntry->next;
-
-    }
-    currentBindingAddress = 1*_STACK_UNIT_SIZE;
-
+    // maintain local variable count
     int localVariableCount = 0;
+    // set the binding of the local variables
     while(LSTEntry!=NULL )
     {
-        localVariableCount++;
-        //push space for local variables
-        fprintf(target_file, "PUSH R0\n");
-        // set binding of the local variable relative to BP
-        LSTEntry->binding = currentBindingAddress;
+        if(LSTEntry->binding==_NONE)
+        {
+            // set the binding of the local variable relative to BP
+            LSTEntry->binding = currentBindingAddress;
+            currentBindingAddress+=_STACK_UNIT_SIZE;
+            localVariableCount++;
+            // push space for the local variable to the stack
+            fprintf(target_file, "PUSH R0\n");
+        }
+
         LSTEntry = LSTEntry->next;
-        currentBindingAddress+=(1*_STACK_UNIT_SIZE);
 
     }
-
 
     // codeGen for the body of the function
     reg_index bodyReg = codeGen(t->right->right, target_file);

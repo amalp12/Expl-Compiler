@@ -52,3 +52,5 @@ void clearLST(); // Clears the local symbol table
 void printGSTNode(struct GlobalSymbolTable * gst_node);
 
 void printGST();
+
+int getLSTLength();

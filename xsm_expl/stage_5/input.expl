@@ -1,31 +1,52 @@
 decl
-    int result,factorial(int n);
+ int ExtendedEuclid(int a,int b);
 enddecl
-int factorial(int n){
-    decl
-        int f;
-    enddecl
-    begin
-        if( n==1  ) then
-            f = 1;
-        else
-            if( n==0) then
-                f = 1;
-            else
-                f = n * factorial(n-1);
-            endif;
-        endif;
-        return f;
-    end
+
+int ExtendedEuclid(int a,int b)
+{
+ decl
+  int r0,r1,s0,s1,t0,t1,qi,ri,si,ti;
+ enddecl
+
+ begin
+  r0 = a;
+  r1 = b;
+  s0 = 1;
+  s1 = 0;
+  t0 = 0;
+  t1 = 1;
+
+  while(r1 != 0) do
+   qi = r0/r1;
+   ri = r0 - (qi*r1);
+   si = s0 - (qi*s1);
+   ti = t0 - (qi*t1);
+   r0 = r1;
+   r1 = ri;
+   s0 = s1;
+   s1 = si;
+   t0 = t1;
+   t1 = ti;
+  endwhile;
+
+  write(r0);
+  write(s0);
+  write(t0);
+
+  return 0;
+ end
 }
-int main(){
-    decl
-        int a;
-    enddecl
-    begin
-        read(a);
-        result = factorial(a);
-        write(result);
-        return 1;
-    end
+
+int main()
+{
+ decl
+  int a,b,c;
+ enddecl
+
+ begin
+  read(a);
+  read(b);
+  c = ExtendedEuclid(a,b);
+  return 0;
+ end 
 }

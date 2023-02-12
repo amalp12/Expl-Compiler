@@ -63,6 +63,7 @@ extern FILE* yyin;
 extern char * yytext;
 FILE * target_file ;
 int _INIT_STATE ;
+
 int yylex(void);
 
 %}
@@ -300,47 +301,17 @@ identifierUse:
     {
       $<node>$ = makeIdNode($<string>1);
     }
-  | ID '[' INT ']' 
+  | ID '[' expr ']' 
     {
         struct expr_tree_node * idNode = makeIdNode($<string>1);
         idNode->left = $<node>3;
         $<node>$ = idNode;
     }
-  | ID '[' INT ']' '[' INT ']'
+  | ID '[' expr ']' '[' expr ']'
     { 
       struct expr_tree_node * idNode = makeIdNode($<string>1);
       idNode->left = $<node>3;
       idNode->right = $<node>6; 
-      $<node>$ = idNode;
-    }
-  | ID '[' ID ']' '[' INT ']'
-    { 
-
-      struct expr_tree_node * idNode = makeIdNode($<string>1);
-      idNode->left = $<node>3;
-      idNode->right = $<node>6; 
-      $<node>$ = idNode;
-    }
-  | ID '[' INT ']' '[' ID ']'
-    { 
-
-      struct expr_tree_node * idNode = makeIdNode($<string>1);
-      idNode->left = $<node>3;
-      idNode->right = $<node>6; 
-      $<node>$ = idNode;
-    }
-  | ID '[' ID ']' '[' ID ']'
-    { 
-
-      struct expr_tree_node * idNode = makeIdNode($<string>1);
-      idNode->left = $<node>3;
-      idNode->right = $<node>6; 
-      $<node>$ = idNode;
-    }
-  | ID '[' ID ']'
-    { 
-      struct expr_tree_node * idNode = makeIdNode($<string>1);
-      idNode->left = $<node>3;
       $<node>$ = idNode;
     }
   
@@ -367,6 +338,8 @@ FDef :
       defineFunction(funcNode, target_file);
       $<node>$ = funcNode;
     }
+
+  
 ;
 
 Body :
@@ -412,6 +385,11 @@ Param :
 LDeclBlock :
     DECL LDecList ENDDECL 
   | DECL ENDDECL
+  | 
+  {      
+    popAllLocalDeclarationsAndCreateEntry(_NONE);
+  }
+
 ;
 
 LDecList : 
@@ -492,7 +470,12 @@ DeclList :
   | Decl
 ;
 Decl : 
-    Type VarList SEMICOLON {popAllGlobalDeclarationsAndCreateEntry($<integer>1);}
+    Type VarList SEMICOLON 
+    {
+      
+      popAllGlobalDeclarationsAndCreateEntry($<integer>1);
+     
+    }
 ;
 Type : 
     INT_DECL

@@ -113,10 +113,8 @@ void LSTInstall(char * varname, int type, int offset, int rows, int cols)   // C
     
     new_node->rows = rows;
     new_node->cols = cols;
-    new_node->binding = _STACK_POINTER;
     new_node->size = max(rows*cols, max(rows, max(cols, _INT_SIZE)));
-    _STACK_POINTER += new_node->size;
-    _BASE_POINTER += new_node->size;
+    new_node->binding = _NONE;
     
     if(_LOCAL_SYMBOL_TABLE == NULL)
     {
@@ -162,4 +160,17 @@ void printGST()
         printGSTNode(temp);
         temp = temp->next;
     }
+}
+
+// get total length of LST
+int getLSTLength()
+{
+    int length = 0;
+    struct LocalSymbolTable * temp = _LOCAL_SYMBOL_TABLE;
+    while(temp != NULL)
+    {
+        length++;
+        temp = temp->next;
+    }
+    return length;
 }
