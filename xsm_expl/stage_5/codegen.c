@@ -22,30 +22,54 @@ int getNewLabel() // Get a new label number
 
 int getFreeReg() // Allocate a free register
 {
-    if(LAST_USED_REGISTER == 19)
+    if(_LAST_USED_REGISTER == 19)
     {
         printf("Error : All registers used up!\n");
         return -1;
     }
-    LAST_USED_REGISTER++;
-    return LAST_USED_REGISTER;
+    _LAST_USED_REGISTER++;
+    return _LAST_USED_REGISTER;
 }
 
 void freeLastReg() // Free the last used register
 {
-    if(LAST_USED_REGISTER==-1)
+    if(_LAST_USED_REGISTER==-1)
     {
         printf("Error : All available registers are already freed!\n");
-        return;
+        exit(1);
     }
-    LAST_USED_REGISTER--;
+    _LAST_USED_REGISTER--;
 }
 
+// save registers
+int saveRegisters(FILE * target_file)
+{
+    int highest_used_register = _LAST_USED_REGISTER;
+    for(int i = 0 ; i <= _LAST_USED_REGISTER; i++)
+    {
+        fprintf(target_file, "PUSH R%d\n", i);
 
+    }
+    _LAST_USED_REGISTER = -1;
+    return highest_used_register;
+}
+int restoreRegistersAndGetReturnValueReg(FILE * target_file, int last_used_register, reg_index returnReg)
+{
+    // mov the return value to the register one higher than the last used register
+    fprintf(target_file, "MOV R%d, R%d\n", last_used_register+1, returnReg);
+    // pop all the registers
+    for(int i = last_used_register ; i >=0; i--)
+    {
+        fprintf(target_file, "POP R%d\n", i);
+
+    }
+    _LAST_USED_REGISTER = last_used_register+1;
+    return _LAST_USED_REGISTER;
+}
 
 void write(reg_index reg_number, FILE * target_file)
 {
-    for(int i = 0 ; i <= LAST_USED_REGISTER; i++)
+    for(int i = 0 ; i <= _LAST_USED_REGISTER; i++)
     {
         fprintf(target_file, "PUSH R%d\n", i);
 
@@ -68,7 +92,7 @@ void write(reg_index reg_number, FILE * target_file)
     fprintf(target_file, "POP R0\n"); //func
 
 
-    for(int i = LAST_USED_REGISTER ; i >=0; i--)
+    for(int i = _LAST_USED_REGISTER ; i >=0; i--)
     {
         fprintf(target_file, "POP R%d\n", i);
 
@@ -81,7 +105,7 @@ void write(reg_index reg_number, FILE * target_file)
 
 void read(reg_index reg_number, FILE * target_file)
 {
-    for(int i = 0 ; i <= LAST_USED_REGISTER; i++)
+    for(int i = 0 ; i <= _LAST_USED_REGISTER; i++)
     {
         fprintf(target_file, "PUSH R%d\n", i);
 
@@ -104,7 +128,7 @@ void read(reg_index reg_number, FILE * target_file)
     fprintf(target_file, "POP R0\n"); //func
 
 
-    for(int i = LAST_USED_REGISTER ; i >=0; i--)
+    for(int i = _LAST_USED_REGISTER ; i >=0; i--)
     {
         fprintf(target_file, "POP R%d\n", i);
 
@@ -396,6 +420,37 @@ int getTopLoopEndLabel()
     return LOOP_STACK->endLabel;
 }
 
+
+// push parameter values in the reverse order
+void pushFunctionParametersInReverse(struct expr_tree_node *t, FILE * target_file)
+{
+    // null check
+    if(t == NULL ) return;
+
+    
+
+    // get the binding for the variable from the LST/GST
+    reg_index exprReg = codeGen(t->right, target_file);
+
+    // if t->right is a variable, then we need to get the value of the variable
+    if(t->right->nodetype == _NODE_TYPE_ID)
+    {
+        fprintf(target_file, "MOV R%d, [R%d]\n", exprReg, exprReg);
+    }
+
+   
+
+    // push the value
+    fprintf(target_file, "PUSH R%d\n", exprReg);
+    freeLastReg();
+
+    if(t->left!=NULL )
+    {    // call recursively left node
+        pushFunctionParametersInReverse(t->left, target_file);
+    }
+
+}
+
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     
     // Corner null case
@@ -423,7 +478,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
 
             // checking if the variable has been declared or not
-            if(t->GSTEntry==NULL)
+            struct LocalSymbolTable * LSTEntry = LSTLookup(t->varname);
+
+            if(t->GSTEntry==NULL && LSTEntry==NULL)
             {
                 printf("Variable %s not declared\n", t->varname);
                 exit(1);
@@ -431,9 +488,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // for variable
             if(leftReg==-1 && rightReg==-1)
             {
-                reg_index newReg = getFreeReg();
+                reg_index newReg = getBinding(t->varname, target_file);
                 // Address of the variable
-                fprintf(target_file, "MOV R%d, %d\n", newReg, t->GSTEntry->binding);
                 return_val = newReg;
             }  
             // for 1D array
@@ -445,17 +501,20 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
                     // load the value of the index into a register
                     fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
                 }
-                 
+                reg_index bindingReg = getBinding(t->varname, target_file);
                 // Address of the variable
-                fprintf(target_file, "ADD R%d, %d\n", leftReg, t->GSTEntry->binding);
+                fprintf(target_file, "ADD R%d, R%d\n", leftReg, bindingReg);
+                // free binding reg
+                freeLastReg();
                 return_val = leftReg;
             }
             // for 2D array
             else if(leftReg!=-1 && rightReg!=-1)
             {
                 // total number of rows in the matrix
-                int totalCols = t->GSTEntry->cols;
-                
+                int totalCols ;
+                if(LSTEntry!=NULL) totalCols = LSTEntry->cols;
+                else totalCols = t->GSTEntry->cols;                
 
                 // if row index is an identifier
                 if(t->left->nodetype==_NODE_TYPE_ID)
@@ -477,9 +536,14 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
                 }
                 // add column index to row index
                 fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
-                freeLastReg();
+                // getting the binding address
+                reg_index bindingReg = getBinding(t->varname, target_file);
                 // Address of the variable
-                fprintf(target_file, "ADD R%d, %d\n", leftReg, t->GSTEntry->binding);
+                fprintf(target_file, "ADD R%d, R%d\n", leftReg, bindingReg);
+                // free binding reg
+                freeLastReg();
+                // free right reg
+                freeLastReg();
                 return_val = leftReg;
                 
             }
@@ -498,6 +562,10 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
+            // if left and right regs are not _NONE then free them
+            if(leftReg!=_NONE) freeLastReg();
+            if(rightReg!=_NONE) freeLastReg();
+
             reg_index newReg= getFreeReg();
             // if leaf is a number
             fprintf(target_file, "MOV R%d, %d\n", newReg,  t->val);
@@ -510,6 +578,10 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
+
+            // if left and right regs are not _NONE then free them
+            if(leftReg!=_NONE) freeLastReg();
+            if(rightReg!=_NONE) freeLastReg();
 
             reg_index newReg= getFreeReg();
             // if leaf is a number
@@ -673,11 +745,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            if(leftReg!=-1)
+            if(leftReg!=_NONE)
             {
                 freeLastReg();
             }
-            if(rightReg!=-1)
+            if(rightReg!=_NONE)
             {
                 freeLastReg();
             }
@@ -786,7 +858,14 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             int label1 = getNewLabel();
             fprintf(target_file, "JZ R%d, _L%d\n", conditionReg, label1);
             // generating code for if block
-            codeGen(t->right->left, target_file);
+            reg_index codeEvalReg = codeGen(t->right->left, target_file);
+
+            // if there is a register then its invalid
+            if(codeEvalReg!=-1)
+            {
+                printf("Invalid code in if block\n");
+                exit(1);
+            }
             
 
             // if else code exists
@@ -798,7 +877,15 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
                 fprintf(target_file, "JMP _L%d\n", label2);
                 // generating code for else block
                 fprintf(target_file, "_L%d:\n", label1);
-                codeGen(t->right->right, target_file);
+                codeEvalReg = codeGen(t->right->right, target_file);
+
+                // if there is a register then its invalid
+                if(codeEvalReg!=-1)
+                {
+                    printf("Invalid code in else block\n");
+                    exit(1);
+                }
+
                 fprintf(target_file, "_L%d:\n", label2);
             
             }
@@ -982,9 +1069,71 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val = -1;
             break;
         }
+         case (_NODE_TYPE_FUNCTION_CALL):
+        {
+            // push all used registers
+            int highestUsedRegister = saveRegisters(target_file);
+            // push all parameters on the stack in reverse and assign them their relative binding addresses
+            pushFunctionParametersInReverse(t->left, target_file);
 
 
+            
+            // Check if function exists
+            if (t->GSTEntry == NULL)
+            {
+                printf("Error : Function not found : %s\n", t->varname);
+                exit(1);
+            }
+            // push the return value reg
+            reg_index returnReg = getFreeReg();
+            fprintf(target_file, "PUSH R%d\n", returnReg);
+            //Call the function
+            fprintf(target_file, "CALL _F%d\n", t->GSTEntry->functionLabelNumber);
 
+
+            // when it it return pop the return value
+            fprintf(target_file, "POP R%d\n", returnReg);
+            
+            
+            // pop function parameters from the stack
+            struct parameter_node * temp = t->GSTEntry->paramList;
+            return_val = returnReg;
+            
+
+
+            reg_index dummyRegister = getFreeReg();
+            while (temp != NULL )
+            {
+                fprintf(target_file, "POP R%d\n", dummyRegister);
+                temp = temp->next;
+            }
+            freeLastReg();
+            
+
+            //  restore all used registers
+            return_val = restoreRegistersAndGetReturnValueReg(target_file, highestUsedRegister, returnReg);
+            break;
+
+
+        }
+        case (_NODE_TYPE_RETURN):
+        {
+            return_val = -1; 
+            // if return value exits then evaluate it
+            if(t->left != NULL)
+            {
+                reg_index returnReg = codeGen(t->left, target_file);
+                // if return value is a variable then take its value
+                if(t->left->nodetype == _NODE_TYPE_ID)
+                {
+                    fprintf(target_file, "MOV R%d, [R%d]\n", returnReg, returnReg);
+                }
+                // store the return value in R0
+                fprintf(target_file, "MOV R0, R%d\n", returnReg);
+                return_val = returnReg;
+            }
+            break;
+        }
         default:
         {
             printf("Codegen : Invalid Node Type : %d\n", t->nodetype);
@@ -1102,8 +1251,6 @@ void explInit(FILE * target_file)
     fprintf(target_file, "PUSH R0\n");
     fprintf(target_file, "CALL _F0\n");
     
-    // exit label
-    fprintf(target_file, "_EXIT:\n");
     // calling int 10
     fprintf(target_file, "INT 10\n");
     
@@ -1111,7 +1258,7 @@ void explInit(FILE * target_file)
 
 void explEnd(FILE * target_file)
 {
-    if(LAST_USED_REGISTER!=-1)
+    if(_LAST_USED_REGISTER!=-1)
     {
         printf("Warning: Register Leak! All registers are not freed.\n");
     }
@@ -1119,11 +1266,54 @@ void explEnd(FILE * target_file)
 
 }
 
-void funtionInit(FILE * target_file)
+reg_index getBinding(char * name, FILE * target_file)
 {
-    // pushing previous BP to the stack
-    fprintf(target_file, "PUSH BP\n");
-    // setting BP to SP
+    // check if string is valid
+    if(name==NULL)
+    {
+        printf("Binding Address Error: Variable name is NULL.\n");
+        exit(1);
+    }
+
+    // checking if local variable
+    struct LocalSymbolTable * LSTEntry = LSTLookup(name);
+    // check if global variabl
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(name);
+
+    //if both are NULL, then variable not declared
+    if(LSTEntry==NULL && GSTEntry==NULL)
+    {
+        printf("Binding Address Error: Variable %s not declared.\n", name);
+        exit(1);
+    }
+
+    reg_index reg_with_binding_address = getFreeReg();
+    // if local variable
+    if(LSTEntry!=NULL)
+    {
+        // get the binding address relative to BP in the register reg_with_binding_address
+        fprintf(target_file, "MOV R%d, %d\n", reg_with_binding_address, LSTEntry->binding);
+
+        // add BP to the binding address
+        fprintf(target_file, "ADD R%d, BP\n", reg_with_binding_address);
+
+
+    }
+    else if (GSTEntry!=NULL)
+    {
+        // if global variable
+        // get the absolute binding address of the variable
+        fprintf(target_file, "MOV R%d, %d\n", reg_with_binding_address, GSTEntry->binding);
+
+    }
+    else
+    {
+        freeLastReg();
+        printf("Error: Variable %s not declared.\n", name);
+        exit(1);
+    }
+
+    return reg_with_binding_address;
 
 }
 
@@ -1132,25 +1322,103 @@ void funcCodegen(struct expr_tree_node * t, FILE * target_file)
     // if the node is null return
     if(t==NULL) return;
 
-    switch(t->nodetype)
+    // get the GST entry 
+    struct GlobalSymbolTable * GSTEntry = t->GSTEntry;
+
+    // set the function label
+    fprintf(target_file, "_F%d:\n", GSTEntry->functionLabelNumber);
+
+    // get the number of parameters
+    int num_params = 0;
+    struct parameter_node * paramList = GSTEntry->paramList;
+    while(paramList!=NULL)
     {
-        case(_NODE_TYPE_FUNCTION_CALL)
-        {
-            // fetch the number of parameters from the GSTEntry of the function
-            struct GlobalSymbolTable* gstEntry = GSTLookup(t->varname);
+        num_params++;
+        paramList = paramList->next;
+    }
+    // pushing previous BP to the stack
+    fprintf(target_file, "PUSH BP\n");
+    // setting BP to SP
+    fprintf(target_file, "MOV BP, SP\n");
 
-            // if the function is not found in the GST
-            if(gstEntry==NULL)
-            {
-                printf("Error: Function %s not found!\n", t->varname);
-                exit(1);
-            }
+    int currentBindingAddress = -3*_STACK_UNIT_SIZE;
+    struct LocalSymbolTable * LSTEntry = _LOCAL_SYMBOL_TABLE;
+    // set the binding of the parameter variables
+    while((num_params--)>0)
+    {
 
-            // Push the return address to the stack
-            fprintf(target_file, "PUSH IP\n");
+        // set binding of the parameters relative to BP
+        LSTEntry->binding = currentBindingAddress;
+        currentBindingAddress-=(1*_STACK_UNIT_SIZE);
+        LSTEntry = LSTEntry->next;
 
-            break;
-        }
+    }
+    currentBindingAddress = 1*_STACK_UNIT_SIZE;
+
+    int localVariableCount = 0;
+    while(LSTEntry!=NULL )
+    {
+        localVariableCount++;
+        //push space for local variables
+        fprintf(target_file, "PUSH R0\n");
+        // set binding of the local variable relative to BP
+        LSTEntry->binding = currentBindingAddress;
+        LSTEntry = LSTEntry->next;
+        currentBindingAddress+=(1*_STACK_UNIT_SIZE);
+
     }
 
+
+    // codeGen for the body of the function
+    reg_index bodyReg = codeGen(t->right->right, target_file);
+
+
+    // codegen for the return statement
+    reg_index returnReg = codeGen(t->right->left, target_file);
+
+    // if return is not void then store the return value in the place allocated for the return value
+    if(returnReg != _NONE)
+    {
+        // move the return value to the place allocated for the return value
+        reg_index tempReg = getFreeReg();
+        fprintf(target_file, "MOV R%d, BP\n", tempReg);
+        fprintf(target_file, "ADD R%d, %d\n", tempReg, _FUNCTION_RETURN_VALUE_OFFSET);
+        fprintf(target_file, "MOV [R%d], R%d\n",tempReg, returnReg);
+        // free temp reg
+        freeLastReg();
+        // free the register
+        freeLastReg();
+    }
+
+
+
+    // if the body reg is not -1, then it is invalid
+    if(bodyReg!=_NONE)
+    {
+        printf("Error: Invalid return type of function %s.\n", GSTEntry->name);
+        exit(1);
+    }
+
+
+    // pop the local variables from the stack
+    LSTEntry = _LOCAL_SYMBOL_TABLE;
+    while(localVariableCount--)
+    {
+        //push space for local variables
+        fprintf(target_file, "POP R0\n");
+    }
+
+    // POP old BP
+    fprintf(target_file, "POP BP\n");
+
+    // return
+    fprintf(target_file, "RET\n");
+
+    // clear lst    
+    clearLST();
+
+    
+
 }
+
+

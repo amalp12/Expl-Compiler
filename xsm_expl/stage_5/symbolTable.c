@@ -48,9 +48,16 @@ void GSTInstall(char * varname,int type,int nodetype, int offset, int rows, int 
     new_gst_entry->paramList = NULL;
     new_gst_entry->functionLabelNumber = _NONE;
 
-    if(nodetype == _NODE_TYPE_FUNCTION_CALL)
+    if(nodetype == _NODE_TYPE_FUNCTION_DEFINITION && strcmp(varname, "main") == 0)
+    {
+        new_gst_entry->functionLabelNumber = _MAIN_FUNCTION_LABEL;
+        new_gst_entry->size = 0;
+    }
+
+    else if(nodetype == _NODE_TYPE_FUNCTION_DEFINITION)
     {
         new_gst_entry->functionLabelNumber = getNewFunctionLabel();
+        new_gst_entry->size = 0;
     }
    
     
@@ -89,28 +96,40 @@ struct LocalSymbolTable *LSTLookup(char * name)            // Returns a pointer 
 
 void LSTInstall(char * varname, int type, int offset, int rows, int cols)   // Creates a symbol table entry.
 {
-    struct LocalSymbolTable * temp = LSTLookup(varname);
-    if(temp != NULL)
+    struct LocalSymbolTable * LSTEntry = LSTLookup(varname);
+    if(LSTEntry != NULL)
     {
         printf("Variable %s already declared\n", varname);
         exit(1);
     }
-    temp = (struct LocalSymbolTable *)malloc(sizeof(struct LocalSymbolTable));
+    free(LSTEntry);
+    struct LocalSymbolTable  * new_node = (struct LocalSymbolTable *)malloc(sizeof(struct LocalSymbolTable));
 
-    temp->name  = strndup(varname, strlen(varname)-offset);
+    new_node->name  = strndup(varname, strlen(varname)-offset);
 
-    temp->type = type;
+    new_node->type = type;
 
 
     
-    temp->rows = rows;
-    temp->cols = cols;
-    temp->binding = _STACK_POINTER;
-    temp->size = max(rows*cols, max(rows, max(cols, _INT_SIZE)));
-    _STACK_POINTER += temp->size;
-    _BASE_POINTER += temp->size;
-    temp->next = _LOCAL_SYMBOL_TABLE;
-    _LOCAL_SYMBOL_TABLE = temp;
+    new_node->rows = rows;
+    new_node->cols = cols;
+    new_node->binding = _STACK_POINTER;
+    new_node->size = max(rows*cols, max(rows, max(cols, _INT_SIZE)));
+    _STACK_POINTER += new_node->size;
+    _BASE_POINTER += new_node->size;
+    
+    if(_LOCAL_SYMBOL_TABLE == NULL)
+    {
+        _LOCAL_SYMBOL_TABLE = new_node;
+        new_node->next = NULL;
+    }
+    else
+    {
+        struct LocalSymbolTable * temp = _LOCAL_SYMBOL_TABLE;
+        while(temp->next != NULL) temp = temp->next;
+        temp->next = new_node;
+
+    }
 }
 
 // print  GST Node

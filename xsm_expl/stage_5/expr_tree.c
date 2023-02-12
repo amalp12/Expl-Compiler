@@ -164,20 +164,57 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
     struct expr_tree_node * temp = parameters;
     struct parameter_node * temp2 = GSTEntry -> paramList;
 
+    // get the last parameter from the parameter list of gst
+    // to check in reverse order cuz in the node tree it is stored in reverse order
+    while(temp2 != NULL && temp2->next != NULL)
+    {
+        temp2 = temp2->next;
+    }
+
+    
+    while(temp != NULL && temp2 != NULL){
+        if(temp->right->type != temp2->type)
+        {
+            printf("Function Call Node Error: Type mismatch in function call %s", name);
+            exit(1);
+        }
+        temp = temp->left;
+        temp2 = temp2->prev;
+    }
+   
+    return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,_TYPE_KEYWORD, name, GSTEntry, parameters,NULL);
+
+}
+
+struct expr_tree_node * makeFunctionDefinitionNode(int type, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body)
+{
+    // check if the variable is declared
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(name);
+
+    // if the function is not declared
+    if(GSTEntry == NULL)
+    {
+        printf("Error: Function %s not declared", name);
+        exit(1);
+    }
+
+    // typechecking parameters
+    struct expr_tree_node * temp = parameters;
+    struct parameter_node * temp2 = GSTEntry -> paramList;
+
     while(temp != NULL && temp2 != NULL){
         if(temp->type != temp2->type)
         {
-            printf("Error: Type mismatch in function call %s", name);
+            printf("Function Definition Node Error: Type mismatch in function call %s", name);
             exit(1);
         }
         temp = temp->left;
         temp2 = temp2->next;
     }
    
-    return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,_TYPE_KEYWORD, name, GSTEntry, parameters,NULL);
+    return makeNode(_NONE, _NODE_TYPE_FUNCTION_DEFINITION,type, name, GSTEntry, parameters,body);
 
-};
-
+}
 
 struct expr_tree_node * makeReturnNode (struct expr_tree_node *expr)
 {
@@ -196,32 +233,36 @@ struct expr_tree_node * makeParameterNode(int type, char * name)
 
 // make function definition node
 //    Type ID '(' ParamList ')' '{' LDeclBlock Body '}'
-void defineFunction(int type, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body)
+void defineFunction(struct expr_tree_node* node, FILE * target_file)
 {
    
     
     // get the GST entry
-    struct GlobalSymbolTable * GSTEntry = GSTLookup(name);
+    struct GlobalSymbolTable * GSTEntry = node->GSTEntry;
 
     // if the function is not declared
     if(GSTEntry == NULL)
     {
-        printf("Error: Function %s not declared", name);
+        printf("Function Definition Error: Function %s not declared", node->varname);
         exit(1);
     }
 
     // compare if the parameters are same
-    struct expr_tree_node * temp = parameters;
+    struct expr_tree_node * temp = node->left; // parameters
     struct parameter_node * temp2 = GSTEntry -> paramList;
     while(temp != NULL && temp2 != NULL){
         if(temp->type != temp2->type)
         {
-            printf("Error: Type mismatch in function definition %s", name);
+            printf("Function Definition Error: Type mismatch in function definition %s", node->varname);
             exit(1);
         }
         temp = temp->left;
         temp2 = temp2->next;
     }
+
+    // calling function code generator
+    funcCodegen(node, target_file);
+
 
   
 }
@@ -242,3 +283,5 @@ void declareMain()
 
 
 }
+
+

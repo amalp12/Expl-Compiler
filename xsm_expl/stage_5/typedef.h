@@ -31,6 +31,7 @@
 #define _NODE_TYPE_RETURN 28
 #define _NODE_TYPE_FUNCTION_DEFINITION 29
 
+
 // Type
 #define _TYPE_INT 0
 #define _TYPE_OPERATOR 1
@@ -52,12 +53,21 @@
 
 // Label Translation
 #define _CODE_START_ADDRESS 2056
+#define _MAIN_FUNCTION_LABEL 0
 
 // Sizes
 #define _INT_SIZE 1
 #define _STRING_SIZE 1
 
 #define _INITIAL_STACK_POINTER 4096
+#define _STACK_UNIT_SIZE 1
+
+
+// function offsets
+#define _FUNCTION_RETURN_ADDRESS_OFFSET -1
+#define _FUNCTION_RETURN_VALUE_OFFSET -2
+#define _FUNCTION_LOCAL_VARIABLE_OFFSET 1
+#define _FUNCTION_ARGUMENT_OFFSET -3
 // stack
 int _STACK_POINTER;
 int _BASE_POINTER;

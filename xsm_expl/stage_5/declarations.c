@@ -177,9 +177,6 @@ void popAllLocalDeclarationsAndCreateEntry(int type)
         if(temp->node->right != NULL) cols = temp->node->right->val;
        
         LSTInstall(temp->node->varname, type, 0,rows, cols);
-        // getting the enty
-        // struct LocalSymbolTable *entry = LSTLookup(temp->node->varname);
-        // no parameters to add in LST
     
         
         free(temp);
@@ -187,3 +184,4 @@ void popAllLocalDeclarationsAndCreateEntry(int type)
 
     }
 }
+

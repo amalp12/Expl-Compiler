@@ -37,12 +37,13 @@ struct loopStack{
 };
 
 
-int LAST_USED_REGISTER = -1;
+int _LAST_USED_REGISTER = -1;
 int LAST_USED_LABEL = -1;
 struct  loopStack * LOOP_STACK= NULL;
 
+int saveRegisters(FILE * target_file);
 
-
+int restoreRegistersAndGetReturnValueReg(FILE * target_file, int last_used_register, reg_index returnReg);
 int getFreeReg(); // Allocate a free register
 
 
@@ -63,3 +64,8 @@ void explEnd(FILE * target_file);
 int evaluate( struct expr_tree_node *t, int * identifier) ;
 
 int getNewLabel(); // Get a new label number
+
+reg_index getBinding(char * name, FILE * target_file);
+
+void funcCodegen(struct expr_tree_node * t, FILE * target_file);
+

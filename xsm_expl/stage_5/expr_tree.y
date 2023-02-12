@@ -57,10 +57,12 @@
 
 
 
+
 void yyerror(char const *s);
 extern FILE* yyin;
 extern char * yytext;
-int identifiers[26];
+FILE * target_file ;
+int _INIT_STATE ;
 int yylex(void);
 
 %}
@@ -123,15 +125,16 @@ Each node can be opertator node or a leaf Node
 Program : 
     GDeclBlock FDefBlock MainBlock
     {
+    
       exit(1);
     }
   | GDeclBlock MainBlock
     {
+
       exit(1);
     }
   | MainBlock
     {
-
       exit(1);
     }
 
@@ -143,15 +146,21 @@ MainBlock :
   
       // printGST();
       // declare main function
+      printf("Generating Assembly Code... \n");
       declareMain();
-      defineFunction($<integer>1, "main", $<node>4, $<node>8);
+      // if init state is false initialze
+      if(_INIT_STATE == _FALSE){
+        explInit(target_file);
+        _INIT_STATE = _TRUE;
+      }
+      struct expr_tree_node * funcNode = makeFunctionDefinitionNode($<integer>1, "main", NULL, $<node>7);
+      defineFunction(funcNode, target_file);
+      $<node>$ = funcNode;
+
     
-      FILE * target_file = fopen("untranslated_assembly.xsm","w");
       
       // printInfix($<node>2);
 
-      printf("Generating Assembly Code... \n");
-      explInit(target_file);
       // codeGen($<node>2, target_file);
       // evaluate($<node>2, identifiers);
       explEnd(target_file);
@@ -167,7 +176,21 @@ MainBlock :
 
 GDeclBlock :
     DECL GDeclList ENDDECL 
+    {
+      // if init state is false initialze
+      if(_INIT_STATE == _FALSE){
+        explInit(target_file);
+        _INIT_STATE = _TRUE;
+      }
+    }
   | DECL ENDDECL
+    {
+      // if init state is false initialze
+      if(_INIT_STATE == _FALSE){
+        explInit(target_file);
+        _INIT_STATE = _TRUE;
+      }
+    }
 ;
 
 GDeclList : 
@@ -198,6 +221,7 @@ Gid :
   | ID '(' GParamList ')'
     {
       struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      idNode->nodetype = _NODE_TYPE_FUNCTION_DEFINITION;
       idNode->left = $<node>3;
       $<node>$ = idNode; 
     }
@@ -327,25 +351,33 @@ identifierUse:
 // --------------------------------------------------------------------------------------
 
 FDefBlock :
-    FDefBlock FDef 
+      FDefBlock FDef 
+      {
+
+      }
     | FDef
+      {
+      }
 ;
 
 FDef :
     Type ID '(' ParamList ')' '{' LDeclBlock Body '}'
     {
-      defineFunction($<integer>1, $<string>2, $<node>4, $<node>8);
+      struct expr_tree_node * funcNode = makeFunctionDefinitionNode($<integer>1, $<string>2, $<node>4, $<node>8);
+      defineFunction(funcNode, target_file);
+      $<node>$ = funcNode;
     }
 ;
 
 Body :
     START Slist ReturnStmt END  
     {
-      $<node>$ = $<node>2;
+      $<node>$ = makeConnectorNode($<node>3,$<node>2);
 
     }
   | START ReturnStmt END 
     {
+      $<node>$ = makeConnectorNode($<node>3,NULL);
       $<node>$ = NULL;
     }
 ;
@@ -412,12 +444,12 @@ LIdList :
 ArgList : 
     ArgList ',' expr
     {
-      $<node>1->left = $<node>3;
-      $<node>$ = $<node>1;
+      $<node>$ = makeConnectorNode($<node>1,$<node>3);
+
     }
   | expr
     {
-      $<node>$ = $<node>1;
+      $<node>$ =makeConnectorNode(NULL,$<node>1);
     }
 ;
 // -----------------------------------------------------------------------------------------
@@ -533,7 +565,10 @@ void yyerror(char const *s)
 int main()
 {
 
-  FILE * input_file=fopen("input.txt","r");
+  FILE * input_file=fopen("input.expl","r");
+  target_file = fopen("untranslated_assembly.xsm","w");
+  _INIT_STATE = _FALSE;
+
   _STACK_POINTER = _INITIAL_STACK_POINTER;
   _BASE_POINTER = _STACK_POINTER+1;
   yyin = input_file;
