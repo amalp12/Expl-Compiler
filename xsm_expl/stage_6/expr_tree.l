@@ -110,13 +110,11 @@ numbers [0-9]+
 "enddecl" {
     return ENDDECL;
 }
-"int" {
-    yylval.integer = _TYPE_INT;
-    return INT_DECL;
+"type" {
+    return TYPE;
 }
-"str" {
-    yylval.integer = _TYPE_STRING;
-    return STRING_DECL;
+"endtype" {
+    return ENDTYPE;
 }
 ">" {
     return GT;

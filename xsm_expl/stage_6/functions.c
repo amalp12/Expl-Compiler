@@ -2,7 +2,7 @@
 // Creates a new parameter list with the given parameter as head if the list is empty
 // if the list is not empty, it adds the parameter to the end of the list
 
-struct parameter_node * createParameterNode(char * name, int  type)
+struct parameter_node * createParameterNode(char * name, struct TypeTable *  type)
 {
     struct parameter_node * new_parameter_node = (struct parameter_node *) malloc(sizeof(struct parameter_node));
     new_parameter_node->name = name;
@@ -14,7 +14,7 @@ struct parameter_node * createParameterNode(char * name, int  type)
 
     return new_parameter_node;
 }
-struct parameter_node * AddToParameterList(struct parameter_node * parameter_list, char * varname, int type, int rows, int cols)
+struct parameter_node * AddToParameterList(struct parameter_node * parameter_list, char * varname, struct TypeTable * type, int rows, int cols)
 {
     struct parameter_node * parameter_node = createParameterNode(varname, type);
     if (parameter_list == NULL)

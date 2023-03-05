@@ -136,250 +136,6 @@ void read(reg_index reg_number, FILE * target_file)
 
 }
 
-// int getVarAddress(char * varname)
-// {
-//     struct Gsymbol * entry = GSTLookup(varname);
-
-//     if(entry==NULL)
-//     {
-//         printf("Variable Doesn't Exist!");
-//         exit(1);
-//     }
-//     return entry -> binding; 
-
-// }
-
-int evaluate( struct expr_tree_node *t, int * identifier) {
-    
-    // Corner null case
-    if(t==NULL) return -1;
-
-    
-
-   
-    int return_val=-1;
-    switch (t->nodetype)
-    {
-    
-        case(_NODE_TYPE_ID):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-            int index= *(t->varname)-'a';
-            return_val = identifier[index];
-            break;
-        }
-        case(_NODE_TYPE_NUM):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-            return_val =  t->val;
-            break;
-        }
-        // Addition
-        case (_NODE_TYPE_PLUS):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-
-            return_val =  leftReg+rightReg;
-            break;
-        }
-        // Subtraction
-        case(_NODE_TYPE_MINUS):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-
-            return_val =  leftReg-rightReg;
-            break;
-        }
-
-        // Muliplication
-        case(_NODE_TYPE_MUL):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-
-            return_val =  leftReg*rightReg;
-            break;
-        }
-
-        // Division
-        case(_NODE_TYPE_DIV):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-
-            return_val =  leftReg/rightReg;
-            break;
-        }
-
-        // EQUAL TO
-        case(_NODE_TYPE_EQUALS):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-            identifier[*(t->left->varname)-'a'] = rightReg;
-            return_val =  -1;
-            break;
-        }
-        case(_NODE_TYPE_CONNECTOR):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-            return_val =  -1;
-            break;
-        }
-        case(_NODE_TYPE_READ):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-            int index = *(t->left->varname)-'a';
-            scanf("%d", &identifier[index]);
-            return_val = -1;
-            break;
-        }
-        case(_NODE_TYPE_WRITE):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);    
-          
-            printf("%d\n", leftReg);
-            return_val = -1;
-            break;
-        }
-        case(_NODE_TYPE_WHILE):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int conditionReg = evaluate(t->left, identifier);
-            int codeBlockReg ;
-            while(conditionReg)
-            {
-                codeBlockReg = evaluate(t->right, identifier);
-                conditionReg = evaluate(t->left, identifier);
-            }
-            return_val = -1;
-            break;
-        }
-        case (_NODE_TYPE_IF_ELSE):
-        {
-            // Evaluating the condtion
-            int conditionReg = evaluate(t->left, identifier);
-
-            if(conditionReg)
-            {
-
-                evaluate(t->right->left, identifier);            }
-            else
-            {
-                if(t->right->right)
-                    evaluate(t->right->right, identifier);
-            }
-            return_val = -1;
-
-        }
-        case (_NODE_TYPE_THEN):
-        {
-            return_val = -1;
-            break;
-        }
-        case (_NODE_TYPE_LE):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-
-            return_val =  leftReg<=rightReg;
-            break;
-        }
-        case (_NODE_TYPE_GE):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-
-            return_val =  leftReg>=rightReg;
-            break;
-        }
-        case (_NODE_TYPE_LT):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-
-            return_val =  leftReg<rightReg;
-            break;
-        }
-        case (_NODE_TYPE_GT):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-
-            return_val =  leftReg>rightReg;
-            break;
-        }
-        case (_NODE_TYPE_NE):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-
-            return_val =  leftReg!=rightReg;
-            break;
-        }
-        case (_NODE_TYPE_EQ):
-        {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            int leftReg = evaluate(t->left, identifier);
-            int rightReg = evaluate(t->right, identifier);
-
-            return_val =  leftReg==rightReg;
-            break;
-        }
-
-        default:
-        {
-            printf("Evaluate : Invalid Node Type : %d\n", t->nodetype);
-            break;
-        }
-
-    }
-
-    
-
-    // the result is stored in the register used for left tree evaluation
-    // return register number storing result
-    return return_val;
-}
 
 void loopStackPush( int start, int end)
 {
@@ -1052,7 +808,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index rightReg = codeGen(t->right, target_file);
 
             // both the left and right trees should be of type boolean
-            if(t->left->type != _TYPE_BOOL || t->right->type != _TYPE_BOOL)
+            struct TypeTable * boolType = typeLookup("bool") ;
+            if(t->left->type != boolType || t->right->type != boolType)
             {
                 printf("Error: AND operator can only be applied on boolean values");
                 exit(1);
@@ -1073,7 +830,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index rightReg = codeGen(t->right, target_file);
 
             // both the left and right trees should be of type boolean
-            if(t->left->type != _TYPE_BOOL || t->right->type != _TYPE_BOOL)
+            struct TypeTable * boolType = typeLookup("bool") ;
+            if(t->left->type != boolType || t->right->type != boolType)
             {
                 printf("Error: OR operator can only be applied on boolean values");
                 exit(1);
@@ -1108,7 +866,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
 
             // both the left and right trees should be of type boolean
-            if(t->left->type != _TYPE_BOOL)
+            struct TypeTable * boolType = typeLookup("bool") ;
+            if(t->left->type != boolType)
             {
                 printf("Error: NOT operator can only be applied on boolean values");
                 exit(1);
@@ -1326,6 +1085,8 @@ void printInfix(struct expr_tree_node * t)
 
 void explInit(FILE * target_file)
 {
+
+
     fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
     fprintf(target_file, "MOV SP, %d\n",_STACK_POINTER);
     fprintf(target_file, "MOV BP, %d\n", _BASE_POINTER);

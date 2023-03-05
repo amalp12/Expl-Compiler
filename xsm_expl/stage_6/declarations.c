@@ -42,29 +42,17 @@ int isGlobalDeclarationStackEmpty()
     return _GLOBAL_DECLARATION_STACK_HEAD == NULL;
 }
 
-void popAllGlobalDeclarationsAndCreateEntry(int type)
+void popAllGlobalDeclarationsAndCreateEntry(char * typeName)
 {
-    int size ;
-    switch (type)
-    {
-        case (_TYPE_INT):
-        {
-                size = _INT_SIZE;
-                break;
-        }
-        case (_TYPE_STRING):
-        {
-                size = _STRING_SIZE;
-                break;
-        }
-        
-        default:
-        {
-            printf("Null Size Error!\n");
-            exit(1);
-            break;
-        }
+    // search type table for type
+    struct TypeTable *typeEntry = typeLookup(typeName);
+
+    // if type not found, throw error
+    if (typeEntry == NULL) {
+        printf("Error: Type %s not found\n", typeName);
+        exit(1);
     }
+
     struct declaration_node * temp = popGlobalDeclaration();
     while(temp!=NULL)
     {
@@ -74,7 +62,7 @@ void popAllGlobalDeclarationsAndCreateEntry(int type)
         if(temp->node->left != NULL) rows = temp->node->left->val;
         if(temp->node->right != NULL) cols = temp->node->right->val;
         
-        GSTInstall(temp->node->varname, type,temp->node->nodetype, 0,rows, cols);
+        GSTInstall(temp->node->varname, typeEntry,temp->node->nodetype, 0,rows, cols);
         // getting the enty
         struct GlobalSymbolTable *entry = GSTLookup(temp->node->varname);
         // adding the parameters
@@ -142,33 +130,13 @@ int isLocalDeclarationStackEmpty()
     return _LOCAL_DECLARATION_STACK_HEAD == NULL;
 }
 
-void popAllLocalDeclarationsAndCreateEntry(int type)
+void popAllLocalDeclarationsAndCreateEntry(char * typeName)
 {
-    int size ;
-    switch (type)
-    {
-        case (_TYPE_INT):
-        {
-                size = _INT_SIZE;
-                break;
-        }
-        case (_TYPE_STRING):
-        {
-                size = _STRING_SIZE;
-                break;
-        }
-        case(_NONE):
-        {
-            size = _STACK_UNIT_SIZE;
-            break;
-        }
-        default:
-        {
-            printf("Null Size Error!\n");
-            exit(1);
-            break;
-        }
-    }
+    // search type table for type
+    struct TypeTable *typeEntry = typeLookup(typeName);
+
+   
+
 
     struct declaration_node * temp = popLocalDeclaration();
     while(temp!=NULL)
@@ -181,12 +149,18 @@ void popAllLocalDeclarationsAndCreateEntry(int type)
         if(temp->node->right != NULL) cols = temp->node->right->val;
 
         // for arguements with types already declared
-        if(temp->node->type!=_NONE)
+        if(temp->node->type!=NULL)
         {
-            type = temp->node->type;
+            typeEntry = temp->node->type;
+            
         }
-       
-        LSTInstall(temp->node->varname, type, 0,rows, cols);
+        // if type not found, throw error
+        if (typeEntry == NULL) 
+        {
+            printf("Error: Type %s not found\n", typeName);
+            exit(1);
+        }
+        LSTInstall(temp->node->varname, typeEntry, 0,rows, cols);
     
         
         free(temp);

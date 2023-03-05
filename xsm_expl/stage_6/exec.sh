@@ -6,5 +6,5 @@ lex label_translation.l
 gcc -g lex.yy.c -o a.out
 ./a.out  
 cd ../
-./xsm -l library.lib -e ./stage_5/assemblycode.xsm --debug
-cd stage_5
+./xsm -l library.lib -e ./stage_6/assemblycode.xsm --debug
+cd stage_6

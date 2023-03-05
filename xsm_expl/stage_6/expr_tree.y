@@ -56,6 +56,15 @@
 #endif
 
 
+#ifndef _TYPE_TABLE_H
+#define _TYPE_TABLE_H
+#include "typeTable.h"
+#endif
+
+#ifndef _TYPE_TABLE_C
+#define _TYPE_TABLE_C
+#include "typeTable.c"
+#endif
 
 
 void yyerror(char const *s);
@@ -73,13 +82,14 @@ int yylex(void);
   char * string;
   int integer;
   struct declaration_node * decl_node;
+  struct Fieldlist * typeField;
 }
 
 
 %token INT MUL DIV PLUS MINUS  ID READ WRITE SEMICOLON START END EQUALS STRING MOD
 %token GT LT GE LE NE EQ 
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE REPEAT UNTIL
-%token DECL ENDDECL INT_DECL STRING_DECL 
+%token DECL ENDDECL TYPE ENDTYPE
 %token BREAK BREAKPOINT CONTINUE 
 %token RETURN MAIN
 %token AND OR NOT
@@ -90,47 +100,23 @@ int yylex(void);
 %left GE LE
 %left PLUS MINUS
 %left MUL DIV MOD
-%left STRING_DECL INT_DECL
+
 
 %%
 
-// start : 
-/*
-Each node can be opertator node or a leaf Node
-*/
 
-
-// program : 
-//     START Slist END SEMICOLON 
-//     {
-//       FILE * target_file = fopen("untranslated_assembly.xsm","w");
-      
-//       // printInfix($<node>2);
-
-//       printf("Generating Assembly Code... \n");
-//       explInit(target_file);
-//       codeGen($<node>2, target_file);
-//       // evaluate($<node>2, identifiers);
-//       explEnd(target_file);
-//       printf("Complete \n");
-
-//       if(target_file) fclose(target_file);
-
-//       exit(1);
-
-//     }
-//   | START END SEMICOLON
-//     {
-//         exit(1);
-//     }
-// ;
 
 Program : 
-    GDeclBlock FDefBlock MainBlock
+    TypeDefBlock GDeclBlock FDefBlock MainBlock
     {
     
       exit(1);
     }
+  | GDeclBlock FDefBlock MainBlock
+    {
+    
+      exit(1);
+    }  
   | GDeclBlock MainBlock
     {
 
@@ -156,16 +142,11 @@ MainBlock :
         explInit(target_file);
         _INIT_STATE = _TRUE;
       }
-      struct expr_tree_node * funcNode = makeFunctionDefinitionNode($<integer>1, "main", NULL, $<node>7);
+      struct expr_tree_node * funcNode = makeFunctionDefinitionNode($<string>1, "main", NULL, $<node>7);
       defineFunction(funcNode, target_file);
       $<node>$ = funcNode;
 
     
-      
-      // printInfix($<node>2);
-
-      // codeGen($<node>2, target_file);
-      // evaluate($<node>2, identifiers);
       explEnd(target_file);
       printf("Complete \n");
 
@@ -176,7 +157,43 @@ MainBlock :
     }
 
 ;
+// ------------------- TypeDeclBlock ---------------------------------------------
+TypeDefBlock :
+    TYPE TypeDefList ENDTYPE
+;
 
+TypeDefList : 
+    TypeDefList TypeDef
+  | TypeDef
+;
+
+TypeDef: 
+    ID '{' FieldDeclList '}'   
+    { 
+        typeInstall($<string>1, $<typeField>3); 
+    }
+;
+
+FieldDeclList : 
+    FieldDeclList FieldDecl 
+    {
+      $<typeField>1->next = $<typeField>2;
+      $<typeField>$ = $<typeField>1;
+    }
+  | FieldDecl
+;
+
+FieldDecl :
+    TypeName ID SEMICOLON 
+    {
+      $<typeField>$ = createField($<string>1, $<string>2);
+    } // check if typename is defined
+;
+
+TypeName : 
+    ID      //TypeName for user-defined types
+;
+// ------------------- GDeclBlock ---------------------------------------------
 GDeclBlock :
     DECL GDeclList ENDDECL 
     {
@@ -204,7 +221,7 @@ GDeclList :
 GDecl : 
     Type GidList SEMICOLON
     {
-      popAllGlobalDeclarationsAndCreateEntry($<integer>1);
+      popAllGlobalDeclarationsAndCreateEntry($<string>1); // sending in type as arguement 
     }
 ;
 
@@ -223,7 +240,7 @@ Gid :
     identifierDecl {$<node>$ = $<node>1;}
   | ID '(' GParamList ')'
     {
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
       idNode->nodetype = _NODE_TYPE_FUNCTION_DEFINITION;
       idNode->left = $<node>3;
       $<node>$ = idNode; 
@@ -249,17 +266,17 @@ GParamList :
 identifierDecl:
      ID 
     {
-      $<node>$ = makeDeclareIdNode($<string>1, _NONE);
+      $<node>$ = makeDeclareIdNode($<string>1, NULL);
     }
   | ID '[' INT ']' 
     {  
-        struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+        struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
         idNode->left = $<node>3;
         $<node>$ = idNode;
     }
   | ID '[' INT ']' '[' INT ']'
     { 
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
       idNode->left = $<node>3; 
       idNode->right = $<node>6; 
       $<node>$ = idNode;
@@ -267,7 +284,7 @@ identifierDecl:
   | ID '[' ID ']' '[' INT ']'
     { 
 
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
       idNode->left = $<node>3; 
       idNode->right = $<node>6; 
       $<node>$ = idNode;
@@ -275,7 +292,7 @@ identifierDecl:
   | ID '[' INT ']' '[' ID ']'
     { 
 
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
       idNode->left = $<node>3; 
       idNode->right = $<node>6; 
       $<node>$ = idNode;
@@ -283,14 +300,14 @@ identifierDecl:
   | ID '[' ID ']' '[' ID ']'
     { 
 
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
       idNode->left = $<node>3; 
       idNode->right = $<node>6; 
       $<node>$ = idNode;
     }
   | ID '[' ID ']'
     { 
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, _NONE);
+      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
       idNode->left = $<node>3; 
       $<node>$ = idNode;
     }
@@ -336,7 +353,7 @@ FDefBlock :
 FDef :
     Type ID '(' ParamList ')' '{' LDeclBlock Body '}'
     {
-      struct expr_tree_node * funcNode = makeFunctionDefinitionNode($<integer>1, $<string>2, $<node>4, $<node>8);
+      struct expr_tree_node * funcNode = makeFunctionDefinitionNode($<string>1, $<string>2, $<node>4, $<node>8);
       defineFunction(funcNode, target_file);
       $<node>$ = funcNode;
     }
@@ -379,7 +396,7 @@ ParamList :
 Param :
   Type ID
   {
-    $<node>$ = makeParameterNode($<integer>1, $<string>2);
+    $<node>$ = makeParameterNode($<string>1, $<string>2);
   }
 ;
 
@@ -389,7 +406,7 @@ LDeclBlock :
   | DECL ENDDECL
   | 
   {      
-    popAllLocalDeclarationsAndCreateEntry(_NONE);
+    popAllLocalDeclarationsAndCreateEntry(NULL);
   }
 
 ;
@@ -399,9 +416,9 @@ LDecList :
   | LDecl
 ;
 LDecl :
-    Type LIdList SEMICOLON
+    ID LIdList SEMICOLON
     {
-      popAllLocalDeclarationsAndCreateEntry($<integer>1);
+      popAllLocalDeclarationsAndCreateEntry($<string>1);
     }
 ;
 
@@ -475,13 +492,12 @@ Decl :
     Type VarList SEMICOLON 
     {
       
-      popAllGlobalDeclarationsAndCreateEntry($<integer>1);
+      popAllGlobalDeclarationsAndCreateEntry($<string>1);
      
     }
 ;
 Type : 
-    INT_DECL
-  | STRING_DECL
+  ID
 ;
 VarList : 
     VarList ',' identifierDecl {pushGlobalDeclaration($<node>3);} 
@@ -555,6 +571,8 @@ int main()
 
   FILE * input_file=fopen("input.expl","r");
   target_file = fopen("untranslated_assembly.xsm","w");
+  // Initializing Type Table
+  typeTableCreate();
   _INIT_STATE = _FALSE;
 
   _STACK_POINTER = _INITIAL_STACK_POINTER;

@@ -1,5 +1,6 @@
-struct expr_tree_node * makeNode(int val, int nodetype, int type, char* varname, struct GlobalSymbolTable * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r)
+struct expr_tree_node * makeNode(int val, int nodetype, struct TypeTable * type, char* varname, struct GlobalSymbolTable * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r)
 {
+    
 
     struct expr_tree_node * new_node = (struct expr_tree_node *) malloc(sizeof(struct expr_tree_node));
     new_node->left = l;
@@ -18,14 +19,14 @@ struct expr_tree_node * makeNode(int val, int nodetype, int type, char* varname,
 struct expr_tree_node* makeOperatorNode(int nodetype, struct expr_tree_node *l,struct expr_tree_node *r){
 	
 
-	return makeNode(-1,nodetype, _TYPE_INT, NULL, NULL, l, r);
+	return makeNode(-1,nodetype, typeLookup("int"), NULL, NULL, l, r);
 }
 
 
 struct expr_tree_node * makeRelopNode(int nodetype,struct expr_tree_node *l,struct expr_tree_node *r){
 	
 
-	return makeNode(-1,nodetype, _TYPE_BOOL, NULL, NULL, l, r);
+	return makeNode(-1,nodetype, typeLookup("bool"), NULL, NULL, l, r);
 }
 
 
@@ -36,15 +37,15 @@ struct expr_tree_node * makeIdNode(char * varname)
     
     struct LocalSymbolTable * LSTEntry = LSTLookup(varname);
 
-    int type ;
+    struct TypeTable * typeEntry = NULL ;
 
     if(LSTEntry != NULL)
     {
-        type = LSTEntry->type;
+        typeEntry = LSTEntry->type;
     }
     else if(GSTEntry != NULL)
     {
-        type = GSTEntry->type;
+        typeEntry = GSTEntry->type;
     }
     else
     {
@@ -53,7 +54,7 @@ struct expr_tree_node * makeIdNode(char * varname)
     }
 
     char * dupString = strdup(varname);   
-    return makeNode(_NONE, _NODE_TYPE_ID,type, dupString, GSTEntry, NULL, NULL);
+    return makeNode(_NONE, _NODE_TYPE_ID,typeEntry, dupString, GSTEntry, NULL, NULL);
 }
 
 // make local id node
@@ -70,12 +71,16 @@ struct expr_tree_node * makeLocalIdNode(char * varname)
     }
 
     char * dupString = strdup(varname);   
-    return makeNode(_NONE, _NODE_TYPE_ID,_NONE, dupString, NULL, NULL, NULL);
+    return makeNode(_NONE, _NODE_TYPE_ID,NULL, dupString, NULL, NULL, NULL);
 }
 
 // decare id node
-struct expr_tree_node * makeDeclareIdNode(char * varname, int type)
+struct expr_tree_node * makeDeclareIdNode(char * varname, char *  typeName)
 {
+    // lookup type
+    struct TypeTable * typeEntry = typeLookup(typeName);
+
+
     // check if the variable is declared
     struct GlobalSymbolTable * GSTEntry = GSTLookup(varname);
     struct LocalSymbolTable * LSTEntry = LSTLookup(varname);
@@ -92,68 +97,68 @@ struct expr_tree_node * makeDeclareIdNode(char * varname, int type)
     }
 
     char * dupString = strdup(varname);   
-    return makeNode(_NONE, _NODE_TYPE_ID,type, dupString, NULL, NULL, NULL);
+    return makeNode(_NONE, _NODE_TYPE_ID,typeEntry, dupString, NULL, NULL, NULL);
 }
 struct expr_tree_node * makeStringNode(char * string, int offset)
 {
     char * dupString = strndup(string, strlen(string)-1);
-    return makeNode(_NONE, _NODE_TYPE_STRING, _TYPE_STRING, dupString, NULL, NULL, NULL);
+    return makeNode(_NONE, _NODE_TYPE_STRING, typeLookup("str"), dupString, NULL, NULL, NULL);
 
 }
 
 struct expr_tree_node * makeNumberNode(int num )
 {
 
-    return makeNode(num, _NODE_TYPE_NUM, _TYPE_INT,NULL, NULL, NULL,NULL);
+    return makeNode(num, _NODE_TYPE_NUM, typeLookup("int"),NULL, NULL, NULL,NULL);
 }
 
 struct expr_tree_node * makeWriteNode(struct expr_tree_node *expr)
 {
-    return makeNode(_NONE, _NODE_TYPE_WRITE, _TYPE_INT,NULL, NULL, expr,NULL);
+    return makeNode(_NONE, _NODE_TYPE_WRITE, typeLookup("int"),NULL, NULL, expr,NULL);
 }
 
 struct expr_tree_node * makeReadNode(struct expr_tree_node *id)
 {
-    return makeNode(_NONE, _NODE_TYPE_READ,_TYPE_INT,NULL, NULL, id,NULL);
+    return makeNode(_NONE, _NODE_TYPE_READ,typeLookup("int"),NULL, NULL, id,NULL);
 }
 
 struct expr_tree_node * makeConnectorNode( struct expr_tree_node *l, struct expr_tree_node *r)
 {
-    return makeNode(_NONE, _NODE_TYPE_CONNECTOR,_TYPE_CONNECTOR, NULL, NULL, l,r);
+    return makeNode(_NONE, _NODE_TYPE_CONNECTOR,NULL, NULL, NULL, l,r);
 }
 
 struct expr_tree_node * makeIfElseNode( struct expr_tree_node *cond, struct expr_tree_node *thenCode, struct expr_tree_node * elseCode)
 {
-    struct expr_tree_node * thenNode =  makeNode(_NONE, _NODE_TYPE_THEN,_TYPE_KEYWORD, NULL, NULL, thenCode,elseCode);
-    struct expr_tree_node * ifNode =  makeNode(_NONE, _NODE_TYPE_IF_ELSE,_TYPE_KEYWORD, NULL, NULL, cond,thenNode);
+    struct expr_tree_node * thenNode =  makeNode(_NONE, _NODE_TYPE_THEN,NULL, NULL, NULL, thenCode,elseCode);
+    struct expr_tree_node * ifNode =  makeNode(_NONE, _NODE_TYPE_IF_ELSE,NULL, NULL, NULL, cond,thenNode);
     
     return ifNode;
 }
 
 struct expr_tree_node * makeWhileNode( struct expr_tree_node *cond, struct expr_tree_node *body)
 {
-    return makeNode(_NONE, _NODE_TYPE_WHILE,_TYPE_KEYWORD, NULL, NULL, cond,body);
+    return makeNode(_NONE, _NODE_TYPE_WHILE,NULL, NULL, NULL, cond,body);
 }
 
 struct expr_tree_node * makeBreakNode()
 {
-    return makeNode(_NONE, _NODE_TYPE_BREAK,_TYPE_KEYWORD, NULL, NULL, NULL,NULL);
+    return makeNode(_NONE, _NODE_TYPE_BREAK,NULL, NULL, NULL, NULL,NULL);
 }
 
 struct expr_tree_node * makeContinueNode()
 {
-    return makeNode(_NONE, _NODE_TYPE_CONTINUE,_TYPE_KEYWORD, NULL, NULL, NULL,NULL);
+    return makeNode(_NONE, _NODE_TYPE_CONTINUE,NULL, NULL, NULL, NULL,NULL);
 }
 
 struct expr_tree_node * makeBreakpointNode()
 {
-    return makeNode(_NONE, _NODE_TYPE_BREAKPOINT,_TYPE_KEYWORD, NULL, NULL, NULL,NULL);
+    return makeNode(_NONE, _NODE_TYPE_BREAKPOINT,NULL, NULL, NULL, NULL,NULL);
 }
 
 // make do while node
 struct expr_tree_node * makeDoWhileNode( struct expr_tree_node *body, struct expr_tree_node *cond)
 {
-    return makeNode(_NONE, _NODE_TYPE_DO_WHILE,_TYPE_KEYWORD, NULL, NULL, body,cond);
+    return makeNode(_NONE, _NODE_TYPE_DO_WHILE,NULL, NULL, NULL, body,cond);
 }
 
 struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node *parameters)
@@ -187,8 +192,15 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
 
 }
 
-struct expr_tree_node * makeFunctionDefinitionNode(int type, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body)
+struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body)
 {
+    // lookup type
+    struct TypeTable * typeEntry = typeLookup(typeName);
+    if(typeEntry == NULL)
+    {
+        printf("Error: Undeclared type %s\n", typeName);
+        exit(1);
+    }
     // check if the variable is declared
     struct GlobalSymbolTable * GSTEntry = GSTLookup(name);
 
@@ -213,23 +225,29 @@ struct expr_tree_node * makeFunctionDefinitionNode(int type, char * name, struct
         temp2 = temp2->next;
     }
    
-    return makeNode(_NONE, _NODE_TYPE_FUNCTION_DEFINITION,type, name, GSTEntry, parameters,body);
+    return makeNode(_NONE, _NODE_TYPE_FUNCTION_DEFINITION,typeEntry, name, GSTEntry, parameters,body);
 
 }
 
 struct expr_tree_node * makeReturnNode (struct expr_tree_node *expr)
 {
-    return makeNode(_NONE, _NODE_TYPE_RETURN,_TYPE_KEYWORD, NULL, NULL, expr,NULL);
+    return makeNode(_NONE, _NODE_TYPE_RETURN,NULL, NULL, NULL, expr,NULL);
 }
 
 
 //  make parameter node
-struct expr_tree_node * makeParameterNode(int type, char * name)
+struct expr_tree_node * makeParameterNode(char * typeName, char * name)
 {
   
+    // lookup type
+    struct TypeTable * typeEntry = typeLookup(typeName);
+    if(typeEntry == NULL)
+    {
+        printf("Error: Undeclared type %s\n", typeName);
+        exit(1);
+    }  
     
-    
-    return makeNode(_NONE, _NODE_TYPE_PARAMETER,type, name, NULL, NULL,NULL);
+    return makeNode(_NONE, _NODE_TYPE_PARAMETER,typeEntry, name, NULL, NULL,NULL);
 }
 
 // make function definition node
@@ -279,7 +297,7 @@ void declareMain()
         exit(1);
     }
     // declare main
-    GSTInstall("main", _TYPE_INT, _NODE_TYPE_FUNCTION_DEFINITION, 0,0, 0);
+    GSTInstall("main", typeLookup("int"), _NODE_TYPE_FUNCTION_DEFINITION, 0,0, 0);
 
 
 

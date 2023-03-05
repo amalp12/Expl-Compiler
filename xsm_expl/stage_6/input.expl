@@ -1,6 +1,15 @@
+type
+    linkedList {
+        int data;
+        linkedList next;
+    }
+
+endtype
+
 decl
   int fact(int n);
 enddecl
+
 
 int fact(int n)
 {

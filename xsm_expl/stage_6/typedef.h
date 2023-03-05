@@ -47,6 +47,9 @@
 #define _TYPE_DECLARATION 8
 #define _TYPE_ID 9
 #define _TYPE_VOID 10
+#define _TYPE_NULL 11
+
+
 // Bool
 #define _TRUE 1
 #define _FALSE 0

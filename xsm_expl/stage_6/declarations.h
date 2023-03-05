@@ -40,7 +40,7 @@ struct declaration_node * popGlobalDeclaration();
 
 int isGlobalDeclarationStackEmpty();
 
-void popAllGlobalDeclarationsAndCreateEntry(int type);
+void popAllGlobalDeclarationsAndCreateEntry(char * type);
 
 
 // Local Declaration Helper Functions
@@ -50,4 +50,4 @@ struct declaration_node * popLocalDeclaration();
 
 int isLocalDeclarationStackEmpty();
 
-void popAllLocalDeclarationsAndCreateEntry(int type);
+void popAllLocalDeclarationsAndCreateEntry(char * type);

@@ -24,12 +24,22 @@
 #include "symbolTable.h"
 #endif
 
+#ifndef _TYPE_TABLE_H
+#define _TYPE_TABLE_H
+#include "typeTable.h"
+#endif
+
+#ifndef _TYPE_TABLE_C
+#define _TYPE_TABLE_C
+#include "typeTable.c"
+#endif
+
 
 struct expr_tree_node
 {
 
-    int val;        // value of a number for NUM nodes.
-    int type;       // type of variable
+    int val;  // value of a number for NUM nodes.
+    struct TypeTable * type;       // type of variable
     char* varname;  // name of a variable for ID nodes
     int nodetype;   // information about non-leaf nodes - read/write/connector/+/* etc.
     struct GlobalSymbolTable * GSTEntry;     // pointer to GST entry for global variables and functions
@@ -38,7 +48,7 @@ struct expr_tree_node
 
 };
 
-struct expr_tree_node * makeNode(int val, int nodetype, int type,  char* varname, struct GlobalSymbolTable * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r);
+struct expr_tree_node * makeNode(int val, int nodetype, struct TypeTable *type,  char* varname, struct GlobalSymbolTable * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r);
 struct expr_tree_node * makeConnectorNode( struct expr_tree_node *l, struct expr_tree_node *r);
 
 struct expr_tree_node * makeReadNode(struct expr_tree_node *id);
@@ -71,7 +81,7 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
 
 struct expr_tree_node * makeReturnNode (struct expr_tree_node *expr);
 
-struct expr_tree_node * makeParameterNode(int type, char * name);
+struct expr_tree_node * makeParameterNode(char * typeName, char * name);
 
 void defineFunction(struct expr_tree_node* node, FILE * target_file);
 
@@ -79,4 +89,4 @@ void declareMain();
 
 struct expr_tree_node * makeLocalIdNode(char * varname);
 
-struct expr_tree_node * makeFunctionDefinitionNode(int type, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body);
+struct expr_tree_node * makeFunctionDefinitionNode(char * typeName, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body);

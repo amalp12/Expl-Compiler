@@ -20,7 +20,7 @@ int max(int a, int b)
     return b;
 }
 
-void GSTInstall(char * varname,int type,int nodetype, int offset, int rows, int cols)   // Creates a symbol table entry.
+void GSTInstall(char * varname,struct TypeTable * type,int nodetype, int offset, int rows, int cols)   // Creates a symbol table entry.
 {
     // see if declaration already exists in GST
     struct GlobalSymbolTable *temp = GSTLookup(varname);
@@ -94,7 +94,7 @@ struct LocalSymbolTable *LSTLookup(char * name)            // Returns a pointer 
 }
 
 
-void LSTInstall(char * varname, int type, int offset, int rows, int cols)   // Creates a symbol table entry.
+void LSTInstall(char * varname, struct TypeTable * type , int offset, int rows, int cols)   // Creates a symbol table entry.
 {
     struct LocalSymbolTable * LSTEntry = LSTLookup(varname);
     if(LSTEntry != NULL)

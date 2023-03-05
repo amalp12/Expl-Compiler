@@ -85,8 +85,8 @@ extern int yydebug;
     UNTIL = 286,                   /* UNTIL  */
     DECL = 287,                    /* DECL  */
     ENDDECL = 288,                 /* ENDDECL  */
-    INT_DECL = 289,                /* INT_DECL  */
-    STRING_DECL = 290,             /* STRING_DECL  */
+    TYPE = 289,                    /* TYPE  */
+    ENDTYPE = 290,                 /* ENDTYPE  */
     BREAK = 291,                   /* BREAK  */
     BREAKPOINT = 292,              /* BREAKPOINT  */
     CONTINUE = 293,                /* CONTINUE  */
@@ -134,8 +134,8 @@ extern int yydebug;
 #define UNTIL 286
 #define DECL 287
 #define ENDDECL 288
-#define INT_DECL 289
-#define STRING_DECL 290
+#define TYPE 289
+#define ENDTYPE 290
 #define BREAK 291
 #define BREAKPOINT 292
 #define CONTINUE 293
@@ -149,14 +149,15 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 71 "expr_tree.y"
+#line 80 "expr_tree.y"
 
   struct expr_tree_node * node;
   char * string;
   int integer;
   struct declaration_node * decl_node;
+  struct Fieldlist * typeField;
 
-#line 160 "y.tab.h"
+#line 161 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

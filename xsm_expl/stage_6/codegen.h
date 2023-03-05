@@ -29,6 +29,15 @@
 #include "symbolTable.h"
 #endif
 
+#ifndef _TYPE_TABLE_H
+#define _TYPE_TABLE_H
+#include "typeTable.h"
+#endif
+
+#ifndef _TYPE_TABLE_C
+#define _TYPE_TABLE_C
+#include "typeTable.c"
+#endif
 
 struct loopStack{
     int startLabel;
