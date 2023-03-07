@@ -194,10 +194,13 @@ TypeDef:
 FieldDeclList : 
     FieldDeclList FieldDecl 
     {
-      $<typeField>1->next = $<typeField>2;
-      $<typeField>$ = $<typeField>1;
+      $<typeField>2->next = $<typeField>1;
+      $<typeField>$ = $<typeField>2;
     }
   | FieldDecl
+    {
+      $<typeField>$ = $<typeField>1;
+    }
 ;
 
 FieldDecl :
