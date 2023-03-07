@@ -1,0 +1,33 @@
+begin
+if(input == "Read")
+endif
+if (input == "Write")
+endif
+if (input == "Exit")
+endif
+if (input == "Initialize")
+    i = 1024;
+    while (i < 2048)
+        memory[i] = i+8;
+        i = i + 8;
+    end
+    i = 2040;
+    memory[i] = -1;
+endif
+if (input == "Alloc")
+    i = 1024;
+    if (memory[i] == -1)
+        return -1;
+    endif
+    temp = memory[i];
+    memory[i] = memory[memory[i]];
+    return temp;
+endif
+if (input == "Free")
+    addr
+    memory[addr] = memory[1024];
+    memory[1024] = addr;
+
+
+endif
+end

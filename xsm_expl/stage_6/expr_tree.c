@@ -13,7 +13,29 @@ struct expr_tree_node * makeNode(int val, int nodetype, struct TypeTable * type,
 
     return new_node;
 
+}
+struct expr_tree_node * makeNullNode()
+{
+    return makeNode(0,_NODE_TYPE_NULL, typeLookup("null"), strdup("null"), NULL, NULL, NULL);
+}
+struct expr_tree_node * makeHeapInitNode()
+{
+    return makeNode(-1,_NODE_TYPE_HEAP_INIT, NULL, NULL, NULL, NULL, NULL);
+}
+struct expr_tree_node * makeHeapAllocateNode()
+{
+    return makeNode(-1,_NODE_TYPE_HEAP_ALLOC, NULL, NULL, NULL, NULL, NULL);
+}
+struct expr_tree_node * makeHeapFreeNode(struct expr_tree_node *l)
+{
+    return makeNode(-1,_NODE_TYPE_HEAP_FREE, NULL, NULL, NULL, l, NULL);
+}
 
+
+struct expr_tree_node* makeFieldNode(char * fieldName, struct expr_tree_node *l,struct expr_tree_node *r){
+        
+             
+        return makeNode(-1,_NODE_TYPE_FIELD, NULL, strdup(fieldName),NULL, l, r);
 }
 
 struct expr_tree_node* makeOperatorNode(int nodetype, struct expr_tree_node *l,struct expr_tree_node *r){
@@ -284,6 +306,42 @@ void defineFunction(struct expr_tree_node* node, FILE * target_file)
 
 
   
+}
+
+// insert into field tree
+void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
+{
+    // nullcheck
+    if(root == NULL)
+    {
+        // print error message
+        printf("Error: Null root node in insertIntoFieldTree\n");
+        exit(1);
+    }
+    if(node == NULL)
+    {
+        // print error message
+        printf("Error: Null node in insertIntoFieldTree\n");
+        exit(1);
+    }
+    
+    struct expr_tree_node * temp = root;
+    while(temp->left != NULL)
+    {
+        temp = temp->left;
+    }
+    temp->left = node;
+
+    // getting the type of the new node inserted
+    struct Fieldlist * typeEntry = typeFieldLookup(temp->type, node->varname);
+    if(typeEntry == NULL)
+    {
+        printf("Error: Undeclared field %s in type %s\n", node->varname, temp->type->name);
+        exit(1);
+    }
+    node->type = typeEntry->type;
+
+    
 }
 
 //declare main function

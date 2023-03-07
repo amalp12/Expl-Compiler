@@ -4,3 +4,4 @@
 ./xfs-interface load --int=6 ../spl/progs/read.xsm
 ./xfs-interface load --int=10 ../spl/progs/halt.xsm
 ./xfs-interface load --exhandler ../spl/progs/exhandler.xsm
+./xfs-interface load --library ../library.lib

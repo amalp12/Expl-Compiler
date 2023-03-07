@@ -15,6 +15,7 @@ struct Fieldlist
   int fieldIndex;          //the position of the field in the field list
   struct TypeTable *type;  //pointer to type table entry of the field's type
   struct Fieldlist *next;  //pointer to the next field
+  char * tempTypeName ; // used to store the type name of the field temporarily until its defined
 };
 
 void typeTableCreate(); //Function to initialise the type table entries with primitive types (int,str) and special entries_(boolean,null,void).
@@ -26,6 +27,8 @@ void typeInstall(char *name, struct Fieldlist *fields) ; // Creates a type table
 struct Fieldlist * typeFieldLookup(struct TypeTable *type, char *name); // Searches for a field of given 'name' in the 'fieldlist' of the given user-defined type and returns a pointer to the field entry. Returns NULL if the type does not have a field of the name.
 
 int getTypeSize(struct TypeTable * type) ; // Returns the amount of memory words required to store a variable of the given type.
+
+void typeValidateFields ( struct TypeTable * type ); // Validates the field list of the given user-defined type. This routine is invoked when the compiler encounters a type definition in the source program.
 
 // type table head
 struct TypeTable * _TYPE_TABLE_HEAD  = NULL;

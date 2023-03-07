@@ -67,6 +67,7 @@
 #endif
 
 
+
 void yyerror(char const *s);
 extern FILE* yyin;
 extern char * yytext;
@@ -91,7 +92,8 @@ int yylex(void);
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE REPEAT UNTIL
 %token DECL ENDDECL TYPE ENDTYPE
 %token BREAK BREAKPOINT CONTINUE 
-%token RETURN MAIN
+%token RETURN MAIN 
+%token INITIALIZE ALLOC FREE NULLVAL
 %token AND OR NOT
 %type <node> expr Program
 %left AND OR NOT
@@ -108,6 +110,21 @@ int yylex(void);
 
 Program : 
     TypeDefBlock GDeclBlock FDefBlock MainBlock
+    {
+    
+      exit(1);
+    }
+  | TypeDefBlock GDeclBlock MainBlock
+    {
+    
+      exit(1);
+    }
+  | TypeDefBlock FDefBlock MainBlock
+    {
+    
+      exit(1);
+    }
+  | TypeDefBlock MainBlock
     {
     
       exit(1);
@@ -184,14 +201,67 @@ FieldDeclList :
 ;
 
 FieldDecl :
-    TypeName ID SEMICOLON 
+    Type ID SEMICOLON 
     {
       $<typeField>$ = createField($<string>1, $<string>2);
     } // check if typename is defined
 ;
 
-TypeName : 
-    ID      //TypeName for user-defined types
+
+
+Field : 
+    Field '.' ID 
+    { 
+      insertIntoFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
+      $<node>$ = $<node>1;
+      
+    }
+  | ID '.' ID 
+    { 
+
+      // make field nodes
+      struct expr_tree_node * rightFieldNode  = makeFieldNode($<string>3, NULL,NULL);
+      struct expr_tree_node * leftFieldNode  = makeFieldNode($<string>1,rightFieldNode,NULL);
+
+      // get the LST entry for the variable
+      struct LocalSymbolTable * lstEntry = LSTLookup($<string>1);
+      // if lst entry is not null
+      if(lstEntry != NULL)
+      {
+        // set the type of the left field node
+        leftFieldNode->type = lstEntry->type;
+      }
+      else
+      {
+        // get the GST entry for the variable
+        struct GlobalSymbolTable * gstEntry = GSTLookup($<string>1);
+        // if gst entry is not null
+        if(gstEntry != NULL)
+        {
+          // set the type of the left field node
+          leftFieldNode->type = gstEntry->type;
+        }
+        else
+        {
+          // error
+          printf("Error: Variable %s not declared \n", $<string>1);
+          exit(1);
+        }
+      } 
+      // get the type of the right field node
+      struct Fieldlist * rightType = typeFieldLookup(leftFieldNode->type, $<string>3);
+      // if right type is null throw error
+      if(rightType == NULL)
+      {
+        printf("Error: Field %s not found in type %s \n", $<string>3, leftFieldNode->type->name);
+        exit(1);
+      }
+      // set the type of the right field node
+      rightFieldNode->type = rightType->type;
+      $<node>$ = leftFieldNode;
+
+
+    }
 ;
 // ------------------- GDeclBlock ---------------------------------------------
 GDeclBlock :
@@ -332,6 +402,19 @@ identifierUse:
       idNode->left = $<node>3;
       idNode->right = $<node>6; 
       $<node>$ = idNode;
+    }
+  | Field {$<node>$ = $<node>1;}
+  | INITIALIZE '(' ')' 
+    {
+      $<node>$ = makeHeapInitNode();
+    }
+  | ALLOC '('  ')' 
+    {
+      $<node>$ = makeHeapAllocateNode();
+    }
+  | FREE '(' expr ')' 
+    {
+      $<node>$ = makeHeapFreeNode($<node>3);
     }
   
 ;
@@ -556,6 +639,7 @@ expr :
   | NOT expr {$<node>$ = makeRelopNode(_NODE_TYPE_NOT,$<node>2,NULL);}
   | ID '(' ')' {$<node>$ = makeFunctionCallNode($<string>1,NULL);}
   | ID '(' ArgList ')' {$<node>$ = makeFunctionCallNode($<string>1,$<node>3);}
+  | NULLVAL  {$<node>$ = makeNullNode();}
 ;
 
 // makeFunctionCallNode(struct expr_tree_node *parameters,  struct expr_tree_node *code, char* name, int type)
@@ -574,9 +658,11 @@ int main()
   // Initializing Type Table
   typeTableCreate();
   _INIT_STATE = _FALSE;
-
+  // stack
   _STACK_POINTER = _INITIAL_STACK_POINTER;
   _BASE_POINTER = _STACK_POINTER+1;
+  // heap
+  _HEAP_POINTER = _INITIAL_HEAP_POINTER;
   yyin = input_file;
   yyparse(); 
   fclose(input_file);  

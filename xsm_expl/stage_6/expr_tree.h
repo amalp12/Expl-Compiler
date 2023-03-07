@@ -90,3 +90,11 @@ void declareMain();
 struct expr_tree_node * makeLocalIdNode(char * varname);
 
 struct expr_tree_node * makeFunctionDefinitionNode(char * typeName, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body);
+
+void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * node);
+
+struct expr_tree_node * makeHeapInitNode();
+
+struct expr_tree_node * makeHeapAllocateNode();
+
+struct expr_tree_node * makeHeapFreeNode(struct expr_tree_node *l);

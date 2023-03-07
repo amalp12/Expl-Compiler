@@ -33,6 +33,12 @@
 #define _NODE_TYPE_AND 30
 #define _NODE_TYPE_OR 31
 #define _NODE_TYPE_NOT 32
+#define _NODE_TYPE_FIELD 33
+#define _NODE_TYPE_HEAP_INIT 34
+#define _NODE_TYPE_HEAP_ALLOC 35
+#define _NODE_TYPE_HEAP_FREE 36
+#define _NODE_TYPE_NULL 37
+
 
 
 // Type
@@ -65,8 +71,15 @@
 #define _INT_SIZE 1
 #define _STRING_SIZE 1
 
+// stack
 #define _INITIAL_STACK_POINTER 4096
 #define _STACK_UNIT_SIZE 1
+
+// heap
+#define _INITIAL_HEAP_POINTER 1024
+#define _HEAP_UNIT_SIZE 8
+#define _HEAP_SIZE 1024
+
 
 
 // function offsets
@@ -77,6 +90,10 @@
 // stack
 int _STACK_POINTER;
 int _BASE_POINTER;
+
+// heap 
+int _HEAP_POINTER; // Before the start of the program, reserve a large area of the address space for heap. The ExpOS memory model suggests that the address region 1024-2047 may be used for this purpose.
+
 
 
 

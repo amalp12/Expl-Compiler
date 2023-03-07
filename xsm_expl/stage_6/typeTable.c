@@ -56,7 +56,7 @@ struct TypeTable* typeLookup(char *name)  // Search through the type table and r
 {
     // null check
     if(name == NULL) return NULL;
-    
+
     struct TypeTable * temp = _TYPE_TABLE_HEAD;
     while(temp != NULL){
         if(strcmp(temp->name,name) == 0)
@@ -81,9 +81,17 @@ void typeInstall(char *name, struct Fieldlist *fields)  // Creates a type table 
     newType->name = name;
     newType->fields = fields;
     newType->next = NULL;
-    // calculating size
-    newType->size = getTypeSize(newType);
+    // calculating size can only be done after getting the types of all fields so we have to wait till validation phase
+    newType->size = 0;
 
+    // assign fieldIDs
+    struct Fieldlist * temp1 = fields;
+    int fieldID = 0;
+    while(temp1 != NULL){
+        temp1->fieldIndex = fieldID;
+        fieldID++;
+        temp1 = temp1->next;
+    }
     
     // adding to the end of the list
     struct TypeTable * temp2 = _TYPE_TABLE_HEAD;
@@ -92,6 +100,45 @@ void typeInstall(char *name, struct Fieldlist *fields)  // Creates a type table 
     }
     temp2->next = newType;
 
+    // validating fields
+    typeValidateFields(newType);
+    
+
+}
+void typeValidateFields ( struct TypeTable * type ) // Validates the field list of the given user-defined type. This routine is invoked when the compiler encounters a type definition in the source program.
+{
+    // null check
+    if(type == NULL) return;
+
+    // if feild exists add size of all feilds
+
+    struct Fieldlist * temp = type->fields;
+    while(temp != NULL){
+        if(temp->type == NULL){
+            // if type is not defined try to look up the type using type name
+            temp->type = typeLookup(temp->tempTypeName);
+
+            // if type is still not defined throw error     
+            if(temp->type == NULL)
+            {
+                printf("Error: Type %s not defined\n", temp->name);
+                exit(1);
+            }
+
+            // clear tempTypeName
+            free(temp->tempTypeName);
+            temp->tempTypeName = NULL;
+
+        }
+    
+        temp = temp->next;
+    }
+    // calculate size of type can only be done after all the types are defined
+    // calculating size
+    type->size = getTypeSize(type);
+
+
+    
 }
 struct Fieldlist* typeFieldLookup(struct TypeTable *type, char *name) // Searches for a field of given 'name' in the 'fieldlist' of the given user-defined type and returns a pointer to the field entry. Returns NULL if the type does not have a field of the name.
 {
@@ -118,7 +165,7 @@ int getTypeSize(struct TypeTable * type)  // Returns the amount of memory words 
     if(type->fields != NULL){
         struct Fieldlist * temp = type->fields;
         while(temp != NULL){
-            size += temp->type->size;
+            size += 1; // since all feild are of size 1 in this implemenation (user define types are also 1 because they reference memory)
             temp = temp->next;
         }
 
@@ -130,12 +177,13 @@ struct Fieldlist * createField(char *typeName, char * name){
     struct Fieldlist * newField = (struct Fieldlist *)malloc(sizeof(struct Fieldlist));
     newField->name = name;
     newField->type = typeLookup(typeName);
-    // if type doesn't exist throw error
-    if(newField->type == NULL){
-        printf("Error: Type %s not defined\n", typeName);
-        exit(1);
+    // if type doesn't exist do not throw error because type might be itself (to be defined later)
+    // we will do type validation of fields in typeInstall
+    // for that we will be storeing the typename in tempTypeName
+    if(newField->type == NULL)
+    {
+        newField->tempTypeName = strdup(typeName);
     }
-
     newField->next = NULL;
     return newField;
 }

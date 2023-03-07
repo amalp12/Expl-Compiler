@@ -100,7 +100,120 @@ void write(reg_index reg_number, FILE * target_file)
 
 }
 
+reg_index initializeHeap(FILE * target_file)
+{
+    int last_used_register = _LAST_USED_REGISTER;
+    for(int i = 0 ; i <= _LAST_USED_REGISTER; i++)
+    {
+        fprintf(target_file, "PUSH R%d\n", i);
 
+    }
+
+    // get a new register to store the return value
+    reg_index returnReg = getFreeReg();
+
+    fprintf(target_file, "MOV R0, \"Heapset\"\n"); 
+    fprintf(target_file, "PUSH R0\n"); //func
+    fprintf(target_file, "PUSH R0\n"); // 1
+    fprintf(target_file, "PUSH R0\n"); // 2
+    fprintf(target_file, "PUSH R0\n"); //3
+    fprintf(target_file, "PUSH R0\n"); // ret
+    fprintf(target_file, "CALL 0\n");
+    fprintf(target_file, "POP R%d\n", returnReg); // ret
+    fprintf(target_file, "POP R0\n"); //3
+    fprintf(target_file, "POP R0\n"); // 2
+    fprintf(target_file, "POP R0\n"); // 1
+    fprintf(target_file, "POP R0\n"); //func
+
+
+    for(int i = last_used_register ; i >=0; i--)
+    {
+        fprintf(target_file, "POP R%d\n", i);
+
+    }
+
+    return returnReg;
+
+}
+
+reg_index allocHeap(FILE * target_file)
+{
+    int last_used_register = _LAST_USED_REGISTER;
+    for(int i = 0 ; i <= _LAST_USED_REGISTER; i++)
+    {
+        fprintf(target_file, "PUSH R%d\n", i);
+
+    }
+
+    // get a new register to store the return value
+    reg_index returnReg = getFreeReg();
+
+    fprintf(target_file, "MOV R0, \"Alloc\"\n"); 
+    fprintf(target_file, "MOV R1, 8\n"); 
+    fprintf(target_file, "PUSH R0\n"); //func
+    fprintf(target_file, "PUSH R1\n"); // 1
+    fprintf(target_file, "PUSH R0\n"); // 2
+    fprintf(target_file, "PUSH R0\n"); //3
+    fprintf(target_file, "PUSH R0\n"); // ret
+    fprintf(target_file, "CALL 0\n");
+    fprintf(target_file, "POP R%d\n", returnReg); // ret
+    fprintf(target_file, "POP R0\n"); //3
+    fprintf(target_file, "POP R0\n"); // 2
+    fprintf(target_file, "POP R0\n"); // 1
+    fprintf(target_file, "POP R0\n"); //func
+
+
+    for(int i = last_used_register ; i >=0; i--)
+    {
+        fprintf(target_file, "POP R%d\n", i);
+
+    }
+
+    return returnReg;
+
+}
+
+
+
+
+reg_index freeHeap(reg_index inputReg, FILE * target_file)
+{
+    int last_used_register = _LAST_USED_REGISTER;
+    for(int i = 0 ; i <= _LAST_USED_REGISTER; i++)
+    {
+        fprintf(target_file, "PUSH R%d\n", i);
+
+    }
+
+    // get a new register to store the return value
+    reg_index returnReg = getFreeReg();
+
+    // note inputReg is the address of the memory to be freed (it cannot be variable take care of that outside this function)
+
+    fprintf(target_file, "MOV R1, R%d\n",inputReg); 
+    fprintf(target_file, "MOV R0, \"Free\"\n"); 
+    fprintf(target_file, "PUSH R0\n"); //func
+    fprintf(target_file, "PUSH R1\n"); // 1
+    fprintf(target_file, "PUSH R0\n"); // 2
+    fprintf(target_file, "PUSH R0\n"); //3
+    fprintf(target_file, "PUSH R0\n"); // ret
+    fprintf(target_file, "CALL 0\n");
+    fprintf(target_file, "POP R%d\n", returnReg); // ret
+    fprintf(target_file, "POP R0\n"); //3
+    fprintf(target_file, "POP R0\n"); // 2
+    fprintf(target_file, "POP R0\n"); // 1
+    fprintf(target_file, "POP R0\n"); //func
+
+
+    for(int i = last_used_register ; i >=0; i--)
+    {
+        fprintf(target_file, "POP R%d\n", i);
+
+    }
+
+    return returnReg;
+
+}
 
 
 void read(reg_index reg_number, FILE * target_file)
@@ -188,8 +301,8 @@ void pushFunctionParametersInReverse(struct expr_tree_node *t, FILE * target_fil
     // get the binding for the variable from the LST/GST
     reg_index exprReg = codeGen(t->right, target_file);
 
-    // if t->right is a variable, then we need to get the value of the variable
-    if(t->right->nodetype == _NODE_TYPE_ID)
+    // if t->right is a variable or field, then we need to get the value of the variable
+    if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
     {
         fprintf(target_file, "MOV R%d, [R%d]\n", exprReg, exprReg);
     }
@@ -251,8 +364,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // for 1D array
             else if(leftReg!=-1 && rightReg==-1)
             {
-                // if index is an identifier
-                if(t->left->nodetype==_NODE_TYPE_ID)
+                // if index is an identifier or field
+                if(t->left->nodetype==_NODE_TYPE_ID || t->left->nodetype==_NODE_TYPE_FIELD)
                 {
                     // load the value of the index into a register
                     fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
@@ -272,8 +385,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
                 if(LSTEntry!=NULL) totalCols = LSTEntry->cols;
                 else totalCols = t->GSTEntry->cols;                
 
-                // if row index is an identifier
-                if(t->left->nodetype==_NODE_TYPE_ID)
+                // if row index is an identifier or a field
+                if(t->left->nodetype==_NODE_TYPE_ID || t->left->nodetype==_NODE_TYPE_FIELD)
                 {
                     // load the value of the row index into a register
                     fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
@@ -284,8 +397,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
                 
 
               
-                // if column index is an identifier
-                if(t->right->nodetype==_NODE_TYPE_ID)
+                // if column index is an identifier or a field
+                if(t->right->nodetype==_NODE_TYPE_ID || t->right->nodetype==_NODE_TYPE_FIELD)
                 {
                     // load the value of the column index into a register
                     fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
@@ -328,6 +441,23 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             return_val =  newReg;
             break;
         }
+        case(_NODE_TYPE_NULL):
+        {
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
+            // if left and right regs are not _NONE then free them
+            if(leftReg!=_NONE) freeLastReg();
+            if(rightReg!=_NONE) freeLastReg();
+
+            reg_index newReg= getFreeReg();
+            // if leaf is a number
+            fprintf(target_file, "MOV R%d, 0\n", newReg);
+            return_val =  newReg;
+            break;
+        }
         case (_NODE_TYPE_STRING):
         {
             // Evaluating the left and right trees respectively
@@ -353,13 +483,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or a field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or a field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -377,13 +507,14 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or field take the value
+            // if left is a variable or field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -403,13 +534,14 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or field take the value
+            // if left is a variable or field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -429,13 +561,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD )
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -454,13 +586,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -481,8 +613,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index rightReg = codeGen(t->right, target_file);
 
           
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -532,8 +664,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left node is id take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left node is id or feild take the value
+            if(t->left->nodetype == _NODE_TYPE_ID ||  t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
@@ -669,13 +801,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -692,13 +824,13 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -715,13 +847,14 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or field take the value
+            // if left is a variable or field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -738,13 +871,14 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or field take the value
+            // if left is a variable or field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -761,13 +895,14 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or field take the value
+            // if left is a variable or field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -784,13 +919,14 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
 
-            // if left is a variable take the value
-            if(t->left->nodetype == _NODE_TYPE_ID)
+            // if left is a variable or field take the value
+            // if left is a variable or field take the value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
-            // if right is a variable take the value
-            if(t->right->nodetype == _NODE_TYPE_ID)
+            // if right is a variable or field take the value
+            if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
@@ -965,8 +1101,8 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             if(t->left != NULL)
             {
                 reg_index returnReg = codeGen(t->left, target_file);
-                // if return value is a variable then take its value
-                if(t->left->nodetype == _NODE_TYPE_ID)
+                // if return value is a variable or field then take its value
+                if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
                 {
                     fprintf(target_file, "MOV R%d, [R%d]\n", returnReg, returnReg);
                 }
@@ -976,10 +1112,135 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             }
             break;
         }
+        case (_NODE_TYPE_FIELD):
+        {
+            // backend code for field
+            // take the first varable and check if  its declared
+
+
+            // if the variable is not declared then exit
+
+            // if the varible is declared
+            // while left node exists
+                // check if the field is present in the structure
+                // if the field is not present then exit
+                // if the field is present then
+
+            // checking if the variable has been declared or not
+            struct LocalSymbolTable * LSTEntry = LSTLookup(t->varname);
+
+            if(t->GSTEntry==NULL && LSTEntry==NULL)
+            {
+                printf("Variable %s not declared\n", t->varname);
+                exit(1);
+            }
+            // for variable
+            
+            // Address of the variable
+            reg_index newReg = getBinding(t->varname, target_file);
+
+            // get the value in the variable
+            fprintf(target_file, "MOV R%d, [R%d]\n", newReg, newReg);
+            
+            struct expr_tree_node * temp = t->left;
+            struct expr_tree_node * parent = t;
+
+
+
+            while (temp != NULL)
+            {
+                // checking if the field is present in the structure
+                struct Fieldlist * field = typeFieldLookup( parent->type, temp->varname);
+                if(field == NULL)
+                {
+                    printf("Error: Field %s not found in structure %s\n", temp->varname, t->type->name);
+                    exit(1);
+                }
+                // if the field is present then
+               
+                // if the field is int or str then
+                // add the offset of the field to the address of the variable
+                fprintf(target_file, "ADD R%d, %d\n", newReg, field->fieldIndex);
+                
+                // propogate the type upwards
+                parent->type = field->type;
+
+
+                temp = temp->left;
+                parent = parent->left;
+                // if temp is not null then take the value of the address
+                if(temp != NULL)
+                {
+                    fprintf(target_file, "MOV R%d, [R%d]\n", newReg, newReg);
+                }
+            }
+         
+            
+
+            return_val = newReg;
+            
+
+            break;
+        }
+        case (_NODE_TYPE_HEAP_INIT):
+        {
+            // backend code for heap initialization
+            // Evaluating the left and right trees respectively
+            // Note that the order is very important
+            reg_index leftReg = codeGen(t->left, target_file);
+            reg_index rightReg = codeGen(t->right, target_file);
+
+            // both the left and right trees should return -1
+            if(leftReg != -1 || rightReg != -1)
+            {
+                printf("Error: Heap Initialization can only be done with constants");
+                exit(1);
+            }
+
+            
+            return_val = initializeHeap(target_file);;
+            break;
+
+        }
+        case (_NODE_TYPE_HEAP_ALLOC):
+        {
+            // backend code for allocation
+            // Evaluating the left tree
+            return_val = allocHeap(target_file);
+            break;
+        }
+        case (_NODE_TYPE_HEAP_FREE):
+        {
+            // backend code for free
+            // Evaluating the left tree
+            reg_index leftReg = codeGen(t->left, target_file);
+
+            // both the left and right trees should return -1
+            if(leftReg == -1)
+            {
+                printf("Error: Free can only be done with a address");
+                exit(1);
+            }
+            // if left tree is a variable or Field then take its value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
+            {
+                fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
+            }
+            // free the memory
+            reg_index success = freeHeap(leftReg, target_file);
+
+            // move the return valuue to leftReg
+            fprintf(target_file, "MOV R%d, R%d\n", leftReg, success);
+            freeLastReg();
+
+            return_val = leftReg;
+            break;
+        }
+
         default:
         {
             printf("Codegen : Invalid Node Type : %d\n", t->nodetype);
-
+            exit(1);
             break;
         }
 

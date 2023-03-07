@@ -154,10 +154,22 @@ numbers [0-9]+
 "NOT" {
     return NOT;
 }
+"initialize" {
+    return INITIALIZE;
+}
+"alloc" {
+    return ALLOC;
+}
+"free" {
+    return FREE;
+}
+"null"  {
+    return NULLVAL;
+}
 
 [\t] {}
     
-[(),\[\]%\{\}\|\&] {
+[(),\[\]%\{\}\|\&\.] {
     return *yytext;
 }
 

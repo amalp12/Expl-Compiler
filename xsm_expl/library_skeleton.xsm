@@ -1,0 +1,190 @@
+/*
+Func return address
+Return val
+Arg 3
+Arg 2
+Arg 1
+Function Code
+*/
+/* Function: Write
+PUSH BP
+MOV BP, SP
+MOV R1, BP
+MOV R2, 5
+SUB R1, R2
+MOV R2, "Write"
+MOV R1, [R1]
+EQ R1, R2
+JZ R1, _L1
+MOV R1, BP
+MOV R2, 4
+SUB R1, R2
+MOV R2, [R1]
+ADD R1, 1
+MOV R3, [R1]
+ADD R1, 1
+MOV R4, [R1]
+MOV R5, 5
+PUSH R5
+PUSH R2
+PUSH R3
+PUSH R4
+PUSH R5
+INT 7
+POP R1
+POP R2
+POP R2
+POP R2
+POP R2
+JMP _L0
+*/
+/* Function: Read
+_L1:
+MOV R1, BP
+MOV R2, 5
+SUB R1, R2
+MOV R2, "Read"
+MOV R1, [R1]
+EQ R1, R2
+JZ R1, _L2
+MOV R1, BP
+MOV R2, 4
+SUB R1, R2
+MOV R2, [R1]
+ADD R1, 1
+MOV R3, [R1]
+ADD R1, 1
+MOV R4, [R1]
+MOV R5, 5
+PUSH R5
+PUSH R2
+PUSH R3
+PUSH R4
+PUSH R5
+INT 6
+POP R1
+POP R2
+POP R2
+POP R2
+POP R2
+JMP _L0
+*/
+
+/* Function: Exit
+_L2:
+MOV R1, BP
+MOV R2, 5
+SUB R1, R2
+MOV R2, "Exit"
+MOV R1, [R1]
+EQ R1, R2
+JZ R1, _L3
+MOV R1, BP
+MOV R2, 4
+SUB R1, R2
+MOV R2, [R1]
+ADD R1, 1
+MOV R3, [R1]
+ADD R1, 1
+MOV R4, [R1]
+MOV R5, 5
+PUSH R5
+PUSH R2
+PUSH R3
+PUSH R4
+PUSH R5
+INT 10
+POP R1
+POP R2
+POP R2
+POP R2
+POP R2
+JMP _L0
+*/
+
+/* Function: Initialize
+_L3:
+MOV R1, BP
+MOV R2, 5
+SUB R1, R2
+MOV R2, "Initialize"
+MOV R1, [R1]
+EQ R1, R2
+JZ R1, _L4
+// alias i R1
+MOV R1, 1024
+MOV R2, 2048
+_L3_1:
+MOV R3, R1
+LT R3, R2
+JZ R3, _L3_2
+MOV R4, [R1]
+ADD R4, 8
+MOV [R1], R4
+ADD R1, 8
+JMP _L3_1
+_L3_2:
+MOV R1, 2040
+MOV [R1], -1
+JMP _L0
+*/
+
+/* Function: Alloc
+_L4:
+MOV R1, BP
+MOV R2, 5
+SUB R1, R2
+MOV R2, "Alloc"
+MOV R1, [R1]
+EQ R1, R2
+JZ R1, _L5
+// checking if there is enough space
+MOV R1, 1024
+MOV R1, [R1]
+// checking if it is -1
+MOV R2, -1
+EQ R1, R2
+JZ R1, _L4_1
+MOV R1, 1024
+MOV R2, [R1]
+MOV R3, [R2]
+MOV [R1], R3
+MOV R1, BP
+SUB R1, 1
+MOV [R1], R2
+JMP _L0
+
+_L4_1:
+// return -1
+MOV R1, BP
+SUB R1, 1
+MOV [R1], -1
+JMP _L0
+
+*/
+
+/* Function: Free
+_L5:
+MOV R1, BP
+MOV R2, 5
+SUB R1, R2
+MOV R2, "Free"
+MOV R1, [R1]
+EQ R1, R2
+JZ R1, _L0
+//fetching the address
+MOV R1, BP
+MOV R2, 4
+SUB R1, R2
+MOV R2, [R1]
+MOV R3, 1024
+MOV R3, [R3]
+MOV [R2], R3
+MOV R3, 1024
+MOV [R3], R2
+JMP _L0
+*/
+
+_L0:
+POP BP
+RET

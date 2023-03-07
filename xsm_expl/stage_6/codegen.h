@@ -78,3 +78,6 @@ reg_index getBinding(char * name, FILE * target_file);
 
 void funcCodegen(struct expr_tree_node * t, FILE * target_file);
 
+reg_index initializeHeap( FILE * target_file);
+
+
