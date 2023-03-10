@@ -15,8 +15,10 @@ struct GlobalSymbolTable {
     struct TypeTable *type;   //pointer to the Typetable entry of variable type/return type of the function
     int rows, cols;   // for arrays
     struct GlobalSymbolTable * next;
-    struct parameter_node * paramList;
+    struct ParameterNode * paramList;
     int functionLabelNumber;
+    struct ClassTable *classType;  //THIS FIELD IS REQUIRED ONLY FOR OEXPL
+
 
 };
 
@@ -28,6 +30,8 @@ struct LocalSymbolTable
     int size; // size of the type of the variable
     int rows, cols;   // for arrays
     struct LocalSymbolTable *next; // pointer to the next variable in the list
+    int functionLabelNumber;
+    struct ParameterNode * paramList;
 };
 
 struct GlobalSymbolTable * _GLOBAL_SYMBOL_TABLE = NULL; // Global Symbol Table

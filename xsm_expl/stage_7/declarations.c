@@ -24,6 +24,33 @@ void pushGlobalDeclaration( struct expr_tree_node * node)
     _GLOBAL_DECLARATION_STACK_HEAD = newNode;
 }
 
+
+void pushClassDeclaration( struct expr_tree_node * node)
+{
+    // see if declaration already exists in GST
+    struct GlobalSymbolTable *temp1 = GSTLookup(node->varname);
+    if (temp1 != NULL) {
+        printf("Error: Redeclaration of variable %s\n", node->varname);
+        exit(1);
+    }
+
+    // check if declaration already exists in GST stack
+    struct declaration_node *temp2 = _GLOBAL_DECLARATION_STACK_HEAD;
+    while (temp2 != NULL) {
+        if (strcmp(temp2->node->varname, node->varname) == 0) {
+            printf("Error: Redeclaration of variable %s\n", node->varname);
+            exit(1);
+        }
+        temp2 = temp2->next;
+    }
+  
+
+    struct declaration_node *newNode = (struct declaration_node *) malloc(sizeof(struct declaration_node));
+    newNode->node = node;
+    newNode->next = _GLOBAL_DECLARATION_STACK_HEAD;
+    _GLOBAL_DECLARATION_STACK_HEAD = newNode;
+}
+
 // returns the varname of the top of the stack
 struct declaration_node * popGlobalDeclaration() 
 {
@@ -84,7 +111,7 @@ void popAllGlobalDeclarationsAndCreateEntry(char * typeName)
 
 void pushLocalDeclaration( struct expr_tree_node * node)
 {
-    // see if declaration already exists in GST
+    // see if declaration already exists in LST
     struct LocalSymbolTable *temp1 = LSTLookup(node->varname);
     if (temp1 != NULL) 
     {
@@ -130,6 +157,7 @@ int isLocalDeclarationStackEmpty()
     return _LOCAL_DECLARATION_STACK_HEAD == NULL;
 }
 
+
 void popAllLocalDeclarationsAndCreateEntry(char * typeName)
 {
     // search type table for type
@@ -167,5 +195,58 @@ void popAllLocalDeclarationsAndCreateEntry(char * typeName)
         temp = popLocalDeclaration();
 
     }
+}
+
+
+void popAllClassLocalDeclarationsAndCreateEntry(char * className)
+{
+    // search type table for type
+    struct ClassTable *classEntry = classLookup(className);
+
+    // if class not found, throw error
+    if (classEntry == NULL) 
+    {
+        printf("Error: Class %s not found\n", className);
+        exit(1);
+    }
+   
+
+
+    struct declaration_node * temp = popLocalDeclaration();
+    while(temp!=NULL)
+    {
+        // check if the node is function definition
+        if(temp->node->nodetype == _NODE_TYPE_FUNCTION_DEFINITION)
+        {
+            // create parameter List for the function
+            struct ParameterNode *paramList = NULL;
+            struct expr_tree_node *param = temp->node->left;
+            
+
+            while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
+            {
+                paramList = AddToParameterList(paramList, param->varname, param->type, param->left->val, param->right->val);
+                param = param->left;
+            }
+
+
+            classMethodInstall (classEntry, temp->node->varname, temp->node->type, paramList) ;
+
+            // 
+
+        }
+        else // unknown node so throw error and exit
+        {
+            printf("Error: Unknown node type %d\n", temp->node->nodetype);
+            exit(1);
+        }
+        
+        free(temp);
+        temp = popLocalDeclaration();
+
+    }
+
+    // clear lst
+    LSTClear();
 }
 

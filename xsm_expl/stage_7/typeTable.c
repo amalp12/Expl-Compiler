@@ -69,7 +69,7 @@ struct TypeTable* typeLookup(char *name)  // Search through the type table and r
 }
 
 
-void typeInstall(char *name, struct Fieldlist *fields)  // Creates a type table entry for the (user defined) type of 'name' with given 'fields' and returns the pointer to the type table entry. The field list must specify the field index, type and name of each field. TInstall returns NULL upon failure. This routine is invoked when the compiler encounters a type definition in the source program.
+void typeInstall(char *name, struct FieldList *fields)  // Creates a type table entry for the (user defined) type of 'name' with given 'fields' and returns the pointer to the type table entry. The field list must specify the field index, type and name of each field. TInstall returns NULL upon failure. This routine is invoked when the compiler encounters a type definition in the source program.
 {
     struct TypeTable * temp = typeLookup(name);
     if(temp != NULL){
@@ -85,7 +85,7 @@ void typeInstall(char *name, struct Fieldlist *fields)  // Creates a type table 
     newType->size = 0;
 
     // assign fieldIDs
-    struct Fieldlist * temp1 = fields;
+    struct FieldList * temp1 = fields;
     int fieldID = 0;
     while(temp1 != NULL){
         temp1->fieldIndex = fieldID;
@@ -112,7 +112,7 @@ void typeValidateFields ( struct TypeTable * type ) // Validates the field list 
 
     // if feild exists add size of all feilds
 
-    struct Fieldlist * temp = type->fields;
+    struct FieldList * temp = type->fields;
     while(temp != NULL){
         if(temp->type == NULL){
             // if type is not defined try to look up the type using type name
@@ -140,9 +140,9 @@ void typeValidateFields ( struct TypeTable * type ) // Validates the field list 
 
     
 }
-struct Fieldlist* typeFieldLookup(struct TypeTable *type, char *name) // Searches for a field of given 'name' in the 'fieldlist' of the given user-defined type and returns a pointer to the field entry. Returns NULL if the type does not have a field of the name.
+struct FieldList* typeFieldLookup(struct TypeTable *type, char *name) // Searches for a field of given 'name' in the 'fieldlist' of the given user-defined type and returns a pointer to the field entry. Returns NULL if the type does not have a field of the name.
 {
-    struct Fieldlist * temp = type->fields;
+    struct FieldList * temp = type->fields;
     while(temp != NULL){
         if(strcmp(temp->name,name) == 0){
             return temp;
@@ -163,7 +163,7 @@ int getTypeSize(struct TypeTable * type)  // Returns the amount of memory words 
 
     // if feild exists add size of all feilds
     if(type->fields != NULL){
-        struct Fieldlist * temp = type->fields;
+        struct FieldList * temp = type->fields;
         while(temp != NULL){
             size += 1; // since all feild are of size 1 in this implemenation (user define types are also 1 because they reference memory)
             temp = temp->next;
@@ -173,9 +173,10 @@ int getTypeSize(struct TypeTable * type)  // Returns the amount of memory words 
     return size;
 }
 
-struct Fieldlist * createField(char *typeName, char * name){
-    struct Fieldlist * newField = (struct Fieldlist *)malloc(sizeof(struct Fieldlist));
+struct FieldList * createField(char *typeName, char * name){
+    struct FieldList * newField = (struct FieldList *)malloc(sizeof(struct FieldList));
     newField->name = name;
+    newField->classType = NULL;
     newField->type = typeLookup(typeName);
     // if type doesn't exist do not throw error because type might be itself (to be defined later)
     // we will do type validation of fields in typeInstall

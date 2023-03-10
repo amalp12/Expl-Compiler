@@ -36,11 +36,9 @@ void GSTInstall(char * varname,struct TypeTable * type,int nodetype, int offset,
 
     new_gst_entry->name  = strndup(varname, strlen(varname)-offset);
     new_gst_entry->type = type;
+    new_gst_entry->classType = NULL;
 
 
-
-    
-    
     new_gst_entry->rows = rows;
     new_gst_entry->cols = cols;
     new_gst_entry->binding = _STACK_POINTER;
@@ -108,6 +106,8 @@ void LSTInstall(char * varname, struct TypeTable * type , int offset, int rows, 
     new_node->name  = strndup(varname, strlen(varname)-offset);
 
     new_node->type = type;
+    new_node->paramList = NULL;
+    new_node->functionLabelNumber = _NONE;
 
 
     
@@ -141,7 +141,7 @@ void printGSTNode(struct GlobalSymbolTable * gst_node)
     printf("Size: %d\t", gst_node->size);
     printf("Function Label Number: %d\t", gst_node->functionLabelNumber);
     printf("Param List: ");
-    struct parameter_node * temp = gst_node->paramList;
+    struct ParameterNode * temp = gst_node->paramList;
     while(temp != NULL)
     {
         printf("%s, ", temp->name);

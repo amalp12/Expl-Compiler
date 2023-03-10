@@ -32,6 +32,7 @@ struct declaration_node
 
 struct declaration_node * _GLOBAL_DECLARATION_STACK_HEAD = NULL;
 struct declaration_node * _LOCAL_DECLARATION_STACK_HEAD = NULL;
+struct declaration_node * _CLASS_DECLARATION_STACK_HEAD = NULL;
 
 // Global Declaration Helper Functions
 void pushGlobalDeclaration( struct expr_tree_node * node); 

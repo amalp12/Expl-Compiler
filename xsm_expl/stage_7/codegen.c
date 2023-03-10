@@ -1074,7 +1074,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             
             
             // pop function parameters from the stack
-            struct parameter_node * temp = t->GSTEntry->paramList;
+            struct ParameterNode * temp = t->GSTEntry->paramList;
             return_val = returnReg;
             
 
@@ -1150,7 +1150,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             while (temp != NULL)
             {
                 // checking if the field is present in the structure
-                struct Fieldlist * field = typeFieldLookup( parent->type, temp->varname);
+                struct FieldList * field = typeFieldLookup( parent->type, temp->varname);
                 if(field == NULL)
                 {
                     printf("Error: Field %s not found in structure %s\n", temp->varname, t->type->name);
@@ -1436,7 +1436,7 @@ void funcCodegen(struct expr_tree_node * t, FILE * target_file)
     int currentBindingAddress = _FUNCTION_ARGUMENT_OFFSET*_STACK_UNIT_SIZE;
     struct LocalSymbolTable * LSTEntry;
     // get the number of parameters
-    struct parameter_node * paramList = GSTEntry->paramList;
+    struct ParameterNode * paramList = GSTEntry->paramList;
     while(paramList!=NULL)
     {
         //get the LST entry of the parameter

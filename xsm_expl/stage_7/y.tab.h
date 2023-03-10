@@ -96,9 +96,15 @@ extern int yydebug;
     ALLOC = 297,                   /* ALLOC  */
     FREE = 298,                    /* FREE  */
     NULLVAL = 299,                 /* NULLVAL  */
-    AND = 300,                     /* AND  */
-    OR = 301,                      /* OR  */
-    NOT = 302                      /* NOT  */
+    CLASS = 300,                   /* CLASS  */
+    ENDCLASS = 301,                /* ENDCLASS  */
+    EXTENDS = 302,                 /* EXTENDS  */
+    NEW = 303,                     /* NEW  */
+    DELETE = 304,                  /* DELETE  */
+    SELF = 305,                    /* SELF  */
+    AND = 306,                     /* AND  */
+    OR = 307,                      /* OR  */
+    NOT = 308                      /* NOT  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -149,9 +155,15 @@ extern int yydebug;
 #define ALLOC 297
 #define FREE 298
 #define NULLVAL 299
-#define AND 300
-#define OR 301
-#define NOT 302
+#define CLASS 300
+#define ENDCLASS 301
+#define EXTENDS 302
+#define NEW 303
+#define DELETE 304
+#define SELF 305
+#define AND 306
+#define OR 307
+#define NOT 308
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -163,9 +175,9 @@ union YYSTYPE
   char * string;
   int integer;
   struct declaration_node * decl_node;
-  struct Fieldlist * typeField;
+  struct FieldList * typeField;
 
-#line 169 "y.tab.h"
+#line 181 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

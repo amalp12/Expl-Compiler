@@ -83,7 +83,7 @@ int yylex(void);
   char * string;
   int integer;
   struct declaration_node * decl_node;
-  struct Fieldlist * typeField;
+  struct FieldList * typeField;
 }
 
 
@@ -94,6 +94,7 @@ int yylex(void);
 %token BREAK BREAKPOINT CONTINUE 
 %token RETURN MAIN 
 %token INITIALIZE ALLOC FREE NULLVAL
+%token CLASS ENDCLASS EXTENDS NEW DELETE SELF
 %token AND OR NOT
 %type <node> expr Program
 %left AND OR NOT
@@ -109,7 +110,7 @@ int yylex(void);
 
 
 Program : 
-    TypeDefBlock ClassDefBlock GlobalDeclBlock FuncDefBlock MainBlock
+    TypeDefBlock ClassDefBlock GDeclBlock FDefBlock MainBlock
     {
       exit(1);
     }
@@ -182,68 +183,169 @@ MainBlock :
 
 ClassDefBlock : 
     CLASS ClassDefList ENDCLASS
-  |
 ;
 ClassDefList : 
     ClassDefList ClassDef
+    {
+      defineClass($<node>2, target_file);
+    }
   | ClassDef
+    {
+      defineClass($<node>1, target_file);
+    }
 ;
 
-Classdef  : 
-    ClassName '{'DECL ClassFieldlists ClassMethodDecl ENDDECL ClassMethodDefns '}'
+ClassDef  : 
+    ClassName '{'DECL ClassFieldLists ClassMethodDeclList ENDDECL ClassMethodDefns '}'
+    {
+      popAllClassLocalDeclarationsAndCreateEntry($<string>1);
+
+      
+      // class name, class fields, class methods declarations, class methods definitions
+      $<node>$ = makeClassNode($<string>1, $<typeField>4, $<node>7);
+    }
 ;
 
 ClassName :
-    ID        {Cptr = Cinstall($1->Name,NULL);}
-  | ID Extends ID {Cptr = Cinstall($1->Name,$3->Name);}
+    ID         
+    {
+      classInstall($<string>1,NULL);
+      $<string>$ = $<string>1;
+    }
+  | ID EXTENDS ID 
+    {
+      classInstall($<string>1,$<string>3);
+      $<string>$ = $<string>1;
+    }
 ;
 
-ClassFieldlists :
-    ClassFieldlists ClassFieldDecl
-  |
+ClassFieldLists :
+    ClassFieldLists ClassFieldDecl
+    {
+      $<typeField>2->next = $<typeField>1;
+      $<typeField>$ = $<typeField>2;
+    }
+  | ClassFieldDecl
+    {
+      $<typeField>$ = $<typeField>1;
+    }
 ;
 
 ClassFieldDecl :
-    Type ID SEMICOLON  {Class_Finstall(Cptr,$1->Name,$2->Name);} //Installing the field to the class
+    Type ID SEMICOLON  // {Class_Finstall(Cptr,$1->Name,$2->Name);} //Installing the field to the class
+    {
+      $<typeField>$ = createField($<string>1, $<string>2);
+    }
 ;
 
 ClassMethodDeclList : 
     ClassMethodDeclList ClassMethodDecl
+    {
+      pushLocalDeclaration($<node>2);
+    }
   | ClassMethodDecl
+    {
+      pushLocalDeclaration($<node>1);
+    }
 ;
 
 ClassMethodDecl :
-    Type ID '(' Paramlist ')' SEMICOLON {Class_Minstall(Cptr,$2->Name,Tlookup($1->Name),$4);}//Installing the method to class
+    Type ID '(' ClassParamList ')' SEMICOLON // {Class_Minstall(Cptr,$2->Name,Tlookup($1->Name),$4);}//Installing the method to class
+  {
+    struct expr_tree_node * idNode = makeDeclareIdNode($<string>2, NULL);
+    idNode->nodetype = _NODE_TYPE_FUNCTION_DEFINITION;
+    idNode->left = $<node>4;
+    idNode->type = typeLookup($<string>1);
+    $<node>$ = idNode; 
+  }
+;
+ClassParamList :
+    ClassParamList ',' Param 
+    {
+
+      $<node>1->left = $<node>3;
+      $<node>$ = $<node>1;
+    }
+  | Param
+    {
+      $<node>$ = $<node>1;
+    }
+  | 
+    {
+      $<node>$ = NULL;
+    }
 ;
 
 ClassMethodDefns:
-    ClassMethodDefns FDef
-  | FDef
+    ClassMethodDefns ClassFunctionDef
+    {
+      insertIntoMethodTree($<node>1, $<node>2);
+      $<node>$ = $<node>1;
+    }
+  | ClassFunctionDef
+  {
+    $<node>$ = makeConnectorNode(NULL, $<node>2);
+  }
 ;
 
-ClassStmt :
-    ClassField EQUALS expr SEMICOLON
-  | ID EQUALS NEW '(' ID ')' SEMICOLON
-  | Field ASSIGN NEW '(' ID ')' SEMICOLON
+
+ClassFunctionDef :
+    Type ID '(' ParamList ')' '{' LDeclBlock ClassFunctionBody '}'
+    {
+      struct expr_tree_node * funcNode = makeFunctionDefinitionNode($<string>1, $<string>2, $<node>4, $<node>8);
+      $<node>$ = funcNode;
+    }
+;
+
+ClassFunctionBody:
+    ClassFunctionBody ClassStmt
+  | ClassStmt
+;
+
+ClassStmt : 
+    InputStmt 
+  | OutputStmt 
+  | AsgStmt 
+  | Ifstmt 
+  | Whilestmt 
+  | brkStmt 
+  | contStmt 
+  | brkpointStmt 
+  | RepeatStmt 
+  | DoWhileStmt 
+  | DeclStmt
+  | ReturnStmt
+  | InsideClassStmt
+;
+
+
+
+InsideClassStmt :
+    ClassField EQUALS expr SEMICOLON // only in class 
+  | ClassField EQUALS NEW '(' ID ')' SEMICOLON // only in class 
+  | identifierUse EQUALS NEW '(' ID ')' SEMICOLON
+  | DELETE '(' ClassField ')' SEMICOLON
+;
+
+OutsideClassStmt :
+    identifierUse EQUALS NEW '(' ID ')' SEMICOLON
   | DELETE '(' ClassField ')' SEMICOLON
 ;
 
 ClassField  :
     SELF '.' ID
-  | ID '.' ID   //This will not occur inside a class.
-  | Field '.' ID
+  | ClassField '.' ID
 ;
 
 ClassFieldFunction  :
-    SELF '.' ID '(' ClassArglist ')'
-  | ID '.' ID '(' ClassArglist ')'   //This will not occur inside a class.
-  | ClassField '.' ID '(' ClassArglist ')'
+    SELF '.' ID '(' ClassArgList ')'
+  | ID '.' ID '(' ClassArgList ')'   //This will not occur inside a class.
+  | ClassField '.' ID '(' ClassArgList ')'
 ;
 
 ClassArgList: 
-  ClassArglist ',' expr
+  ClassArgList ',' expr
   | expr
-  |
 ;
 // ------------------- TypeDeclBlock ---------------------------------------------
 TypeDefBlock :
@@ -323,7 +425,7 @@ TypeField :
         }
       } 
       // get the type of the right field node
-      struct Fieldlist * rightType = typeFieldLookup(leftFieldNode->type, $<string>3);
+      struct FieldList * rightType = typeFieldLookup(leftFieldNode->type, $<string>3);
       // if right type is null throw error
       if(rightType == NULL)
       {
@@ -561,9 +663,8 @@ Param :
 LDeclBlock :
     DECL LDecList ENDDECL 
   | DECL ENDDECL
-  | 
   {      
-    popAllLocalDeclarationsAndCreateEntry(NULL);
+    popAllLocalDeclarationsAndCreateEntry(NULL); 
   }
 
 ;
@@ -612,6 +713,7 @@ Slist :
     Slist Stmt {$<node>$ = makeConnectorNode($<node>1,$<node>2);}
   | Stmt {$<node>$ = $<node>1;}
 ;
+
 Stmt : 
     InputStmt 
   | OutputStmt 
@@ -625,7 +727,7 @@ Stmt :
   | DoWhileStmt 
   | DeclStmt
   | ReturnStmt
-  | ClassStmt
+  | OutsideClassStmt
 ;
 
 
@@ -716,11 +818,10 @@ expr :
   | ID '(' ')' {$<node>$ = makeFunctionCallNode($<string>1,NULL);}
   | ID '(' ArgList ')' {$<node>$ = makeFunctionCallNode($<string>1,$<node>3);}
   | NULLVAL  {$<node>$ = makeNullNode();}
-  | ClassField
-  | ClassFieldFunction
+  | ClassField {}
+  | ClassFieldFunction {}
 ;
 
-// makeFunctionCallNode(struct expr_tree_node *parameters,  struct expr_tree_node *code, char* name, int type)
 %%
 
 void yyerror(char const *s)

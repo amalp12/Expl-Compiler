@@ -38,6 +38,7 @@
 #define _NODE_TYPE_HEAP_ALLOC 35
 #define _NODE_TYPE_HEAP_FREE 36
 #define _NODE_TYPE_NULL 37
+#define _NODE_TYPE_CLASS 38
 
 
 

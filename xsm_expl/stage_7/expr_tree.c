@@ -14,6 +14,30 @@ struct expr_tree_node * makeNode(int val, int nodetype, struct TypeTable * type,
     return new_node;
 
 }
+struct expr_tree_node * makeClassNode(char * className, struct FieldList *fields, struct expr_tree_node * methodDefinitions)
+{
+        // get the class type entry
+        struct ClassTable * classEntry = classLookup(className);
+
+        // if class does not exist throw error and exit]
+        if(classEntry == NULL)
+        {
+            printf("Error: Class %s not defined\n", className);
+            exit(1);
+        }
+
+        // install fields in the class
+        classEntry->memberFields = fields;
+
+        // validate fields
+        validateFields(classEntry);
+
+        // makenode
+        return makeNode(-1,_NODE_TYPE_CLASS, NULL, strdup(className), NULL, methodDefinitions, NULL);
+
+  
+}
+        
 struct expr_tree_node * makeNullNode()
 {
     return makeNode(0,_NODE_TYPE_NULL, typeLookup("null"), strdup("null"), NULL, NULL, NULL);
@@ -190,7 +214,7 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
 
     // typechecking parameters
     struct expr_tree_node * temp = parameters;
-    struct parameter_node * temp2 = GSTEntry -> paramList;
+    struct ParameterNode * temp2 = GSTEntry -> paramList;
 
     // get the last parameter from the parameter list of gst
     // to check in reverse order cuz in the node tree it is stored in reverse order
@@ -235,7 +259,7 @@ struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name
 
     // typechecking parameters
     struct expr_tree_node * temp = parameters;
-    struct parameter_node * temp2 = GSTEntry -> paramList;
+    struct ParameterNode * temp2 = GSTEntry -> paramList;
 
     while(temp != NULL && temp2 != NULL){
         if(temp->type != temp2->type)
@@ -290,7 +314,7 @@ void defineFunction(struct expr_tree_node* node, FILE * target_file)
 
     // compare if the parameters are same
     struct expr_tree_node * temp = node->left; // parameters
-    struct parameter_node * temp2 = GSTEntry -> paramList;
+    struct ParameterNode * temp2 = GSTEntry -> paramList;
     while(temp != NULL && temp2 != NULL){
         if(temp->type != temp2->type)
         {
@@ -307,6 +331,29 @@ void defineFunction(struct expr_tree_node* node, FILE * target_file)
 
   
 }
+
+void defineClass(struct expr_tree_node* node, FILE * target_file)
+{
+   
+
+    // for each method in class validate parameters from the ClassTable
+    struct expr_tree_node * methodDefinition = node;   
+    while|(methodDefinition!=NULL)
+    {
+        // look up the function in the 
+    }    
+    
+
+
+    
+
+    // calling function code generator
+    funcCodegen(node, target_file);
+
+
+  
+}
+
 
 // insert into field tree
 void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
@@ -333,10 +380,45 @@ void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * n
     temp->left = node;
 
     // getting the type of the new node inserted
-    struct Fieldlist * typeEntry = typeFieldLookup(temp->type, node->varname);
+    struct FieldList * typeEntry = typeFieldLookup(temp->type, node->varname);
     if(typeEntry == NULL)
     {
         printf("Error: Undeclared field %s in type %s\n", node->varname, temp->type->name);
+        exit(1);
+    }
+    node->type = typeEntry->type;
+
+    
+}
+
+void insertIntoMethodTree(struct expr_tree_node * root, struct expr_tree_node * node)
+{
+    // nullcheck
+    if(root == NULL)
+    {
+        // print error message
+        printf("Error: Null root node in insertIntoMethodTree\n");
+        exit(1);
+    }
+    if(node == NULL)
+    {
+        // print error message
+        printf("Error: Null node in insertIntoMethodTree\n");
+        exit(1);
+    }
+    
+    struct expr_tree_node * temp = root;
+    while(temp->left != NULL)
+    {
+        temp = temp->left;
+    }
+    temp->left = node;
+
+    // getting the type of the new node inserted
+    struct FieldList * typeEntry = typeFieldLookup(temp->type, node->varname);
+    if(typeEntry == NULL)
+    {
+        printf("Error: Undeclared method %s in type %s\n", node->varname, temp->type->name);
         exit(1);
     }
     node->type = typeEntry->type;

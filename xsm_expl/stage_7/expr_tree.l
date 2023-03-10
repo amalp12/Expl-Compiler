@@ -166,7 +166,24 @@ numbers [0-9]+
 "null"  {
     return NULLVAL;
 }
-
+"class" {
+    return CLASS;
+}
+"endclass" {
+    return ENDCLASS;
+}
+"extends" {
+    return EXTENDS;
+}
+"new"   {
+    return NEW;
+}
+"delete" {
+    return DELETE;
+}
+"self" {
+    return SELF;
+}
 [\t] {}
     
 [(),\[\]%\{\}\|\&\.] {
