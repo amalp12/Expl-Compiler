@@ -195,6 +195,16 @@ void popAllLocalDeclarationsAndCreateEntry(char * typeName)
         temp = popLocalDeclaration();
 
     }
+    // if class is being declared
+    if(getCurrentClassBeingDefined()!=NULL)
+    {
+        // add self to the local symbol table
+        LSTInstall("self", NULL, 0,0, 0);
+        // get lst entry and add class type
+        struct LocalSymbolTable *LSTEntry = LSTLookup("self");
+        LSTEntry->classType = getCurrentClassBeingDefined();
+    }
+    
 }
 
 
@@ -231,6 +241,7 @@ void popAllClassLocalDeclarationsAndCreateEntry(char * className)
 
 
             classMethodInstall (classEntry, temp->node->varname, temp->node->type, paramList) ;
+            LSTInstall(temp->node->varname, temp->node->type, 0,0, 0);
 
             // 
 
@@ -245,8 +256,16 @@ void popAllClassLocalDeclarationsAndCreateEntry(char * className)
         temp = popLocalDeclaration();
 
     }
+    // create an LST entry for the self
+    // if class is being declared
+    if(getCurrentClassBeingDefined()!=NULL)
+    {
+        // add self to the local symbol table
+        LSTInstall("self", NULL, 0,0, 0);
+        // get lst entry and add class type
+        struct LocalSymbolTable *LSTEntry = LSTLookup("self");
+        LSTEntry->classType = getCurrentClassBeingDefined();
+    }
 
-    // clear lst
-    LSTClear();
 }
 

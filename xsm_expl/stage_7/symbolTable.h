@@ -32,6 +32,8 @@ struct LocalSymbolTable
     struct LocalSymbolTable *next; // pointer to the next variable in the list
     int functionLabelNumber;
     struct ParameterNode * paramList;
+    struct ClassTable *classType;  //THIS FIELD IS REQUIRED ONLY FOR OEXPL
+
 };
 
 struct GlobalSymbolTable * _GLOBAL_SYMBOL_TABLE = NULL; // Global Symbol Table

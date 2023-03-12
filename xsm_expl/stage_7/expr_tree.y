@@ -66,6 +66,16 @@
 #include "typeTable.c"
 #endif
 
+#ifndef _CLASS_H
+#define _CLASS_H
+#include "class.h"
+#endif
+
+#ifndef _CLASS_C
+#define _CLASS_C
+#include "class.c"
+#endif
+
 
 
 void yyerror(char const *s);
@@ -284,7 +294,7 @@ ClassMethodDefns:
     }
   | ClassFunctionDef
   {
-    $<node>$ = makeConnectorNode(NULL, $<node>2);
+    $<node>$ = makeConnectorNode(NULL, $<node>1);
   }
 ;
 
@@ -292,7 +302,9 @@ ClassMethodDefns:
 ClassFunctionDef :
     Type ID '(' ParamList ')' '{' LDeclBlock ClassFunctionBody '}'
     {
+
       struct expr_tree_node * funcNode = makeFunctionDefinitionNode($<string>1, $<string>2, $<node>4, $<node>8);
+      defineClassMethod(getCurrentClassBeingDefined(),funcNode, target_file);
       $<node>$ = funcNode;
     }
 ;

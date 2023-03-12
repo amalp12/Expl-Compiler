@@ -39,6 +39,17 @@
 #include "typeTable.c"
 #endif
 
+#ifndef _CLASS_H
+#define _CLASS_H
+#include "class.h"
+#endif
+
+#ifndef _CLASS_C
+#define _CLASS_C
+#include "class.c"
+#endif
+
+
 struct loopStack{
     int startLabel;
     int endLabel;

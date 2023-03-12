@@ -1533,4 +1533,182 @@ void funcCodegen(struct expr_tree_node * t, FILE * target_file)
 
 }
 
+void classMethodCodegen(struct ClassTable * classPtr, struct expr_tree_node * t, FILE * target_file)
+{
+    // if the node is null return
+    if(t==NULL) return;
+
+    // if class is not declared
+    if(classPtr==NULL)
+    {
+        printf("Error: Class %s not found.\n", t->left->left->varname);
+        exit(1);
+    }
+    // get the method 
+    struct ClassMemberFunctionList * method = classMethodLookup(classPtr, t->right->varname);
+
+    // check if the method exists
+    if(method == NULL)
+    {
+        printf("Error: Method %s not found in class %s.\n", t->right->varname, t->left->left->varname);
+        exit(1);
+    }
+
+    // set the function label
+    fprintf(target_file, "_F%d:\n", method->functionLabel);
+
+
+
+    int currentBindingAddress = _FUNCTION_ARGUMENT_OFFSET*_STACK_UNIT_SIZE;
+    struct expr_tree_node * methodNodeParameters = t->right->left;
+
+    // get the number of parameters
+    struct ParameterNode * param;
+    int nodeParamCount = 0;
+
+    // search for self
+    struct LocalSymbolTable * LSTEntry = LSTLookup("self");
+
+    // throw error is self is not found
+    if(LSTEntry==NULL)
+    {
+        printf("Error: Parameter self not declared.\n");
+        exit(1);
+    }
+    LSTEntry->binding = currentBindingAddress;
+    currentBindingAddress-=_STACK_UNIT_SIZE;
+
+    while(methodNodeParameters!=NULL)
+    {
+        //get the ClassMemberFuntionNode of that parameter
+        param = classMethodParamLookup( method, methodNodeParameters->varname);
+        //get the LST entry of the parameter
+        LSTEntry = LSTLookup(param->name);
+
+        // if the LST entry is null, then the parameter is not declared
+        if(LSTEntry==NULL)
+        {
+            printf("Error: Parameter %s not declared.\n", methodNodeParameters->varname);
+            exit(1);
+        }
+
+        // if the LST entry is null, then the parameter is not declared
+        if(param==NULL)
+        {
+            printf("Error: Parameter %s not declared.\n", methodNodeParameters->varname);
+            exit(1);
+        }
+        // incrementing the node parameter count
+        nodeParamCount++;
+        // set the binding of the parameter
+        LSTEntry->binding = currentBindingAddress;
+        currentBindingAddress-=_STACK_UNIT_SIZE;
+        methodNodeParameters = methodNodeParameters->left;
+    }
+   
+
+ 
+    // pushing previous BP to the stack
+    fprintf(target_file, "PUSH BP\n");
+    // setting BP to SP
+    fprintf(target_file, "MOV BP, SP\n");
+
+    currentBindingAddress = _FUNCTION_LOCAL_VARIABLE_OFFSET*_STACK_UNIT_SIZE;
+    LSTEntry = _LOCAL_SYMBOL_TABLE;
+
+    // maintain local variable count
+    int localVariableCount = 0;
+    // set the binding of the local variables
+    while(LSTEntry!=NULL )
+    {
+        if(LSTEntry->binding==_NONE)
+        {
+            // set the binding of the local variable relative to BP
+            LSTEntry->binding = currentBindingAddress;
+            currentBindingAddress+=_STACK_UNIT_SIZE;
+            localVariableCount++;
+            // push space for the local variable to the stack
+            fprintf(target_file, "PUSH R0\n");
+        }
+
+        LSTEntry = LSTEntry->next;
+
+    }
+
+    // codeGen for the body of the function
+    reg_index bodyReg = codeGen(t->right->right, target_file);
+
+
+    // codegen for the return statement
+    reg_index returnReg = codeGen(t->right->left, target_file);
+
+    // if return is not void then store the return value in the place allocated for the return value
+    if(returnReg != _NONE)
+    {
+        // move the return value to the place allocated for the return value
+        reg_index tempReg = getFreeReg();
+        fprintf(target_file, "MOV R%d, BP\n", tempReg);
+        fprintf(target_file, "ADD R%d, %d\n", tempReg, _FUNCTION_RETURN_VALUE_OFFSET);
+        fprintf(target_file, "MOV [R%d], R%d\n",tempReg, returnReg);
+        // free temp reg
+        freeLastReg();
+        // free the register
+        freeLastReg();
+    }
+
+
+
+    // if the body reg is not -1, then it is invalid
+    if(bodyReg!=_NONE)
+    {
+        printf("Error: Invalid return type of function %s.\n", LSTEntry->name);
+        exit(1);
+    }
+
+
+    // pop the local variables from the stack
+    LSTEntry = _LOCAL_SYMBOL_TABLE;
+    while(localVariableCount--)
+    {
+        //push space for local variables
+        fprintf(target_file, "POP R0\n");
+    }
+
+    // POP old BP
+    fprintf(target_file, "POP BP\n");
+
+    // return
+    fprintf(target_file, "RET\n");
+
+    // clear lst    
+    clearLST();
+
+    
+
+}
+
+void classCodegen(struct expr_tree_node * t, FILE * target_file)
+{
+    // if the node is null return
+    if(t==NULL) return;
+
+    // get the Class Table Entry
+    struct ClassTable * classEntry = classLookup(t->varname);
+    // set the class label
+    fprintf(target_file, "_C%d:\n", classEntry->classIndex);
+
+    // write the code for the all the functions of the class
+    struct expr_tree_node * methodDefinitionConnector = t->right; // connector of method 1 or null   
+    while(methodDefinitionConnector!=NULL)
+    {
+        classMethodCodegen(getCurrentClassBeingDefined(),methodDefinitionConnector->right->right, target_file);
+    }
+
+    //
+
+    
+
+}
+
+
 

@@ -1,3 +1,8 @@
+#ifndef _TYPE_TABLE_H
+#define _TYPE_TABLE_H
+#include "typeTable.h"
+#endif
+
 struct ClassTable {
     char *name;                           //name of the class
     struct FieldList *memberFields;        //pointer to FieldList
@@ -20,6 +25,7 @@ struct ClassMemberFunctionList {
 
 // class table head
 struct ClassTable * _CLASS_TABLE_HEAD = NULL;
+struct ClassTable * _CURRENT_CLASS_BEING_DEFINED = NULL;
 // class label counter
 int _LAST_USED_CLASS_LABEL = 0;
 /*
@@ -33,22 +39,29 @@ The following scope rules must be carefully checked to ensure correct semantic a
 
 4.    There is exactly one method carrying a name in a class. Thus, function overloading is not permitted.
 */
-struct ClassTable * classInstall(char * name ,char * parentClassName);
+void classInstall(char * name ,char * parentClassName);
 
 struct ClassTable* classLookup(char * className);
 
 void classFieldInstall(struct ClassTable * classPtr, char * typeName, char *name);
 void validateFields (struct ClassTable * classPtr);
-void classMethodInstall (struct ClassTable * classPtr, char *name, struct Typetable *type, struct ParameterNode *Paramlist) :
+
+void classMethodInstall (struct ClassTable * classPtr, char *name, struct TypeTable *type, struct ParameterNode *Paramlist);
 
 struct ClassMemberFunctionList* classMethodLookup(struct ClassTable* classPtr ,char* methodName);
 
 struct FieldList * ClassFieldLookup(struct ClassTable* classPtr,char* fieldName);
 
+struct ParameterNode* classMethodParamLookup(struct ClassMemberFunctionList * method, char * paramName);
+
 // Gets a new class label Number for the class
 int getNewClassLabel();
 
+void resetCurrentClassBeingDefined();
 
+struct ClassTable * getCurrentClassBeingDefined();
+
+struct ClassMemberFunctionList* classMethodLookup(struct ClassTable* classPtr ,char* methodName);
 
 
 

@@ -332,15 +332,100 @@ void defineFunction(struct expr_tree_node* node, FILE * target_file)
   
 }
 
+ void defineClassMethod(struct ClassTable * classPtr, struct expr_tree_node* node, FILE * target_file)
+{
+    // node null check thow error
+    if(node == NULL)
+    {
+        printf("Class Definition Error: Class method definition is null");
+        exit(1);
+    }
+    
+    
+    if(classPtr == NULL)
+    {
+        printf("Class Definition Error: Class not declared forvFunction %s", node->varname);
+        exit(1);
+    }
+    // search the method from the class 
+    struct ClassMemberFunctionList * method = classMethodLookup(classPtr, node->varname);
+
+    // if the function is not declared
+    if(method == NULL)
+    {
+        printf("Function Definition Error: Function %s not declared", node->varname);
+        exit(1);
+    }
+
+    // compare if the parameters are same
+    struct expr_tree_node * temp = node->left; // parameters
+    struct ParameterNode * temp2 = method -> paramList;
+    while(temp != NULL && temp2 != NULL){
+        if(temp->type != temp2->type)
+        {
+            printf("Function Definition Error: Type mismatch in function definition %s", node->varname);
+            exit(1);
+        }
+        temp = temp->left;
+        temp2 = temp2->next;
+    }
+
+    // calling function code generator
+    classMethodCodegen(getCurrentClassBeingDefined(),node, target_file);
+
+
+  
+}
+
+
+
 void defineClass(struct expr_tree_node* node, FILE * target_file)
 {
    
 
+    struct ClassTable * classEntry = classLookup(node->varname);
+    if(classEntry == NULL)
+    {
+        printf("Class Definition Error: Class %s not declared", node->varname);
+        exit(1);
+    }
     // for each method in class validate parameters from the ClassTable
-    struct expr_tree_node * methodDefinition = node;   
-    while|(methodDefinition!=NULL)
+    struct expr_tree_node * methodDefinitionConnector = node->right; // connector of method 1 or null   
+    while(methodDefinitionConnector!=NULL)
     {
         // look up the function in the 
+        struct ClassMemberFunctionList * method = classMethodLookup(classEntry, methodDefinitionConnector->right->varname);
+
+        // if the method is not declared
+        if(method == NULL)
+        {
+            printf("Class Definition Error: Method %s of class %s not declared", methodDefinitionConnector->right->varname, node->varname);
+            exit(1);
+        }
+
+        // compare if the parameters are same
+        struct expr_tree_node * temp = methodDefinitionConnector->right->left; // parameters
+        struct ParameterNode * temp2 = method -> paramList;
+        while(temp != NULL && temp2 != NULL){
+            if(temp->type != temp2->type)
+            {
+                printf("Class Definition Error: Type mismatch in method definition %s of class %s", methodDefinitionConnector->right->varname, node->varname);
+                exit(1);
+            }
+            temp = temp->left;
+            temp2 = temp2->next;
+        }
+
+        // if both not null throw error number of parameters don't match
+        if(temp != NULL || temp2 != NULL)
+        {
+            printf("Class Definition Error: Number of parameters don't match in method definition %s of class %s", methodDefinitionConnector->right->varname, node->varname);
+            exit(1);
+        }
+
+        // move to next method definition
+        methodDefinitionConnector = methodDefinitionConnector->left;
+
     }    
     
 
@@ -348,7 +433,7 @@ void defineClass(struct expr_tree_node* node, FILE * target_file)
     
 
     // calling function code generator
-    funcCodegen(node, target_file);
+    classCodegen(node, target_file);
 
 
   

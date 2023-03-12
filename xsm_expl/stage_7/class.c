@@ -2,16 +2,18 @@ void classInstall(char * name ,char * parentClassName)
 {
     struct ClassTable * newClass = (struct ClassTable *)malloc(sizeof(struct ClassTable));
     newClass->name = strdup(name);
-    newClass->parentClassName = strdup(parentClassName);
+    newClass->parent = classLookup(parentClassName);
     newClass->fieldCount = 0;
     newClass->methodCount = 0;
-    newClass->fieldList = NULL;
-    newClass->methodList = NULL;
+    newClass->memberFields = NULL;
+    newClass->memberFunctionList = NULL;
     newClass->next = NULL;
+    newClass->classIndex = getNewClassLabel();
     
     // insert into head
     newClass->next = _CLASS_TABLE_HEAD;
     _CLASS_TABLE_HEAD = newClass;
+    _CURRENT_CLASS_BEING_DEFINED = newClass;
 }
 
 struct ClassTable* classLookup(char * className)
@@ -56,14 +58,14 @@ void classFieldInstall(struct ClassTable * classPtr, char * typeName, char *name
     newField->next = NULL;
 
     // insert into head
-    newField->next = classPtr->fieldList;
-    classPtr->fieldList = newField;
+    newField->next = classPtr->memberFields;
+    classPtr->memberFields = newField;
     classPtr->fieldCount++;
 }
 
 void validateFields (struct ClassTable * classPtr)
 {
-    struct FieldList * field = classPtr->fieldList;
+    struct FieldList * field = classPtr->memberFields;
 
     while(field != NULL)
     {
@@ -87,7 +89,7 @@ void validateFields (struct ClassTable * classPtr)
 
 }
 
-void classMethodInstall (struct ClassTable * classPtr, char *name, struct Typetable *type, struct ParameterNode *Paramlist)
+void classMethodInstall (struct ClassTable * classPtr, char *name, struct TypeTable *type, struct ParameterNode *Paramlist)
 {
     // check if method already exists
     // 4. There is exactly one method carrying a name in a class. Thus, function overloading is not permitted.
@@ -103,12 +105,14 @@ void classMethodInstall (struct ClassTable * classPtr, char *name, struct Typeta
     newMethod->type = type;
     newMethod->paramList = Paramlist;
     // method index starts from 0 hence the next methodIndex will have value equal to method count of the class
-    newMethod->methodIndex = classPtr->methodCount;
+    newMethod->functionPosition = classPtr->methodCount;
+    // get label for method
+    newMethod->functionLabel = getNewFunctionLabel();
     newMethod->next = NULL;
 
     // insert into head
-    newMethod->next = classPtr->methodList;
-    classPtr->methodList = newMethod;
+    newMethod->next = classPtr->memberFunctionList;
+    classPtr->memberFunctionList = newMethod;
     classPtr->methodCount++;
 }
 
@@ -117,7 +121,7 @@ struct ClassMemberFunctionList* classMethodLookup(struct ClassTable* classPtr ,c
     // null check
     if(methodName == NULL) return NULL;
 
-    struct ClassMemberFunctionList * temp = classPtr->methodList;
+    struct ClassMemberFunctionList * temp = classPtr->memberFunctionList;
     while(temp != NULL){
         if(strcmp(temp->name,methodName) == 0)
         {
@@ -135,12 +139,35 @@ struct ClassMemberFunctionList* classMethodLookup(struct ClassTable* classPtr ,c
     return NULL;
 }
 
+struct ParameterNode* classMethodParamLookup(struct ClassMemberFunctionList * method, char * paramName)
+{
+    // null check
+    if(method == NULL) return NULL;
+
+    struct ParameterNode * temp = method->paramList;
+    while(temp != NULL){
+        if(strcmp(temp->name,paramName) == 0)
+        {
+            return temp;
+        }
+        temp = temp->next;
+    }
+    // no param found
+    if(temp == NULL)
+    {
+        printf("Param %s not found in method %s.\n",paramName,method->name);
+        exit(1);
+    }
+
+    return NULL;
+}
+
 struct FieldList * ClassFieldLookup(struct ClassTable* classPtr,char* fieldName)
 {
     // null check
     if(fieldName == NULL) return NULL;
 
-    struct FieldList * temp = classPtr->fieldList;
+    struct FieldList * temp = classPtr->memberFields;
     while(temp != NULL){
         if(strcmp(temp->name,fieldName) == 0)
         {
@@ -158,6 +185,8 @@ struct FieldList * ClassFieldLookup(struct ClassTable* classPtr,char* fieldName)
     return NULL;
 }
 
+
+
 int getNewClassLabel()
 {
     _LAST_USED_CLASS_LABEL++;
@@ -165,3 +194,12 @@ int getNewClassLabel()
 }
 
 
+void resetCurrentClassBeingDefined()
+{
+    _CURRENT_CLASS_BEING_DEFINED = NULL;
+}
+
+struct ClassTable * getCurrentClassBeingDefined()
+{
+    return _CURRENT_CLASS_BEING_DEFINED;
+}
