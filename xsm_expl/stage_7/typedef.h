@@ -39,6 +39,8 @@
 #define _NODE_TYPE_HEAP_FREE 36
 #define _NODE_TYPE_NULL 37
 #define _NODE_TYPE_CLASS 38
+#define _NODE_TYPE_NEW 39
+#define _NODE_TYPE_DELETE 40
 
 
 

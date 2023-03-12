@@ -50,7 +50,7 @@ void classMethodInstall (struct ClassTable * classPtr, char *name, struct TypeTa
 
 struct ClassMemberFunctionList* classMethodLookup(struct ClassTable* classPtr ,char* methodName);
 
-struct FieldList * ClassFieldLookup(struct ClassTable* classPtr,char* fieldName);
+struct FieldList * classFieldLookup(struct ClassTable* classPtr,char* fieldName);
 
 struct ParameterNode* classMethodParamLookup(struct ClassMemberFunctionList * method, char * paramName);
 

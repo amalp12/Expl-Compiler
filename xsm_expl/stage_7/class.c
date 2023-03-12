@@ -10,6 +10,9 @@ void classInstall(char * name ,char * parentClassName)
     newClass->next = NULL;
     newClass->classIndex = getNewClassLabel();
     
+
+    
+
     // insert into head
     newClass->next = _CLASS_TABLE_HEAD;
     _CLASS_TABLE_HEAD = newClass;
@@ -110,7 +113,15 @@ void classMethodInstall (struct ClassTable * classPtr, char *name, struct TypeTa
     newMethod->functionLabel = getNewFunctionLabel();
     newMethod->next = NULL;
 
-    // insert into head
+    // create a parameter called self for each method
+    struct ParameterNode * self = (struct ParameterNode *)malloc(sizeof(struct ParameterNode));
+    self->name = strdup("self");
+    self->type = typeLookup("int");
+    self->next = Paramlist;
+    newMethod->paramList = self;
+    
+
+    // insert into head of class
     newMethod->next = classPtr->memberFunctionList;
     classPtr->memberFunctionList = newMethod;
     classPtr->methodCount++;
@@ -129,12 +140,7 @@ struct ClassMemberFunctionList* classMethodLookup(struct ClassTable* classPtr ,c
         }
         temp = temp->next;
     }
-    // no method found
-    if(temp == NULL)
-    {
-        printf("Method %s not found in class %s.\n",methodName,classPtr->name);
-        exit(1);
-    }
+   
 
     return NULL;
 }
@@ -162,7 +168,7 @@ struct ParameterNode* classMethodParamLookup(struct ClassMemberFunctionList * me
     return NULL;
 }
 
-struct FieldList * ClassFieldLookup(struct ClassTable* classPtr,char* fieldName)
+struct FieldList * classFieldLookup(struct ClassTable* classPtr,char* fieldName)
 {
     // null check
     if(fieldName == NULL) return NULL;
@@ -175,12 +181,7 @@ struct FieldList * ClassFieldLookup(struct ClassTable* classPtr,char* fieldName)
         }
         temp = temp->next;
     }
-    // no field found
-    if(temp == NULL)
-    {
-        printf("Field %s not found in class %s.\n",fieldName,classPtr->name);
-        exit(1);
-    }
+
 
     return NULL;
 }

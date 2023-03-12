@@ -1149,13 +1149,31 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
             while (temp != NULL)
             {
-                // checking if the field is present in the structure
-                struct FieldList * field = typeFieldLookup( parent->type, temp->varname);
-                if(field == NULL)
+                // checking if the field is present in the structure or class
+                struct FieldList * field ;
+                // if parent is a struct type
+                if(parent->type != NULL)
                 {
-                    printf("Error: Field %s not found in structure %s\n", temp->varname, t->type->name);
-                    exit(1);
+                    field = typeFieldLookup( parent->type, temp->varname);
+                    if(field == NULL)
+                    {
+                        printf("Error: Field %s not found in structure %s\n", temp->varname, t->type->name);
+                        exit(1);
+                    }
+
                 }
+                // else if the parent is a class
+                else if(parent->classType != NULL)
+                {
+                    field = classFieldLookup(parent->classType, temp->varname);
+                    if(field == NULL)
+                    {
+                        printf("Error: Field %s not found in class %s\n", temp->varname, parent->classType->name);
+                        exit(1);
+                    }
+                }
+
+                
                 // if the field is present then
                
                 // if the field is int or str then
@@ -1541,16 +1559,16 @@ void classMethodCodegen(struct ClassTable * classPtr, struct expr_tree_node * t,
     // if class is not declared
     if(classPtr==NULL)
     {
-        printf("Error: Class %s not found.\n", t->left->left->varname);
+        printf("Error: Class not found.\n");
         exit(1);
     }
     // get the method 
-    struct ClassMemberFunctionList * method = classMethodLookup(classPtr, t->right->varname);
+    struct ClassMemberFunctionList * method = classMethodLookup(classPtr, t->varname);
 
     // check if the method exists
     if(method == NULL)
     {
-        printf("Error: Method %s not found in class %s.\n", t->right->varname, t->left->left->varname);
+        printf("Error: Method %s not found in class %s.\n", t->varname, classPtr->name);
         exit(1);
     }
 
@@ -1560,7 +1578,7 @@ void classMethodCodegen(struct ClassTable * classPtr, struct expr_tree_node * t,
 
 
     int currentBindingAddress = _FUNCTION_ARGUMENT_OFFSET*_STACK_UNIT_SIZE;
-    struct expr_tree_node * methodNodeParameters = t->right->left;
+    struct expr_tree_node * methodNodeParameters = t->left;
 
     // get the number of parameters
     struct ParameterNode * param;
@@ -1661,7 +1679,7 @@ void classMethodCodegen(struct ClassTable * classPtr, struct expr_tree_node * t,
     // if the body reg is not -1, then it is invalid
     if(bodyReg!=_NONE)
     {
-        printf("Error: Invalid return type of function %s.\n", LSTEntry->name);
+        printf("Error: Invalid body of function %s.\n", t->varname);
         exit(1);
     }
 

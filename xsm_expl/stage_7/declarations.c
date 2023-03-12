@@ -269,3 +269,32 @@ void popAllClassLocalDeclarationsAndCreateEntry(char * className)
 
 }
 
+void declareMethod( struct expr_tree_node * node)
+{
+   // get the current class being defined
+    struct ClassTable *classEntry = getCurrentClassBeingDefined();
+    // if class not found, throw error
+    if (classEntry == NULL) 
+    {
+        printf("Error: Class not found\n");
+        exit(1);
+    }
+    // check if method already exists in class
+    struct ClassMemberFunctionList *methodEntry = classMethodLookup(classEntry, node->varname);
+    if (methodEntry != NULL) 
+    {
+        printf("Error: Method %s already exists in class %s\n", node->varname, classEntry->name);
+        exit(1);
+    }
+
+    // create a method entry in the class
+    struct ParameterNode *paramList = NULL;
+    struct expr_tree_node *param = node->left;
+    while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
+    {
+        paramList = AddToParameterList(paramList, param->varname, param->type, 0, 0);
+        param = param->left;
+    }
+    classMethodInstall (classEntry, node->varname, node->type, paramList) ;
+
+}

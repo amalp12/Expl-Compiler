@@ -31,5 +31,6 @@ int getTypeSize(struct TypeTable * type) ; // Returns the amount of memory words
 
 void typeValidateFields ( struct TypeTable * type ); // Validates the field list of the given user-defined type. This routine is invoked when the compiler encounters a type definition in the source program.
 
+
 // type table head
 struct TypeTable * _TYPE_TABLE_HEAD  = NULL;

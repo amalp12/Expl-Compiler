@@ -44,7 +44,7 @@ struct expr_tree_node
     int nodetype;   // information about non-leaf nodes - read/write/connector/+/* etc.
     struct GlobalSymbolTable * GSTEntry;     // pointer to GST entry for global variables and functions
     struct expr_tree_node * left, * right;     // left and right branches
-
+    struct ClassTable * classType; // for field list
 
 };
 
@@ -91,10 +91,14 @@ struct expr_tree_node * makeLocalIdNode(char * varname);
 
 struct expr_tree_node * makeFunctionDefinitionNode(char * typeName, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body);
 
-void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * node);
+void insertIntoTypeFieldTree(struct expr_tree_node * root, struct expr_tree_node * node);
+
+void insertIntoClassFieldTree(struct expr_tree_node * root, struct expr_tree_node * node);
 
 struct expr_tree_node * makeHeapInitNode();
 
 struct expr_tree_node * makeHeapAllocateNode();
 
 struct expr_tree_node * makeHeapFreeNode(struct expr_tree_node *l);
+
+struct expr_tree_node * makeNewNode(char * className );

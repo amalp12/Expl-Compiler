@@ -14,6 +14,17 @@ struct expr_tree_node * makeNode(int val, int nodetype, struct TypeTable * type,
     return new_node;
 
 }
+struct expr_tree_node * makeNewNode(char * className )
+{
+    struct expr_tree_node * node = makeNode(-1,_NODE_TYPE_NEW, NULL, strdup(className), NULL, NULL,NULL);
+    // set the class type
+    node->classType = classLookup(className);
+    // return node
+    return node;
+
+}
+
+
 struct expr_tree_node * makeClassNode(char * className, struct FieldList *fields, struct expr_tree_node * methodDefinitions)
 {
         // get the class type entry
@@ -253,7 +264,7 @@ struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name
     // if the function is not declared
     if(GSTEntry == NULL)
     {
-        printf("Error: Function %s not declared", name);
+        printf("Error: Function %s not declared\n", name);
         exit(1);
     }
 
@@ -274,6 +285,51 @@ struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name
     return makeNode(_NONE, _NODE_TYPE_FUNCTION_DEFINITION,typeEntry, name, GSTEntry, parameters,body);
 
 }
+
+
+struct expr_tree_node * makeMethodDefinitionNode( char * typeName, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body)
+{
+    // lookup type
+    struct TypeTable * typeEntry = typeLookup(typeName);
+    if(typeEntry == NULL)
+    {
+        printf("Error: Undeclared type %s\n", typeName);
+        exit(1);
+    }
+  
+    // get the current class being defined
+    struct ClassTable * currentClass = getCurrentClassBeingDefined();
+
+    // get method from class
+    struct ClassMemberFunctionList * method = classMethodLookup(currentClass, name);
+
+    // if method is not declared in the class throw error and exit
+    if(method == NULL)
+    {
+        printf("Error: Method %s not declared in class %s \n", name, currentClass->name);
+        exit(1);
+    }
+    // typechecking parameters
+    struct expr_tree_node * temp = parameters;
+    struct ParameterNode * temp2 = method -> paramList;
+
+    while(temp != NULL && temp2 != NULL){
+        if(temp->type != temp2->type)
+        {
+            printf("Function Definition Node Error: Type mismatch in function call %s", name);
+            exit(1);
+        }
+        temp = temp->left;
+        temp2 = temp2->next;
+    }
+   
+    struct expr_tree_node * new_node =  makeNode(_NONE, _NODE_TYPE_FUNCTION_DEFINITION,typeEntry, name, NULL, parameters,body);
+    new_node->classType = currentClass;
+    return new_node;
+
+}
+
+
 
 struct expr_tree_node * makeReturnNode (struct expr_tree_node *expr)
 {
@@ -441,19 +497,19 @@ void defineClass(struct expr_tree_node* node, FILE * target_file)
 
 
 // insert into field tree
-void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
+void insertIntoTypeFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
 {
     // nullcheck
     if(root == NULL)
     {
         // print error message
-        printf("Error: Null root node in insertIntoFieldTree\n");
+        printf("Error: Null root node in insertIntoTypeFieldTree\n");
         exit(1);
     }
     if(node == NULL)
     {
         // print error message
-        printf("Error: Null node in insertIntoFieldTree\n");
+        printf("Error: Null node in insertIntoTypeFieldTree\n");
         exit(1);
     }
     
@@ -472,6 +528,77 @@ void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * n
         exit(1);
     }
     node->type = typeEntry->type;
+
+    
+}
+
+// insert into field tree
+void insertIntoClassFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
+{
+    // nullcheck
+    if(root == NULL)
+    {
+        // print error message
+        printf("Error: Null root node in insertIntoTypeFieldTree\n");
+        exit(1);
+    }
+    if(node == NULL)
+    {
+        // print error message
+        printf("Error: Null node in insertIntoTypeFieldTree\n");
+        exit(1);
+    }
+    
+    struct expr_tree_node * temp = root;
+    while(temp->left != NULL)
+    {
+        temp = temp->left;
+    }
+    temp->left = node;
+
+    // if there is a dot after temp then that means temp node has to refer to either a class of a struct
+
+    if(temp->classType!=NULL)
+    {
+        // if its a class type then search the class fields for the field
+        struct FieldList * feildEntry = classFieldLookup(temp->classType, node->varname);
+
+        // if the class field is not declared
+        if(feildEntry == NULL)
+        {
+            printf("Error: Undeclared field %s in class %s\n", node->varname, temp->classType->name);
+            exit(1);
+        }
+        node->classType = temp->classType;
+        node->type = NULL;
+
+    }
+    else if (temp->type!=NULL)
+    {
+        // if its type is a struct type then search in the type fields for the field 
+        struct FieldList * typeEntry = typeFieldLookup(temp->type, node->varname);
+
+        // if the field is not declared
+        if(typeEntry == NULL)
+        {
+            printf("Error: Undeclared field %s in type %s\n", node->varname, temp->type->name);
+            exit(1);
+        }
+        node->type = typeEntry->type;
+        node->classType = NULL;
+
+    }
+    else
+    {
+        // temp is not a class or a struct type
+        printf("Error: %s is not a class or a struct type\n", temp->varname);
+        exit(1);
+
+    }
+
+
+
+
 
     
 }

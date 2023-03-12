@@ -81,6 +81,7 @@
 void yyerror(char const *s);
 extern FILE* yyin;
 extern char * yytext;
+extern int yylineno; 
 FILE * target_file ;
 int _INIT_STATE ;
 
@@ -206,7 +207,7 @@ ClassDefList :
 ;
 
 ClassDef  : 
-    ClassName '{'DECL ClassFieldLists ClassMethodDeclList ENDDECL ClassMethodDefns '}'
+    ClassName '{' DECL ClassFieldLists ClassMethodDeclList ENDDECL ClassMethodDefns '}'
     {
       popAllClassLocalDeclarationsAndCreateEntry($<string>1);
 
@@ -242,20 +243,21 @@ ClassFieldLists :
 ;
 
 ClassFieldDecl :
-    Type ID SEMICOLON  // {Class_Finstall(Cptr,$1->Name,$2->Name);} //Installing the field to the class
+    Type ID SEMICOLON 
     {
       $<typeField>$ = createField($<string>1, $<string>2);
+      classFieldInstall(getCurrentClassBeingDefined(), $<string>1, $<string>2);
     }
 ;
 
 ClassMethodDeclList : 
     ClassMethodDeclList ClassMethodDecl
     {
-      pushLocalDeclaration($<node>2);
+      declareMethod($<node>2);
     }
   | ClassMethodDecl
     {
-      pushLocalDeclaration($<node>1);
+      declareMethod($<node>1);
     }
 ;
 
@@ -303,50 +305,62 @@ ClassFunctionDef :
     Type ID '(' ParamList ')' '{' LDeclBlock ClassFunctionBody '}'
     {
 
-      struct expr_tree_node * funcNode = makeFunctionDefinitionNode($<string>1, $<string>2, $<node>4, $<node>8);
+      struct expr_tree_node * funcNode = makeMethodDefinitionNode($<string>1, $<string>2, $<node>4, $<node>8);
       defineClassMethod(getCurrentClassBeingDefined(),funcNode, target_file);
       $<node>$ = funcNode;
     }
 ;
 
-ClassFunctionBody:
-    ClassFunctionBody ClassStmt
-  | ClassStmt
-;
+ClassFunctionBody :
+    START Slist ReturnStmt END  
+    {
+      $<node>$ = makeConnectorNode($<node>3,$<node>2);
 
-ClassStmt : 
-    InputStmt 
-  | OutputStmt 
-  | AsgStmt 
-  | Ifstmt 
-  | Whilestmt 
-  | brkStmt 
-  | contStmt 
-  | brkpointStmt 
-  | RepeatStmt 
-  | DoWhileStmt 
-  | DeclStmt
-  | ReturnStmt
-  | InsideClassStmt
+    }
+  | START ReturnStmt END 
+    {
+      $<node>$ = makeConnectorNode($<node>3,NULL);
+      $<node>$ = NULL;
+    }
 ;
 
 
 
-InsideClassStmt :
-    ClassField EQUALS expr SEMICOLON // only in class 
-  | ClassField EQUALS NEW '(' ID ')' SEMICOLON // only in class 
-  | identifierUse EQUALS NEW '(' ID ')' SEMICOLON
-  | DELETE '(' ClassField ')' SEMICOLON
-;
 
-OutsideClassStmt :
-    identifierUse EQUALS NEW '(' ID ')' SEMICOLON
-  | DELETE '(' ClassField ')' SEMICOLON
-;
+
+
 
 ClassField  :
-    SELF '.' ID
+    SELF '.' ID 
+    {
+      // make field nodes
+      struct expr_tree_node * rightFieldNode  = makeFieldNode($<string>3, NULL,NULL);
+      struct expr_tree_node * leftFieldNode  = makeFieldNode("self",rightFieldNode,NULL);
+      leftFieldNode->classType = getCurrentClassBeingDefined();
+
+      
+ 
+      // get the type of the right field node
+      struct FieldList * rightType = classFieldLookup(leftFieldNode->classType, rightFieldNode->varname);
+      // if right type is null
+      if(rightType == NULL)
+      {
+        yyerror("Field not found in class \n");
+        exit(1);
+      }
+     
+      // set the type of the right field node
+      rightFieldNode->type = rightType->type;
+      $<node>$ = leftFieldNode;
+
+
+    }
   | ClassField '.' ID
+    {
+      insertIntoClassFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
+      $<node>$ = $<node>1;
+
+    }
 ;
 
 ClassFieldFunction  :
@@ -400,7 +414,7 @@ TypeFieldDecl :
 TypeField : 
     TypeField '.' ID 
     { 
-      insertIntoFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
+      insertIntoTypeFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
       $<node>$ = $<node>1;
       
     }
@@ -592,6 +606,7 @@ identifierUse:
       $<node>$ = idNode;
     }
   | TypeField {$<node>$ = $<node>1;}
+  | ClassField {$<node>$ = $<node>1;}
   | INITIALIZE '(' ')' 
     {
       $<node>$ = makeHeapInitNode();
@@ -604,7 +619,11 @@ identifierUse:
     {
       $<node>$ = makeHeapFreeNode($<node>3);
     }
-  
+  | NEW '(' ID ')' SEMICOLON
+  {
+    $<node>$ = makeNewNode($<string>3);
+  }
+  | ClassFieldFunction {$<node>$ = $<node>1;}
 ;
 
 
@@ -678,6 +697,10 @@ LDeclBlock :
   {      
     popAllLocalDeclarationsAndCreateEntry(NULL); 
   }
+  |
+  {      
+    popAllLocalDeclarationsAndCreateEntry(NULL); 
+  } 
 
 ;
 
@@ -739,9 +762,12 @@ Stmt :
   | DoWhileStmt 
   | DeclStmt
   | ReturnStmt
-  | OutsideClassStmt
+  | ClassDeleteStmt
 ;
 
+ClassDeleteStmt :
+  DELETE '(' ClassField ')' SEMICOLON
+;
 
 ReturnStmt : 
     RETURN expr SEMICOLON 
@@ -830,15 +856,14 @@ expr :
   | ID '(' ')' {$<node>$ = makeFunctionCallNode($<string>1,NULL);}
   | ID '(' ArgList ')' {$<node>$ = makeFunctionCallNode($<string>1,$<node>3);}
   | NULLVAL  {$<node>$ = makeNullNode();}
-  | ClassField {}
-  | ClassFieldFunction {}
 ;
 
 %%
 
 void yyerror(char const *s)
 {
-    printf("yyerror %s : %s\n",s, yytext);
+    // print error and line number
+    printf("yyerror %s : %s at line number %d\n",s, yytext, yylineno);
 }
 
 int main()

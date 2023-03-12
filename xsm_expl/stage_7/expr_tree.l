@@ -191,7 +191,7 @@ numbers [0-9]+
 }
 
 [\n] {
-    
+    yylineno++;
 }
     
 {identifier} {
