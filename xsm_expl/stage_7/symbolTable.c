@@ -20,7 +20,7 @@ int max(int a, int b)
     return b;
 }
 
-void GSTInstall(char * varname,struct TypeTable * type,int nodetype, int offset, int rows, int cols)   // Creates a symbol table entry.
+void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * classType, int nodetype, int offset, int rows, int cols)   // Creates a symbol table entry.
 {
     // see if declaration already exists in GST
     struct GlobalSymbolTable *temp = GSTLookup(varname);
@@ -36,8 +36,7 @@ void GSTInstall(char * varname,struct TypeTable * type,int nodetype, int offset,
 
     new_gst_entry->name  = strndup(varname, strlen(varname)-offset);
     new_gst_entry->type = type;
-    new_gst_entry->classType = NULL;
-
+    new_gst_entry->classType = classType;
 
     new_gst_entry->rows = rows;
     new_gst_entry->cols = cols;

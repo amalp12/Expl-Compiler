@@ -41,6 +41,7 @@
 #define _NODE_TYPE_CLASS 38
 #define _NODE_TYPE_NEW 39
 #define _NODE_TYPE_DELETE 40
+#define _NODE_TYPE_METHOD_CALL 41
 
 
 

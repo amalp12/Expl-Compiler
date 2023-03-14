@@ -17,6 +17,7 @@
         "limits": "c",
         "ratio": "c",
         "tuple": "c",
-        "variant": "c"
+        "variant": "c",
+        "class.h": "c"
     }
 }

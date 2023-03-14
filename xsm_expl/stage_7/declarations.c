@@ -71,12 +71,16 @@ int isGlobalDeclarationStackEmpty()
 
 void popAllGlobalDeclarationsAndCreateEntry(char * typeName)
 {
-    // search type table for type
+    // search type table for stuct type
     struct TypeTable *typeEntry = typeLookup(typeName);
 
+    
+    // search if its a class 
+    struct ClassTable *classEntry = classLookup(typeName);
+
     // if type not found, throw error
-    if (typeEntry == NULL) {
-        printf("Error: Type %s not found\n", typeName);
+    if (typeEntry == NULL && classEntry == NULL) {
+        printf("Error: %s not a class or a struct that is defined\n", typeName);
         exit(1);
     }
 
@@ -89,7 +93,7 @@ void popAllGlobalDeclarationsAndCreateEntry(char * typeName)
         if(temp->node->left != NULL) rows = temp->node->left->val;
         if(temp->node->right != NULL) cols = temp->node->right->val;
         
-        GSTInstall(temp->node->varname, typeEntry,temp->node->nodetype, 0,rows, cols);
+        GSTInstall(temp->node->varname, typeEntry, classEntry, temp->node->nodetype, 0,rows, cols);
         // getting the enty
         struct GlobalSymbolTable *entry = GSTLookup(temp->node->varname);
         // adding the parameters
@@ -97,7 +101,7 @@ void popAllGlobalDeclarationsAndCreateEntry(char * typeName)
 
         while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
         {
-            entry->paramList = AddToParameterList(entry->paramList, param->varname, param->type, rows, cols);
+            entry->paramList = AddToParameterList(entry->paramList, param->varname, param->type, param->classType, rows, cols);
             param = param->left;
         }
 
@@ -195,11 +199,14 @@ void popAllLocalDeclarationsAndCreateEntry(char * typeName)
         temp = popLocalDeclaration();
 
     }
-    // if class is being declared
-    if(getCurrentClassBeingDefined()!=NULL)
+    // if class is being declared and self is not declared
+    if(getCurrentClassBeingDefined()!=NULL && LSTLookup("self")==NULL)
     {
         // add self to the local symbol table
         LSTInstall("self", NULL, 0,0, 0);
+        // intall it in class too
+        struct ClassTable *classEntry = getCurrentClassBeingDefined();
+        classFieldInstall(classEntry, "int", "self");
         // get lst entry and add class type
         struct LocalSymbolTable *LSTEntry = LSTLookup("self");
         LSTEntry->classType = getCurrentClassBeingDefined();
@@ -208,66 +215,6 @@ void popAllLocalDeclarationsAndCreateEntry(char * typeName)
 }
 
 
-void popAllClassLocalDeclarationsAndCreateEntry(char * className)
-{
-    // search type table for type
-    struct ClassTable *classEntry = classLookup(className);
-
-    // if class not found, throw error
-    if (classEntry == NULL) 
-    {
-        printf("Error: Class %s not found\n", className);
-        exit(1);
-    }
-   
-
-
-    struct declaration_node * temp = popLocalDeclaration();
-    while(temp!=NULL)
-    {
-        // check if the node is function definition
-        if(temp->node->nodetype == _NODE_TYPE_FUNCTION_DEFINITION)
-        {
-            // create parameter List for the function
-            struct ParameterNode *paramList = NULL;
-            struct expr_tree_node *param = temp->node->left;
-            
-
-            while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
-            {
-                paramList = AddToParameterList(paramList, param->varname, param->type, param->left->val, param->right->val);
-                param = param->left;
-            }
-
-
-            classMethodInstall (classEntry, temp->node->varname, temp->node->type, paramList) ;
-            LSTInstall(temp->node->varname, temp->node->type, 0,0, 0);
-
-            // 
-
-        }
-        else // unknown node so throw error and exit
-        {
-            printf("Error: Unknown node type %d\n", temp->node->nodetype);
-            exit(1);
-        }
-        
-        free(temp);
-        temp = popLocalDeclaration();
-
-    }
-    // create an LST entry for the self
-    // if class is being declared
-    if(getCurrentClassBeingDefined()!=NULL)
-    {
-        // add self to the local symbol table
-        LSTInstall("self", NULL, 0,0, 0);
-        // get lst entry and add class type
-        struct LocalSymbolTable *LSTEntry = LSTLookup("self");
-        LSTEntry->classType = getCurrentClassBeingDefined();
-    }
-
-}
 
 void declareMethod( struct expr_tree_node * node)
 {
@@ -292,7 +239,7 @@ void declareMethod( struct expr_tree_node * node)
     struct expr_tree_node *param = node->left;
     while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
     {
-        paramList = AddToParameterList(paramList, param->varname, param->type, 0, 0);
+        paramList = AddToParameterList(paramList, param->varname, param->type, param->classType, 0, 0);
         param = param->left;
     }
     classMethodInstall (classEntry, node->varname, node->type, paramList) ;

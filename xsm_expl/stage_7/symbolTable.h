@@ -48,7 +48,7 @@ int max(int a, int  b);
 int min(int a, int b);
 
 
-void GSTInstall(char * varname,struct TypeTable * type,int nodetype, int offset, int rows, int cols);   // Creates a symbol table entry.
+void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * classType,int nodetype, int offset, int rows, int cols);   // Creates a symbol table entry.
 
 void LSTInstall(char * varname, struct TypeTable * type, int offset, int rows, int cols) ;  // Creates a symbol table entry.
 

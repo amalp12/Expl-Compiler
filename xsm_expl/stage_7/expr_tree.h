@@ -48,7 +48,8 @@ struct expr_tree_node
 
 };
 
-struct expr_tree_node * makeNode(int val, int nodetype, struct TypeTable *type,  char* varname, struct GlobalSymbolTable * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r);
+struct expr_tree_node * makeNode(int val, int nodetype, struct TypeTable * type, struct ClassTable * classType, char* varname, struct GlobalSymbolTable * GSTEntry, struct expr_tree_node *l, struct expr_tree_node *r);
+
 struct expr_tree_node * makeConnectorNode( struct expr_tree_node *l, struct expr_tree_node *r);
 
 struct expr_tree_node * makeReadNode(struct expr_tree_node *id);
@@ -102,3 +103,7 @@ struct expr_tree_node * makeHeapAllocateNode();
 struct expr_tree_node * makeHeapFreeNode(struct expr_tree_node *l);
 
 struct expr_tree_node * makeNewNode(char * className );
+
+void fieldCall(struct expr_tree_node * leftFieldNode, struct expr_tree_node * rightFieldNode);
+
+struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * afterDotNode, struct expr_tree_node *parameters);

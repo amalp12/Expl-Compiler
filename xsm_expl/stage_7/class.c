@@ -32,12 +32,7 @@ struct ClassTable* classLookup(char * className)
         }
         temp = temp->next;
     }
-    // no class found
-    if(temp == NULL)
-    {
-        printf("Class %s not found.\n",className);
-        exit(1);
-    }
+    
 
     return NULL;
 }

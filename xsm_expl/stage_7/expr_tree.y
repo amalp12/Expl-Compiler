@@ -166,7 +166,7 @@ MainBlock :
     Type MAIN '(' ')' '{' LDeclBlock Body '}'
     {
   
-      // printGST();
+
       // declare main function
       printf("Generating Assembly Code... \n");
       declareMain();
@@ -199,18 +199,21 @@ ClassDefList :
     ClassDefList ClassDef
     {
       defineClass($<node>2, target_file);
+      // reset 
+      resetCurrentClassBeingDefined();
+
     }
   | ClassDef
     {
       defineClass($<node>1, target_file);
+      // reset
+      resetCurrentClassBeingDefined();
     }
 ;
 
 ClassDef  : 
     ClassName '{' DECL ClassFieldLists ClassMethodDeclList ENDDECL ClassMethodDefns '}'
     {
-      popAllClassLocalDeclarationsAndCreateEntry($<string>1);
-
       
       // class name, class fields, class methods declarations, class methods definitions
       $<node>$ = makeClassNode($<string>1, $<typeField>4, $<node>7);
@@ -291,36 +294,20 @@ ClassParamList :
 ClassMethodDefns:
     ClassMethodDefns ClassFunctionDef
     {
-      insertIntoMethodTree($<node>1, $<node>2);
-      $<node>$ = $<node>1;
+      popAllLocalDeclarationsAndCreateEntry(NULL);
     }
   | ClassFunctionDef
   {
-    $<node>$ = makeConnectorNode(NULL, $<node>1);
+    popAllLocalDeclarationsAndCreateEntry(NULL);
   }
 ;
 
 
 ClassFunctionDef :
-    Type ID '(' ParamList ')' '{' LDeclBlock ClassFunctionBody '}'
+    Type ID '(' ParamList ')' '{' LDeclBlock Body '}'
     {
-
       struct expr_tree_node * funcNode = makeMethodDefinitionNode($<string>1, $<string>2, $<node>4, $<node>8);
       defineClassMethod(getCurrentClassBeingDefined(),funcNode, target_file);
-      $<node>$ = funcNode;
-    }
-;
-
-ClassFunctionBody :
-    START Slist ReturnStmt END  
-    {
-      $<node>$ = makeConnectorNode($<node>3,$<node>2);
-
-    }
-  | START ReturnStmt END 
-    {
-      $<node>$ = makeConnectorNode($<node>3,NULL);
-      $<node>$ = NULL;
     }
 ;
 
@@ -330,48 +317,58 @@ ClassFunctionBody :
 
 
 
-ClassField  :
-    SELF '.' ID 
-    {
-      // make field nodes
-      struct expr_tree_node * rightFieldNode  = makeFieldNode($<string>3, NULL,NULL);
-      struct expr_tree_node * leftFieldNode  = makeFieldNode("self",rightFieldNode,NULL);
-      leftFieldNode->classType = getCurrentClassBeingDefined();
+
+// ClassField  :
+//     SELF '.' ID 
+//     {
+//       // make field nodes
+//       struct expr_tree_node * rightFieldNode  = makeFieldNode($<string>3, NULL,NULL);
+//       struct expr_tree_node * leftFieldNode  = makeFieldNode("self",rightFieldNode,NULL);
+//       leftFieldNode->classType = getCurrentClassBeingDefined();
 
       
  
-      // get the type of the right field node
-      struct FieldList * rightType = classFieldLookup(leftFieldNode->classType, rightFieldNode->varname);
-      // if right type is null
-      if(rightType == NULL)
-      {
-        yyerror("Field not found in class \n");
-        exit(1);
-      }
+//       // get the type of the right field node
+//       struct FieldList * rightType = classFieldLookup(leftFieldNode->classType, rightFieldNode->varname);
+//       // if right type is null
+//       if(rightType == NULL)
+//       {
+//         yyerror("Field not found in class \n");
+//         exit(1);
+//       }
      
-      // set the type of the right field node
-      rightFieldNode->type = rightType->type;
-      $<node>$ = leftFieldNode;
+//       // set the type of the right field node
+//       rightFieldNode->type = rightType->type;
+//       $<node>$ = leftFieldNode;
 
 
-    }
-  | ClassField '.' ID
-    {
-      insertIntoClassFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
-      $<node>$ = $<node>1;
+//     }
+//   | ClassField '.' ID
+//     {
+//       insertIntoClassFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
+//       $<node>$ = $<node>1;
 
-    }
-;
+//     }
+// ;
 
 ClassFieldFunction  :
-    SELF '.' ID '(' ClassArgList ')'
-  | ID '.' ID '(' ClassArgList ')'   //This will not occur inside a class.
-  | ClassField '.' ID '(' ClassArgList ')'
+    SELF '.' ID '(' ArgList ')'
+  {
+    $<node>$ = makeMethodCallNode($<string>3, makeIdNode("self"), $<node>5);
+
+  }
+  | ID '.' ID '(' ArgList ')' // This will not occur inside a class
+  {
+    $<node>$ = makeMethodCallNode($<string>3, makeIdNode($<string>1), $<node>5);
+
+  }
+  | Field '.' ID '(' ArgList ')'
+  {
+    $<node>$ = makeMethodCallNode($<string>3, $<node>1, $<node>5);
+  }
 ;
 
-ClassArgList: 
-  ClassArgList ',' expr
-  | expr
+
 ;
 // ------------------- TypeDeclBlock ---------------------------------------------
 TypeDefBlock :
@@ -411,13 +408,19 @@ TypeFieldDecl :
 
 
 
-TypeField : 
-    TypeField '.' ID 
+Field : 
+    Field '.' ID 
     { 
-      insertIntoTypeFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
+      insertIntoClassFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
       $<node>$ = $<node>1;
+
       
     }
+  | ClassFieldFunction
+  {
+    $<node>$ = $<node>1;
+  }
+
   | ID '.' ID 
     { 
 
@@ -425,39 +428,37 @@ TypeField :
       struct expr_tree_node * rightFieldNode  = makeFieldNode($<string>3, NULL,NULL);
       struct expr_tree_node * leftFieldNode  = makeFieldNode($<string>1,rightFieldNode,NULL);
 
-      // get the LST entry for the variable
-      struct LocalSymbolTable * lstEntry = LSTLookup($<string>1);
-      // if lst entry is not null
-      if(lstEntry != NULL)
+      fieldCall(leftFieldNode,rightFieldNode);
+
+      $<node>$ = leftFieldNode;
+
+
+    }
+  | SELF '.' ID 
+    {
+      // make field nodes
+      struct expr_tree_node * rightFieldNode  = makeFieldNode($<string>3, NULL,NULL);
+      struct expr_tree_node * leftFieldNode  = makeFieldNode("self",rightFieldNode,NULL);
+      leftFieldNode->classType = getCurrentClassBeingDefined();
+
+      // if left class type is null
+      if(leftFieldNode->classType == NULL)
       {
-        // set the type of the left field node
-        leftFieldNode->type = lstEntry->type;
-      }
-      else
-      {
-        // get the GST entry for the variable
-        struct GlobalSymbolTable * gstEntry = GSTLookup($<string>1);
-        // if gst entry is not null
-        if(gstEntry != NULL)
-        {
-          // set the type of the left field node
-          leftFieldNode->type = gstEntry->type;
-        }
-        else
-        {
-          // error
-          printf("Error: Variable %s not declared \n", $<string>1);
-          exit(1);
-        }
-      } 
-      // get the type of the right field node
-      struct FieldList * rightType = typeFieldLookup(leftFieldNode->type, $<string>3);
-      // if right type is null throw error
-      if(rightType == NULL)
-      {
-        printf("Error: Field %s not found in type %s \n", $<string>3, leftFieldNode->type->name);
+        yyerror("Self not declared. Self can only be used inside classes.\n");
         exit(1);
       }
+
+      
+ 
+      // get the type of the right field node
+      struct FieldList * rightType = classFieldLookup(leftFieldNode->classType, rightFieldNode->varname);
+      // if right type is null
+      if(rightType == NULL)
+      {
+        yyerror("Field not found in class \n");
+        exit(1);
+      }
+     
       // set the type of the right field node
       rightFieldNode->type = rightType->type;
       $<node>$ = leftFieldNode;
@@ -605,8 +606,6 @@ identifierUse:
       idNode->right = $<node>6; 
       $<node>$ = idNode;
     }
-  | TypeField {$<node>$ = $<node>1;}
-  | ClassField {$<node>$ = $<node>1;}
   | INITIALIZE '(' ')' 
     {
       $<node>$ = makeHeapInitNode();
@@ -619,11 +618,15 @@ identifierUse:
     {
       $<node>$ = makeHeapFreeNode($<node>3);
     }
-  | NEW '(' ID ')' SEMICOLON
+  | NEW '(' ID ')' 
   {
     $<node>$ = makeNewNode($<string>3);
   }
-  | ClassFieldFunction {$<node>$ = $<node>1;}
+  | Field 
+  {
+    $<node>$ = $<node>1;
+  }
+
 ;
 
 
@@ -638,6 +641,7 @@ FDefBlock :
     | FDef
       {
       }
+    
 ;
 
 FDef :
@@ -647,7 +651,7 @@ FDef :
       defineFunction(funcNode, target_file);
       $<node>$ = funcNode;
     }
-
+    
   
 ;
 
@@ -659,8 +663,7 @@ Body :
     }
   | START ReturnStmt END 
     {
-      $<node>$ = makeConnectorNode($<node>3,NULL);
-      $<node>$ = NULL;
+      $<node>$ = makeConnectorNode($<node>2,NULL);
     }
 ;
 
@@ -766,7 +769,7 @@ Stmt :
 ;
 
 ClassDeleteStmt :
-  DELETE '(' ClassField ')' SEMICOLON
+  DELETE '(' ID ')' SEMICOLON
 ;
 
 ReturnStmt : 
@@ -856,6 +859,7 @@ expr :
   | ID '(' ')' {$<node>$ = makeFunctionCallNode($<string>1,NULL);}
   | ID '(' ArgList ')' {$<node>$ = makeFunctionCallNode($<string>1,$<node>3);}
   | NULLVAL  {$<node>$ = makeNullNode();}
+
 ;
 
 %%

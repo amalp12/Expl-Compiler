@@ -1094,6 +1094,76 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
 
         }
+         case (_NODE_TYPE_METHOD_CALL):
+        {
+            // push all used registers
+            int highestUsedRegister = saveRegisters(target_file);
+
+            // get the class type of the object
+            struct ClassTable * classType = t->right->classType;
+            // if class not defined
+            if (classType == NULL)
+            {
+                printf("Error : Class not defined : %s\n", t->right->varname);
+                exit(1);
+            }
+
+            // Check if function exists in class
+
+            struct ClassMemberFunctionList * method = classMethodLookup(classType, t->varname);
+
+            if (method == NULL)
+            {
+                printf("Error : Method not found : %s in class %s\n", t->varname, classType->name);
+                exit(1);
+            }
+
+            
+            // get the address of the object
+            reg_index objectAddressReg = codeGen(t->right, target_file);
+
+            // before pushing the parameters push the object address (self)
+            fprintf(target_file, "PUSH R%d\n", objectAddressReg);
+            
+
+            // push all parameters on the stack in reverse and assign them their relative binding addresses
+            pushFunctionParametersInReverse(t->left, target_file);
+
+
+
+            // push the return value reg
+            reg_index returnReg = getFreeReg();
+            fprintf(target_file, "PUSH R%d\n", returnReg);
+            //Call the function
+            fprintf(target_file, "CALL _F%d\n", method->functionLabel);
+
+
+            // when it it return pop the return value
+            fprintf(target_file, "POP R%d\n", returnReg);
+            
+            
+            // pop function parameters from the stack
+            struct ParameterNode * temp = method->paramList;
+            return_val = returnReg;
+            
+
+
+            reg_index dummyRegister = getFreeReg();
+            while (temp != NULL )
+            {
+                fprintf(target_file, "POP R%d\n", dummyRegister);
+                temp = temp->next;
+            }
+            freeLastReg();
+            
+
+            //  restore all used registers
+            return_val = restoreRegistersAndGetReturnValueReg(target_file, highestUsedRegister, returnReg);
+            break;
+
+
+        }
+        
         case (_NODE_TYPE_RETURN):
         {
             return_val = -1; 
