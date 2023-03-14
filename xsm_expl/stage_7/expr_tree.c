@@ -249,7 +249,7 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
     while(temp != NULL && temp2 != NULL){
         if(temp->right->type != temp2->type)
         {
-            printf("Function Call Node Error: Type mismatch in function call %s", name);
+            printf("Function Call Node Error: Type mismatch in function call %s\n", name);
             exit(1);
         }
         temp = temp->left;
@@ -294,14 +294,14 @@ struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * 
     {
         if(temp->right->type != temp2->type)
         {
-            printf("Function Call Node Error: Type mismatch in function call %s", name);
+            printf("Function Call Node Error: Type mismatch in function call %s\n", name);
             exit(1);
         }
         temp = temp->left;
         temp2 = temp2->prev;
     }
    
-    return makeNode(_NONE, _NODE_TYPE_METHOD_CALL, NULL, classEntry,name , NULL, parameters,afterDotNode);
+    return makeNode(_NONE, _NODE_TYPE_METHOD_CALL, methodEntry->type, classEntry,name , NULL, parameters,afterDotNode);
 
 }
 

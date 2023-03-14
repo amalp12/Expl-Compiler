@@ -10,6 +10,11 @@
 #include <stdlib.h>
 #endif
 
+#ifndef _UNISTD_H
+#define _UNISTD_H
+#include <unistd.h>
+#endif
+
 #ifndef _STRING_H
 #define _STRING_H
 #include <string.h>
@@ -122,6 +127,14 @@ int yylex(void);
 
 Program : 
     TypeDefBlock ClassDefBlock GDeclBlock FDefBlock MainBlock
+    {
+      exit(1);
+    }
+  | ClassDefBlock GDeclBlock FDefBlock MainBlock
+    {
+      exit(1);
+    }
+  | TypeDefBlock ClassDefBlock GDeclBlock MainBlock
     {
       exit(1);
     }
@@ -312,59 +325,128 @@ ClassFunctionDef :
 ;
 
 
-
-
-
-
-
-
-// ClassField  :
-//     SELF '.' ID 
-//     {
-//       // make field nodes
-//       struct expr_tree_node * rightFieldNode  = makeFieldNode($<string>3, NULL,NULL);
-//       struct expr_tree_node * leftFieldNode  = makeFieldNode("self",rightFieldNode,NULL);
-//       leftFieldNode->classType = getCurrentClassBeingDefined();
-
-      
- 
-//       // get the type of the right field node
-//       struct FieldList * rightType = classFieldLookup(leftFieldNode->classType, rightFieldNode->varname);
-//       // if right type is null
-//       if(rightType == NULL)
-//       {
-//         yyerror("Field not found in class \n");
-//         exit(1);
-//       }
-     
-//       // set the type of the right field node
-//       rightFieldNode->type = rightType->type;
-//       $<node>$ = leftFieldNode;
-
-
-//     }
-//   | ClassField '.' ID
-//     {
-//       insertIntoClassFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
-//       $<node>$ = $<node>1;
-
-//     }
-// ;
-
 ClassFieldFunction  :
     SELF '.' ID '(' ArgList ')'
   {
-    $<node>$ = makeMethodCallNode($<string>3, makeIdNode("self"), $<node>5);
+    struct expr_tree_node * idNode = makeIdNode("self");
+    // get current class being defined
+    struct ClassTable * currentClass = getCurrentClassBeingDefined();
+    // if current class is null
+    if(currentClass == NULL)
+    {
+      yyerror("Self can only be used inside a class \n");
+      exit(1);
+    }
+    idNode->classType = currentClass;
+    $<node>$ = makeMethodCallNode($<string>3,idNode , $<node>5);
+
+  }
+  | SELF '.' ID '(' ')'
+  {
+    struct expr_tree_node * idNode = makeIdNode("self");
+    // get current class being defined
+    struct ClassTable * currentClass = getCurrentClassBeingDefined();
+    // if current class is null
+    if(currentClass == NULL)
+    {
+      printf("Self can only be used inside a class \n");
+      exit(1);
+    }
+    idNode->classType = currentClass;
+    $<node>$ = makeMethodCallNode($<string>3, idNode, NULL);
 
   }
   | ID '.' ID '(' ArgList ')' // This will not occur inside a class
   {
-    $<node>$ = makeMethodCallNode($<string>3, makeIdNode($<string>1), $<node>5);
+    struct expr_tree_node * idNode = makeIdNode($<string>1);
+    // search the id in the local symbol table
+    struct LocalSymbolTable * LSTEntry = LSTLookup(idNode->varname);
+
+    // search the id in the global symbol table
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(idNode->varname);
+
+    // if both not found
+    if(GSTEntry == NULL && LSTEntry == NULL)
+    {
+      printf("Variable %s not declared \n", idNode->varname);
+      exit(1);
+    }
+    // if found in local symbol table
+    if(LSTEntry != NULL)
+    {
+      idNode->classType = LSTEntry->classType;
+      // variable the id is not a class thow error
+      if(idNode->classType == NULL)
+      {
+        printf("Variable %s is not a class \n", idNode->varname);
+        exit(1);
+      }
+    }    
+    // if found in global symbol table
+    if(GSTEntry != NULL)
+    {
+      idNode->classType = GSTEntry->classType;
+      // variable the id is not a class thow error
+      if(idNode->classType == NULL)
+      {
+        printf("Variable %s is not a class \n", idNode->varname);
+        exit(1);
+      }
+    }
+
+
+    $<node>$ = makeMethodCallNode($<string>3, idNode, $<node>5);
+
+  }
+  | ID '.' ID '(' ')' // This will not occur inside a class
+  {
+    struct expr_tree_node * idNode = makeIdNode($<string>1);
+    // search the id in the local symbol table
+    struct LocalSymbolTable * LSTEntry = LSTLookup(idNode->varname);
+
+    // search the id in the global symbol table
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(idNode->varname);
+
+    // if both not found
+    if(GSTEntry == NULL && LSTEntry == NULL)
+    {
+      printf("Variable %s not declared \n", idNode->varname);
+      exit(1);
+    }
+    // if found in local symbol table
+    if(LSTEntry != NULL)
+    {
+      idNode->classType = LSTEntry->classType;
+      // variable the id is not a class thow error
+      if(idNode->classType == NULL)
+      {
+        printf("Variable %s is not a class \n", idNode->varname);
+        exit(1);
+      }
+    }    
+    // if found in global symbol table
+    if(GSTEntry != NULL)
+    {
+      idNode->classType = GSTEntry->classType;
+      // variable the id is not a class thow error
+      if(idNode->classType == NULL)
+      {
+        printf("Variable %s is not a class \n", idNode->varname);
+        exit(1);
+      }
+    }
+
+
+    $<node>$ = makeMethodCallNode($<string>3, idNode, NULL);
 
   }
   | Field '.' ID '(' ArgList ')'
   {
     $<node>$ = makeMethodCallNode($<string>3, $<node>1, $<node>5);
+  }
+  | Field '.' ID '('  ')'
+  {
+    $<node>$ = makeMethodCallNode($<string>3, $<node>1, NULL);
   }
 ;
 
@@ -416,10 +498,6 @@ Field :
 
       
     }
-  | ClassFieldFunction
-  {
-    $<node>$ = $<node>1;
-  }
 
   | ID '.' ID 
     { 
@@ -626,6 +704,10 @@ identifierUse:
   {
     $<node>$ = $<node>1;
   }
+  | ClassFieldFunction
+  {
+    $<node>$ = $<node>1;
+  }
 
 ;
 
@@ -744,6 +826,7 @@ ArgList :
     {
       $<node>$ =makeConnectorNode(NULL,$<node>1);
     }
+    
 ;
 // -----------------------------------------------------------------------------------------
 
@@ -874,7 +957,7 @@ int main()
 {
 
   FILE * input_file=fopen("input.expl","r");
-  target_file = fopen("untranslated_assembly.xsm","w");
+  target_file = fopen("untranslated_assembly.xsm","w+");
   // Initializing Type Table
   typeTableCreate();
   _INIT_STATE = _FALSE;

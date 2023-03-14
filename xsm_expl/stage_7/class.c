@@ -43,9 +43,10 @@ void classFieldInstall(struct ClassTable * classPtr, char * typeName, char *name
     struct FieldList * newField = (struct FieldList *)malloc(sizeof(struct FieldList));
     newField->name = strdup(name);
     newField->type = typeLookup(typeName);
+    newField->classType = classLookup(typeName);
 
     // check if type found
-    if(newField->type == NULL)
+    if(newField->type == NULL && newField->classType == NULL)
     {
         printf("Type %s in class definition %s not found.\n",typeName,classPtr->name);
         exit(1);

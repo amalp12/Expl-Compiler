@@ -67,7 +67,7 @@ int restoreRegistersAndGetReturnValueReg(FILE * target_file, int last_used_regis
     return _LAST_USED_REGISTER;
 }
 
-void write(reg_index reg_number, FILE * target_file)
+void explWrite(reg_index reg_number, FILE * target_file)
 {
     for(int i = 0 ; i <= _LAST_USED_REGISTER; i++)
     {
@@ -103,7 +103,7 @@ void write(reg_index reg_number, FILE * target_file)
 reg_index initializeHeap(FILE * target_file)
 {
     int last_used_register = _LAST_USED_REGISTER;
-    for(int i = 0 ; i <= _LAST_USED_REGISTER; i++)
+    for(int i = 0 ; i <= last_used_register; i++)
     {
         fprintf(target_file, "PUSH R%d\n", i);
 
@@ -216,7 +216,7 @@ reg_index freeHeap(reg_index inputReg, FILE * target_file)
 }
 
 
-void read(reg_index reg_number, FILE * target_file)
+void explRead(reg_index reg_number, FILE * target_file)
 {
     for(int i = 0 ; i <= _LAST_USED_REGISTER; i++)
     {
@@ -652,7 +652,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             reg_index rightReg = codeGen(t->right, target_file);
 
 
-            read(leftReg, target_file);
+            explRead(leftReg, target_file);
             freeLastReg();
             return_val = -1;
             break;
@@ -670,7 +670,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
                 fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
             }
 
-            write(leftReg, target_file);
+            explWrite(leftReg, target_file);
             freeLastReg();
             return_val = -1;
             break;
@@ -1090,6 +1090,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
             //  restore all used registers
             return_val = restoreRegistersAndGetReturnValueReg(target_file, highestUsedRegister, returnReg);
+
             break;
 
 
@@ -1122,10 +1123,17 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // get the address of the object
             reg_index objectAddressReg = codeGen(t->right, target_file);
 
+            // if the object is id then get the address of the object
+            if (t->right->nodetype == _NODE_TYPE_ID)
+            {
+                // get the address of the object
+                fprintf(target_file, "MOV R%d, [R%d]\n", objectAddressReg, objectAddressReg);
+            }
+            
+
             // before pushing the parameters push the object address (self)
             fprintf(target_file, "PUSH R%d\n", objectAddressReg);
             
-
             // push all parameters on the stack in reverse and assign them their relative binding addresses
             pushFunctionParametersInReverse(t->left, target_file);
 
@@ -1134,21 +1142,22 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // push the return value reg
             reg_index returnReg = getFreeReg();
             fprintf(target_file, "PUSH R%d\n", returnReg);
+
             //Call the function
             fprintf(target_file, "CALL _F%d\n", method->functionLabel);
 
-
+          
             // when it it return pop the return value
             fprintf(target_file, "POP R%d\n", returnReg);
             
             
             // pop function parameters from the stack
             struct ParameterNode * temp = method->paramList;
-            return_val = returnReg;
             
 
 
-            reg_index dummyRegister = getFreeReg();
+            reg_index dummyRegister = getFreeReg();            // pop self from the stack
+            // pop all parameters from the stack (this includes self also)
             while (temp != NULL )
             {
                 fprintf(target_file, "POP R%d\n", dummyRegister);
@@ -1156,9 +1165,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             }
             freeLastReg();
             
-
             //  restore all used registers
             return_val = restoreRegistersAndGetReturnValueReg(target_file, highestUsedRegister, returnReg);
+            
             break;
 
 
@@ -1272,25 +1281,19 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_HEAP_INIT):
         {
-            // backend code for heap initialization
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            reg_index leftReg = codeGen(t->left, target_file);
-            reg_index rightReg = codeGen(t->right, target_file);
-
-            // both the left and right trees should return -1
-            if(leftReg != -1 || rightReg != -1)
-            {
-                printf("Error: Heap Initialization can only be done with constants");
-                exit(1);
-            }
-
             
             return_val = initializeHeap(target_file);;
             break;
 
         }
         case (_NODE_TYPE_HEAP_ALLOC):
+        {
+            // backend code for allocation
+            // Evaluating the left tree
+            return_val = allocHeap(target_file);
+            break;
+        }
+        case (_NODE_TYPE_NEW):
         {
             // backend code for allocation
             // Evaluating the left tree
@@ -1431,10 +1434,32 @@ void printInfix(struct expr_tree_node * t)
 
 }
 
+void printStringAtBeginning(FILE *fp, const char *str) {
+    long int currentPosition = ftell(fp); // get the current position of the file pointer
+    rewind(fp); // move the file pointer to the beginning of the file
+    fputs(str, fp); // print the string at the beginning of the file
+    fseek(fp, currentPosition, SEEK_SET); // move the file pointer back to its original position
+}
+void deleteFileContents(FILE *fp) {
+    fseek(fp, 0, SEEK_SET); // move the file pointer to the beginning of the file
+    ftruncate(fileno(fp), 0); // truncate the file to zero bytes
+}
 
 void explInit(FILE * target_file)
 {
 
+    long int currentPosition = ftell(target_file); // get the current position of the file pointer
+    char *buffer; // create a buffer to store the contents of the file
+    size_t bufferSize;
+    fseek(target_file, 0, SEEK_END); // move the file pointer to the end of the file
+    bufferSize = ftell(target_file); // get the size of the file
+    rewind(target_file); // move the file pointer to the beginning of the file
+
+    buffer = (char *) malloc((bufferSize + 1)*sizeof(char)); // allocate memory for the buffer
+    fread(buffer, sizeof(char), bufferSize, target_file); // read the contents of the file into the buffer
+    buffer[bufferSize] = '\0'; // add null terminator to the end of the buffer
+    
+    deleteFileContents(target_file); // delete the contents of the file
 
     fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
     fprintf(target_file, "MOV SP, %d\n",_STACK_POINTER);
@@ -1446,6 +1471,11 @@ void explInit(FILE * target_file)
     
     // calling int 10
     fprintf(target_file, "INT 10\n");
+
+    fprintf(target_file, "%s", buffer); // print the contents of the file after the string
+    free(buffer); // free the memory used by the buffer
+
+
     
 }
 
@@ -1655,16 +1685,8 @@ void classMethodCodegen(struct ClassTable * classPtr, struct expr_tree_node * t,
     int nodeParamCount = 0;
 
     // search for self
-    struct LocalSymbolTable * LSTEntry = LSTLookup("self");
+    struct LocalSymbolTable * LSTEntry ;
 
-    // throw error is self is not found
-    if(LSTEntry==NULL)
-    {
-        printf("Error: Parameter self not declared.\n");
-        exit(1);
-    }
-    LSTEntry->binding = currentBindingAddress;
-    currentBindingAddress-=_STACK_UNIT_SIZE;
 
     while(methodNodeParameters!=NULL)
     {
@@ -1694,7 +1716,16 @@ void classMethodCodegen(struct ClassTable * classPtr, struct expr_tree_node * t,
         methodNodeParameters = methodNodeParameters->left;
     }
    
+    LSTEntry = LSTLookup("self");
 
+    // throw error is self is not found
+    if(LSTEntry==NULL)
+    {
+        printf("Error: Parameter self not declared.\n");
+        exit(1);
+    }
+    LSTEntry->binding = currentBindingAddress;
+    currentBindingAddress-=_STACK_UNIT_SIZE;
  
     // pushing previous BP to the stack
     fprintf(target_file, "PUSH BP\n");
