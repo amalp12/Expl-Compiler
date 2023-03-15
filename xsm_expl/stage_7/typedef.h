@@ -100,7 +100,7 @@ int _BASE_POINTER;
 // heap 
 int _HEAP_POINTER; // Before the start of the program, reserve a large area of the address space for heap. The ExpOS memory model suggests that the address region 1024-2047 may be used for this purpose.
 
-
-
+// initial state to decide when to print the starter code (header plus calling main functiona and exit)
+int _INIT_STATE ;
 
 

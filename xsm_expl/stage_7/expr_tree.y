@@ -88,7 +88,7 @@ extern FILE* yyin;
 extern char * yytext;
 extern int yylineno; 
 FILE * target_file ;
-int _INIT_STATE ;
+
 
 int yylex(void);
 
@@ -126,56 +126,9 @@ int yylex(void);
 
 
 Program : 
-    ClassDefBlock GDeclBlock MainBlock
-    {
-      exit(1);
-    }
-    TypeDefBlock ClassDefBlock GDeclBlock FDefBlock MainBlock
-    {
-      exit(1);
-    }
-  | ClassDefBlock GDeclBlock FDefBlock MainBlock
-    {
-      exit(1);
-    }
-  | TypeDefBlock ClassDefBlock GDeclBlock MainBlock
-    {
-      exit(1);
-    }
-  |  TypeDefBlock GDeclBlock FDefBlock MainBlock
-    {
-    
-      exit(1);
-    }
-  | TypeDefBlock GDeclBlock MainBlock
-    {
-    
-      exit(1);
-    }
-  | TypeDefBlock FDefBlock MainBlock
-    {
-    
-      exit(1);
-    }
-  | TypeDefBlock MainBlock
-    {
-    
-      exit(1);
-    }
-  | GDeclBlock FDefBlock MainBlock
-    {
-    
-      exit(1);
-    }  
-  | GDeclBlock MainBlock
-    {
 
-      exit(1);
-    }
-  | MainBlock
-    {
-      exit(1);
-    }
+    TypeDefBlock ClassDefBlock GDeclBlock FDefBlock MainBlock {exit(1);}
+    | TypeDefBlock ClassDefBlock GDeclBlock  MainBlock{exit(1);}
 
 ;
 
@@ -186,24 +139,10 @@ MainBlock :
 
       // declare main function
       printf("Generating Assembly Code... \n");
-      declareMain();
-      // if init state is false initialze
-      if(_INIT_STATE == _FALSE){
-        explInit(target_file);
-        _INIT_STATE = _TRUE;
-      }
-      struct expr_tree_node * funcNode = makeFunctionDefinitionNode($<string>1, "main", NULL, $<node>7);
-      defineFunction(funcNode, target_file);
-      $<node>$ = funcNode;
+      
+      $<node>$ =  declareAndDefineMain($<string>1, $<node>7, target_file);
 
-    
-      explEnd(target_file);
       printf("Complete \n");
-
-      if(target_file) fclose(target_file);
-
-
-    
     }
 
 ;
@@ -211,6 +150,7 @@ MainBlock :
 
 ClassDefBlock : 
     CLASS ClassDefList ENDCLASS
+  |
 ;
 ClassDefList : 
     ClassDefList ClassDef
@@ -228,10 +168,7 @@ ClassDefList :
 
 ClassDef  : 
     ClassName '{' DECL ClassFieldLists ClassMethodDeclList ENDDECL ClassMethodDefns '}'
-    {
-      
-      // class name, class fields, class methods declarations, class methods definitions
-    }
+
 ;
 
 ClassName :
@@ -250,6 +187,7 @@ ClassName :
 ClassFieldLists :
     ClassFieldLists ClassFieldDecl
     {
+      // make a linked list of fields
       $<typeField>2->next = $<typeField>1;
       $<typeField>$ = $<typeField>2;
     }
@@ -281,17 +219,15 @@ ClassMethodDeclList :
 ClassMethodDecl :
     Type ID '(' ClassParamList ')' SEMICOLON // {Class_Minstall(Cptr,$2->Name,Tlookup($1->Name),$4);}//Installing the method to class
   {
-    struct expr_tree_node * idNode = makeDeclareIdNode($<string>2, NULL);
-    idNode->nodetype = _NODE_TYPE_FUNCTION_DEFINITION;
-    idNode->left = $<node>4;
-    idNode->type = typeLookup($<string>1);
-    $<node>$ = idNode; 
+    
+    $<node>$ = makeMethodDeclareNode($<string>2, $<string>1, $<node>4);
+
   }
 ;
 ClassParamList :
     ClassParamList ',' Param 
     {
-
+      // make a tree of params such the left most is the first param
       $<node>1->left = $<node>3;
       $<node>$ = $<node>1;
     }
@@ -301,6 +237,7 @@ ClassParamList :
     }
   | 
     {
+      // paramters can also be empty
       $<node>$ = NULL;
     }
 ;
@@ -311,9 +248,9 @@ ClassMethodDefns:
       popAllLocalDeclarationsAndCreateEntry(NULL);
     }
   | ClassFunctionDef
-  {
-    popAllLocalDeclarationsAndCreateEntry(NULL);
-  }
+    {
+      popAllLocalDeclarationsAndCreateEntry(NULL);
+    }
 ;
 
 
@@ -329,116 +266,22 @@ ClassFunctionDef :
 ClassFieldFunction  :
     SELF '.' ID '(' ArgList ')'
   {
-    struct expr_tree_node * idNode = makeIdNode("self");
-    // get current class being defined
-    struct ClassTable * currentClass = getCurrentClassBeingDefined();
-    // if current class is null
-    if(currentClass == NULL)
-    {
-      yyerror("Self can only be used inside a class \n");
-      exit(1);
-    }
-    idNode->classType = currentClass;
-    $<node>$ = makeMethodCallNode($<string>3,idNode , $<node>5);
-
+    $<node>$ = makeSelfDotFunctionNode($<string>3, $<node>5);
   }
   | SELF '.' ID '(' ')'
   {
-    struct expr_tree_node * idNode = makeIdNode("self");
-    // get current class being defined
-    struct ClassTable * currentClass = getCurrentClassBeingDefined();
-    // if current class is null
-    if(currentClass == NULL)
-    {
-      printf("Self can only be used inside a class \n");
-      exit(1);
-    }
-    idNode->classType = currentClass;
-    $<node>$ = makeMethodCallNode($<string>3, idNode, NULL);
-
+    $<node>$ = makeSelfDotFunctionNode($<string>3, NULL);
   }
   | ID '.' ID '(' ArgList ')' // This will not occur inside a class
   {
-    struct expr_tree_node * idNode = makeIdNode($<string>1);
-    // search the id in the local symbol table
-    struct LocalSymbolTable * LSTEntry = LSTLookup(idNode->varname);
+    
 
-    // search the id in the global symbol table
-    struct GlobalSymbolTable * GSTEntry = GSTLookup(idNode->varname);
-
-    // if both not found
-    if(GSTEntry == NULL && LSTEntry == NULL)
-    {
-      printf("Variable %s not declared \n", idNode->varname);
-      exit(1);
-    }
-    // if found in local symbol table
-    if(LSTEntry != NULL)
-    {
-      idNode->classType = LSTEntry->classType;
-      // variable the id is not a class thow error
-      if(idNode->classType == NULL)
-      {
-        printf("Variable %s is not a class \n", idNode->varname);
-        exit(1);
-      }
-    }    
-    // if found in global symbol table
-    if(GSTEntry != NULL)
-    {
-      idNode->classType = GSTEntry->classType;
-      // variable the id is not a class thow error
-      if(idNode->classType == NULL)
-      {
-        printf("Variable %s is not a class \n", idNode->varname);
-        exit(1);
-      }
-    }
-
-
-    $<node>$ = makeMethodCallNode($<string>3, idNode, $<node>5);
+    $<node>$ = makeIdDotFunctionNode($<string>1, $<string>3, $<node>5);
 
   }
   | ID '.' ID '(' ')' // This will not occur inside a class
   {
-    struct expr_tree_node * idNode = makeIdNode($<string>1);
-    // search the id in the local symbol table
-    struct LocalSymbolTable * LSTEntry = LSTLookup(idNode->varname);
-
-    // search the id in the global symbol table
-    struct GlobalSymbolTable * GSTEntry = GSTLookup(idNode->varname);
-
-    // if both not found
-    if(GSTEntry == NULL && LSTEntry == NULL)
-    {
-      printf("Variable %s not declared \n", idNode->varname);
-      exit(1);
-    }
-    // if found in local symbol table
-    if(LSTEntry != NULL)
-    {
-      idNode->classType = LSTEntry->classType;
-      // variable the id is not a class thow error
-      if(idNode->classType == NULL)
-      {
-        printf("Variable %s is not a class \n", idNode->varname);
-        exit(1);
-      }
-    }    
-    // if found in global symbol table
-    if(GSTEntry != NULL)
-    {
-      idNode->classType = GSTEntry->classType;
-      // variable the id is not a class thow error
-      if(idNode->classType == NULL)
-      {
-        printf("Variable %s is not a class \n", idNode->varname);
-        exit(1);
-      }
-    }
-
-
-    $<node>$ = makeMethodCallNode($<string>3, idNode, NULL);
+    $<node>$ = makeIdDotFunctionNode($<string>1, $<string>3, $<node>5);
 
   }
   | Field '.' ID '(' ArgList ')'
@@ -456,6 +299,7 @@ ClassFieldFunction  :
 // ------------------- TypeDeclBlock ---------------------------------------------
 TypeDefBlock :
     TYPE TypeDefList ENDTYPE
+  |
 ;
 
 TypeDefList : 
@@ -486,85 +330,41 @@ TypeFieldDecl :
     Type ID SEMICOLON 
     {
       $<typeField>$ = createField($<string>1, $<string>2);
-    } // check if typename is defined
+    } 
 ;
-
 
 
 Field : 
     Field '.' ID 
     { 
-      insertIntoClassFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
+      insertIntoFieldTree($<node>1, makeFieldNode($<string>3, NULL, NULL));
       $<node>$ = $<node>1;
-
-      
     }
 
   | ID '.' ID 
     { 
-
-      // make field nodes
-      struct expr_tree_node * rightFieldNode  = makeFieldNode($<string>3, NULL,NULL);
-      struct expr_tree_node * leftFieldNode  = makeFieldNode($<string>1,rightFieldNode,NULL);
-
-      fieldCall(leftFieldNode,rightFieldNode);
-
-      $<node>$ = leftFieldNode;
-
-
+      // set up the types of the nodes
+      $<node>$ =  makeIdDotIdFieldNode($<string>1, $<string>3);
     }
   | SELF '.' ID 
     {
-      // make field nodes
-      struct expr_tree_node * rightFieldNode  = makeFieldNode($<string>3, NULL,NULL);
-      struct expr_tree_node * leftFieldNode  = makeFieldNode("self",rightFieldNode,NULL);
-      leftFieldNode->classType = getCurrentClassBeingDefined();
-
-      // if left class type is null
-      if(leftFieldNode->classType == NULL)
-      {
-        yyerror("Self not declared. Self can only be used inside classes.\n");
-        exit(1);
-      }
-
-      
- 
-      // get the type of the right field node
-      struct FieldList * rightType = classFieldLookup(leftFieldNode->classType, rightFieldNode->varname);
-      // if right type is null
-      if(rightType == NULL)
-      {
-        yyerror("Field not found in class \n");
-        exit(1);
-      }
-     
-      // set the type of the right field node
-      rightFieldNode->type = rightType->type;
-      // set the class type of the right field node
-      rightFieldNode->classType = rightType->classType;
-      $<node>$ = leftFieldNode;
-
-
+      $<node>$ = makeSelfDotIdFieldNode($<string>3);
     }
 ;
 // ------------------- GDeclBlock ---------------------------------------------
 GDeclBlock :
     DECL GDeclList ENDDECL 
     {
-      // if init state is false initialze
-      if(_INIT_STATE == _FALSE){
-        explInit(target_file);
-        _INIT_STATE = _TRUE;
-      }
+
+      compilerInit(target_file); // set up header and init code
+
     }
   | DECL ENDDECL
     {
-      // if init state is false initialze
-      if(_INIT_STATE == _FALSE){
-        explInit(target_file);
-        _INIT_STATE = _TRUE;
-      }
+      compilerInit(target_file); // set up header and init code
+
     }
+  |
 ;
 
 GDeclList : 
@@ -720,12 +520,8 @@ identifierUse:
 
 FDefBlock :
       FDefBlock FDef 
-      {
 
-      }
     | FDef
-      {
-      }
     
 ;
 
@@ -736,7 +532,7 @@ FDef :
       defineFunction(funcNode, target_file);
       $<node>$ = funcNode;
     }
-    
+
   
 ;
 
@@ -879,9 +675,7 @@ DeclList :
 Decl : 
     Type VarList SEMICOLON 
     {
-      
       popAllGlobalDeclarationsAndCreateEntry($<string>1);
-     
     }
 ;
 Type : 
@@ -969,7 +763,8 @@ int main()
   _BASE_POINTER = _STACK_POINTER+1;
   // heap
   _HEAP_POINTER = _INITIAL_HEAP_POINTER;
-  yyin = input_file;
+  
+  yyin = input_file; 
   yyparse(); 
   fclose(input_file);  
 }

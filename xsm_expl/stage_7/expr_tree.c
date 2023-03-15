@@ -206,6 +206,96 @@ struct expr_tree_node * makeDoWhileNode( struct expr_tree_node *body, struct exp
     return makeNode(_NONE, _NODE_TYPE_DO_WHILE,NULL, NULL, NULL, NULL, body,cond);
 }
 
+struct expr_tree_node * makeSelfDotFunctionNode(char * idName, struct expr_tree_node * argNode )
+{
+
+    struct expr_tree_node * idNode = makeIdNode("self");
+    // get current class being defined
+    struct ClassTable * currentClass = getCurrentClassBeingDefined();
+    // if current class is null
+    if(currentClass == NULL)
+    {
+      printf("Self can only be used inside a class \n");
+      exit(1);
+    }
+    idNode->classType = currentClass;
+
+    return makeMethodCallNode(idName, idNode, argNode);
+}
+
+struct expr_tree_node * makeSelfDotIdFieldNode(char * idName)
+{
+    // make field nodes
+      struct expr_tree_node * rightFieldNode  = makeFieldNode(idName, NULL,NULL);
+      struct expr_tree_node * leftFieldNode  = makeFieldNode("self",rightFieldNode,NULL);
+      leftFieldNode->classType = getCurrentClassBeingDefined();
+
+      // if left class type is null
+      if(leftFieldNode->classType == NULL)
+      {
+        printf("Self not declared. Self can only be used inside classes.\n");
+        exit(1);
+      }
+
+      
+ 
+      // get the type of the right field node
+      struct FieldList * rightType = classFieldLookup(leftFieldNode->classType, rightFieldNode->varname);
+      // if right type is null
+      if(rightType == NULL)
+      {
+        printf("Field not found in class \n");
+        exit(1);
+      }
+     
+      // set the type of the right field node
+      rightFieldNode->type = rightType->type;
+      // set the class type of the right field node
+      rightFieldNode->classType = rightType->classType;
+      return leftFieldNode;
+
+}
+struct expr_tree_node * makeIdDotFunctionNode(char * idNameBeforeDot, char *idNameAfterDot, struct expr_tree_node * argNode )
+{
+    struct expr_tree_node * idNode = makeIdNode(idNameBeforeDot);
+    // search the id in the local symbol table
+    struct LocalSymbolTable * LSTEntry = LSTLookup(idNode->varname);
+
+    // search the id in the global symbol table
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(idNode->varname);
+
+    // if both not found
+    if(GSTEntry == NULL && LSTEntry == NULL)
+    {
+      printf("Variable %s not declared \n", idNode->varname);
+      exit(1);
+    }
+    // if found in local symbol table
+    if(LSTEntry != NULL)
+    {
+      idNode->classType = LSTEntry->classType;
+      // variable the id is not a class thow error
+      if(idNode->classType == NULL)
+      {
+        printf("Variable %s is not a class \n", idNode->varname);
+        exit(1);
+      }
+    }    
+    // if found in global symbol table
+    if(GSTEntry != NULL)
+    {
+      idNode->classType = GSTEntry->classType;
+      // variable the id is not a class thow error
+      if(idNode->classType == NULL)
+      {
+        printf("Variable %s is not a class \n", idNode->varname);
+        exit(1);
+      }
+    }
+
+    return makeMethodCallNode(idNameAfterDot, idNode, argNode);
+
+}
 struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node *parameters)
 {
     // check if the variable is declared
@@ -234,6 +324,15 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
     }
    
     return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,GSTEntry->type, GSTEntry->classType,name , GSTEntry, parameters,NULL);
+
+}
+struct expr_tree_node * makeMethodDeclareNode(char * name, char * typeName, struct expr_tree_node * parameters)
+{
+    struct expr_tree_node * idNode = makeDeclareIdNode(name, NULL);
+    idNode->nodetype = _NODE_TYPE_FUNCTION_DEFINITION;
+    idNode->left = parameters;
+    idNode->type = typeLookup(typeName);
+    return idNode;
 
 }
 
@@ -518,7 +617,7 @@ void insertIntoTypeFieldTree(struct expr_tree_node * root, struct expr_tree_node
 }
 
 // insert into field tree
-void insertIntoClassFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
+void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
 {
     // nullcheck
     if(root == NULL)
@@ -624,7 +723,7 @@ void insertIntoMethodTree(struct expr_tree_node * root, struct expr_tree_node * 
 }
 
 //declare main function
-void declareMain()
+struct expr_tree_node * declareAndDefineMain(char * typeName, struct expr_tree_node * mainBodyNode, FILE * target_file)
 {
     // check if main is declared
     struct GlobalSymbolTable * GSTEntry = GSTLookup("main");
@@ -633,16 +732,37 @@ void declareMain()
         printf("Error: Main function already declared!\n");
         exit(1);
     }
-    // declare main
+
+    // declare main in Global Symbol Table
     GSTInstall("main", typeLookup("int"),NULL, _NODE_TYPE_FUNCTION_DEFINITION, 0,0, 0);
 
 
+    // if init state is false initialze
+    compilerInit(target_file);
+
+    // make function definition node for main
+    struct expr_tree_node * funcNode = makeFunctionDefinitionNode(typeName, "main", NULL, mainBodyNode);
+
+    // define function main
+    defineFunction(funcNode, target_file);
+
+    // end expl code 
+    explEnd(target_file);
+
+    // close target file
+    if(target_file) fclose(target_file);
+    
+    // return function node
+    return funcNode;
 
 }
 
-void fieldCall(struct expr_tree_node * leftFieldNode, struct expr_tree_node * rightFieldNode)
+struct expr_tree_node * makeIdDotIdFieldNode(char * leftIdName, char * rightIdName)
 {
-        
+    // make field nodes
+    struct expr_tree_node * rightFieldNode  = makeFieldNode(rightIdName, NULL,NULL);
+    struct expr_tree_node * leftFieldNode  = makeFieldNode(leftIdName,rightFieldNode,NULL);
+
     // get the LST entry for the variable
     struct LocalSymbolTable * lstEntry = LSTLookup(leftFieldNode->varname);
     // if lst entry is not null
@@ -712,6 +832,7 @@ void fieldCall(struct expr_tree_node * leftFieldNode, struct expr_tree_node * ri
         exit(1);
     }
     
+    return leftFieldNode;
 }
 
 
@@ -761,3 +882,12 @@ void classFieldCall(struct expr_tree_node * leftFieldNode, struct expr_tree_node
       rightFieldNode->type = rightType->type;
 }
 
+void compilerInit(FILE * target_file)
+{
+    // if init state is false initialze
+    if(_INIT_STATE == _FALSE)
+    {
+        explInit(target_file);
+        _INIT_STATE = _TRUE;
+    }
+}

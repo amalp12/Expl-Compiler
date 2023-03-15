@@ -86,7 +86,17 @@ struct expr_tree_node * makeParameterNode(char * typeName, char * name);
 
 void defineFunction(struct expr_tree_node* node, FILE * target_file);
 
-void declareMain();
+struct expr_tree_node * makeMethodDeclareNode(char * name, char * typeName, struct expr_tree_node * parameters);
+
+struct expr_tree_node * makeSelfDotFunctionNode(char * idName, struct expr_tree_node * argNode );
+
+struct expr_tree_node * makeSelfDotIdFieldNode(char * idName);
+
+struct expr_tree_node * makeIdDotFunctionNode(char * idNameBeforeDot, char *idNameAfterDot, struct expr_tree_node * argNode );
+
+struct expr_tree_node * makeIdDotIdFieldNode(char * leftIdName, char * rightIdName);
+
+struct expr_tree_node * declareAndDefineMain(char * typeName, struct expr_tree_node * mainBodyNode, FILE * target_file);
 
 struct expr_tree_node * makeLocalIdNode(char * varname);
 
@@ -94,7 +104,7 @@ struct expr_tree_node * makeFunctionDefinitionNode(char * typeName, char * name,
 
 void insertIntoTypeFieldTree(struct expr_tree_node * root, struct expr_tree_node * node);
 
-void insertIntoClassFieldTree(struct expr_tree_node * root, struct expr_tree_node * node);
+void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * node);
 
 struct expr_tree_node * makeHeapInitNode();
 
@@ -104,6 +114,6 @@ struct expr_tree_node * makeHeapFreeNode(struct expr_tree_node *l);
 
 struct expr_tree_node * makeNewNode(char * className );
 
-void fieldCall(struct expr_tree_node * leftFieldNode, struct expr_tree_node * rightFieldNode);
-
 struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * beforeDotNode, struct expr_tree_node *parameters);
+
+void compilerInit(FILE * target_file);
