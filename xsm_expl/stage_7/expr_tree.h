@@ -106,4 +106,4 @@ struct expr_tree_node * makeNewNode(char * className );
 
 void fieldCall(struct expr_tree_node * leftFieldNode, struct expr_tree_node * rightFieldNode);
 
-struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * afterDotNode, struct expr_tree_node *parameters);
+struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * beforeDotNode, struct expr_tree_node *parameters);

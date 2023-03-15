@@ -1100,12 +1100,20 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // push all used registers
             int highestUsedRegister = saveRegisters(target_file);
 
+            struct expr_tree_node * nodeJustBeforeMethod = t->right;
+
+            // go to the node just before the method call
+            while (nodeJustBeforeMethod->left !=NULL)
+            {
+                nodeJustBeforeMethod = nodeJustBeforeMethod->left;
+            }
+
             // get the class type of the object
-            struct ClassTable * classType = t->right->classType;
+            struct ClassTable * classType = nodeJustBeforeMethod->classType;
             // if class not defined
             if (classType == NULL)
             {
-                printf("Error : Class not defined : %s\n", t->right->varname);
+                printf("Error : Class not defined : %s\n", nodeJustBeforeMethod->varname);
                 exit(1);
             }
 
@@ -1805,29 +1813,3 @@ void classMethodCodegen(struct ClassTable * classPtr, struct expr_tree_node * t,
     
 
 }
-
-void classCodegen(struct expr_tree_node * t, FILE * target_file)
-{
-    // if the node is null return
-    if(t==NULL) return;
-
-    // get the Class Table Entry
-    struct ClassTable * classEntry = classLookup(t->varname);
-    // set the class label
-    fprintf(target_file, "_C%d:\n", classEntry->classIndex);
-
-    // write the code for the all the functions of the class
-    struct expr_tree_node * methodDefinitionConnector = t->right; // connector of method 1 or null   
-    while(methodDefinitionConnector!=NULL)
-    {
-        classMethodCodegen(getCurrentClassBeingDefined(),methodDefinitionConnector->right->right, target_file);
-    }
-
-    //
-
-    
-
-}
-
-
-

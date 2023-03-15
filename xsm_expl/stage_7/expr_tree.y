@@ -126,6 +126,10 @@ int yylex(void);
 
 
 Program : 
+    ClassDefBlock GDeclBlock MainBlock
+    {
+      exit(1);
+    }
     TypeDefBlock ClassDefBlock GDeclBlock FDefBlock MainBlock
     {
       exit(1);
@@ -211,14 +215,12 @@ ClassDefBlock :
 ClassDefList : 
     ClassDefList ClassDef
     {
-      defineClass($<node>2, target_file);
       // reset 
       resetCurrentClassBeingDefined();
 
     }
   | ClassDef
     {
-      defineClass($<node>1, target_file);
       // reset
       resetCurrentClassBeingDefined();
     }
@@ -229,7 +231,6 @@ ClassDef  :
     {
       
       // class name, class fields, class methods declarations, class methods definitions
-      $<node>$ = makeClassNode($<string>1, $<typeField>4, $<node>7);
     }
 ;
 
@@ -539,6 +540,8 @@ Field :
      
       // set the type of the right field node
       rightFieldNode->type = rightType->type;
+      // set the class type of the right field node
+      rightFieldNode->classType = rightType->classType;
       $<node>$ = leftFieldNode;
 
 

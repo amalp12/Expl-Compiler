@@ -68,21 +68,21 @@ void validateFields (struct ClassTable * classPtr)
 
     while(field != NULL)
     {
-        // check if field type exists
-        if(field->type == NULL)
+        // check if field type or class exists
+        if(field->type == NULL && field->classType == NULL)
         {
-            printf("Field %s in class %s has no type.\n",field->name,classPtr->name);
+            printf("Field %s in class %s has no type/class type.\n",field->name,classPtr->name);
             exit(1);
         }
 
         // 3. A class cannot have a field of type null.
-        if(strcmp(field->type->name,"null") == 0)
-        {
-            printf("Field %s in class %s cannot be of type null.\n",field->name,classPtr->name);
-            exit(1);
-        }
-        field->fieldIndex = classPtr->fieldCount;
-        classPtr->fieldCount++;
+        // if(strcmp(field->type->name,"null") == 0)
+        // {
+        //     printf("Field %s in class %s cannot be of type null.\n",field->name,classPtr->name);
+        //     exit(1);
+        // }
+        // field->fieldIndex = classPtr->fieldCount;
+        // classPtr->fieldCount++;
         field = field->next;
     }
 

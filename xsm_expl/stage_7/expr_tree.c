@@ -30,30 +30,7 @@ struct expr_tree_node * makeNewNode(char * className )
 }
 
 
-struct expr_tree_node * makeClassNode(char * className, struct FieldList *fields, struct expr_tree_node * methodDefinitions)
-{
-        // get the class type entry
-        struct ClassTable * classEntry = classLookup(className);
-
-        // if class does not exist throw error and exit]
-        if(classEntry == NULL)
-        {
-            printf("Error: Class %s not defined\n", className);
-            exit(1);
-        }
-
-        // install fields in the class
-        classEntry->memberFields = fields;
-
-        // validate fields
-        validateFields(classEntry);
-
-        // makenode
-        return makeNode(-1,_NODE_TYPE_CLASS, NULL,classEntry, strdup(className), NULL, methodDefinitions, NULL);
-
-  
-}
-        
+     
 struct expr_tree_node * makeNullNode()
 {
     return makeNode(0,_NODE_TYPE_NULL, typeLookup("null"), NULL, strdup("null"), NULL, NULL, NULL);
@@ -260,12 +237,19 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
 
 }
 
-struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * afterDotNode, struct expr_tree_node *parameters)
+struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * beforeDotNode, struct expr_tree_node *parameters)
 {
     
     // get the type of the left node
     // left node can only be a class
-    struct ClassTable * classEntry = afterDotNode->classType;
+    struct expr_tree_node * nodeJustBeforeMethod = beforeDotNode;
+    // go to the left most node
+    while(nodeJustBeforeMethod->left != NULL)
+    {
+        nodeJustBeforeMethod = nodeJustBeforeMethod->left;
+    }
+    
+    struct ClassTable * classEntry = nodeJustBeforeMethod->classType;
 
     // if class entry is null then it is not a class
     if(classEntry == NULL)
@@ -273,6 +257,7 @@ struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * 
         printf("Method Call Node Error: %s is not a class variable\n", name);
         exit(1);
     }
+    
 
     // lookup the method in the class
     struct ClassMemberFunctionList * methodEntry = classMethodLookup(classEntry, name);
@@ -301,7 +286,7 @@ struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * 
         temp2 = temp2->prev;
     }
    
-    return makeNode(_NONE, _NODE_TYPE_METHOD_CALL, methodEntry->type, classEntry,name , NULL, parameters,afterDotNode);
+    return makeNode(_NONE, _NODE_TYPE_METHOD_CALL, methodEntry->type, classEntry,name , NULL, parameters, beforeDotNode);
 
 }
 
@@ -495,66 +480,6 @@ void defineFunction(struct expr_tree_node* node, FILE * target_file)
 
 
 
-void defineClass(struct expr_tree_node* node, FILE * target_file)
-{
-   
-
-    struct ClassTable * classEntry = classLookup(node->varname);
-    if(classEntry == NULL)
-    {
-        printf("Class Definition Error: Class %s not declared", node->varname);
-        exit(1);
-    }
-    // for each method in class validate parameters from the ClassTable
-    struct expr_tree_node * methodDefinitionConnector = node->right; // connector of method 1 or null   
-    while(methodDefinitionConnector!=NULL)
-    {
-        // look up the function in the 
-        struct ClassMemberFunctionList * method = classMethodLookup(classEntry, methodDefinitionConnector->right->varname);
-
-        // if the method is not declared
-        if(method == NULL)
-        {
-            printf("Class Definition Error: Method %s of class %s not declared", methodDefinitionConnector->right->varname, node->varname);
-            exit(1);
-        }
-
-        // compare if the parameters are same
-        struct expr_tree_node * temp = methodDefinitionConnector->right->left; // parameters
-        struct ParameterNode * temp2 = method -> paramList;
-        while(temp != NULL && temp2 != NULL){
-            if(temp->type != temp2->type)
-            {
-                printf("Class Definition Error: Type mismatch in method definition %s of class %s", methodDefinitionConnector->right->varname, node->varname);
-                exit(1);
-            }
-            temp = temp->left;
-            temp2 = temp2->next;
-        }
-
-        // if both not null throw error number of parameters don't match
-        if(temp != NULL || temp2 != NULL)
-        {
-            printf("Class Definition Error: Number of parameters don't match in method definition %s of class %s", methodDefinitionConnector->right->varname, node->varname);
-            exit(1);
-        }
-
-        // move to next method definition
-        methodDefinitionConnector = methodDefinitionConnector->left;
-
-    }    
-    
-
-
-    
-
-    // calling function code generator
-    classCodegen(node, target_file);
-
-
-  
-}
-
 
 // insert into field tree
 void insertIntoTypeFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
@@ -730,28 +655,28 @@ void fieldCall(struct expr_tree_node * leftFieldNode, struct expr_tree_node * ri
     }
     else
     {
-    // get the GST entry for the variable
-    struct GlobalSymbolTable * gstEntry = GSTLookup(leftFieldNode->varname);
-    // if gst entry is not null
-    if(gstEntry != NULL)
-    {
-        // set the type of the left field node
-        leftFieldNode->type = gstEntry->type;
-        leftFieldNode->classType = gstEntry->classType;
-    }
-    else
-    {
-        // error
-        printf("Error: Variable %s not declared \n", leftFieldNode->varname);
-        exit(1);
-    }
+        // get the GST entry for the variable
+        struct GlobalSymbolTable * gstEntry = GSTLookup(leftFieldNode->varname);
+        // if gst entry is not null
+        if(gstEntry != NULL)
+        {
+            // set the type of the left field node
+            leftFieldNode->type = gstEntry->type;
+            leftFieldNode->classType = gstEntry->classType;
+        }
+        else
+        {
+            // error
+            printf("Error: Variable %s not declared \n", leftFieldNode->varname);
+            exit(1);
+        }
     } 
 
     // check if left feilds is a struct or a class
     if(leftFieldNode->type == NULL && leftFieldNode->classType == NULL)
     {
-    printf("Error: Variable %s is not a struct or a class\n", leftFieldNode->varname);
-    exit(1);
+        printf("Error: Variable %s is not a struct or a class\n", leftFieldNode->varname);
+        exit(1);
     }
     // get the type of the right field node if type field is not empty
     if(leftFieldNode->type != NULL)
@@ -765,6 +690,8 @@ void fieldCall(struct expr_tree_node * leftFieldNode, struct expr_tree_node * ri
         }
         // set the type of the right field node
         rightFieldNode->type = rightType->type;
+        rightFieldNode->classType = rightType->classType;
+
     }
     else if (leftFieldNode->classType != NULL)
     {
