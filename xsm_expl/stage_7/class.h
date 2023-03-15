@@ -44,7 +44,6 @@ void classInstall(char * name ,char * parentClassName);
 struct ClassTable* classLookup(char * className);
 
 void classFieldInstall(struct ClassTable * classPtr, char * typeName, char *name);
-void validateFields (struct ClassTable * classPtr);
 
 void classMethodInstall (struct ClassTable * classPtr, char *name, struct TypeTable *type, struct ParameterNode *Paramlist);
 
