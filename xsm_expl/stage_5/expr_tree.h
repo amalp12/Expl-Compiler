@@ -80,3 +80,5 @@ void declareMain();
 struct expr_tree_node * makeLocalIdNode(char * varname);
 
 struct expr_tree_node * makeFunctionDefinitionNode(int type, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body);
+
+void insertIntoTree(struct expr_tree_node * root, struct expr_tree_node * node);

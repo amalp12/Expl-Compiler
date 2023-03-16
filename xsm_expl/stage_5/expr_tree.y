@@ -94,36 +94,6 @@ int yylex(void);
 
 %%
 
-// start : 
-/*
-Each node can be opertator node or a leaf Node
-*/
-
-
-// program : 
-//     START Slist END SEMICOLON 
-//     {
-//       FILE * target_file = fopen("untranslated_assembly.xsm","w");
-      
-//       // printInfix($<node>2);
-
-//       printf("Generating Assembly Code... \n");
-//       explInit(target_file);
-//       codeGen($<node>2, target_file);
-//       // evaluate($<node>2, identifiers);
-//       explEnd(target_file);
-//       printf("Complete \n");
-
-//       if(target_file) fclose(target_file);
-
-//       exit(1);
-
-//     }
-//   | START END SEMICOLON
-//     {
-//         exit(1);
-//     }
-// ;
 
 Program : 
     GDeclBlock FDefBlock MainBlock
@@ -234,7 +204,7 @@ GParamList :
     GParamList ',' Param 
     {
 
-      $<node>1->left = $<node>3;
+      insertIntoTree($<node>1, $<node>3);
       $<node>$ = $<node>1;
     }
   | Param
@@ -362,7 +332,7 @@ ParamList :
     {
       pushLocalDeclaration($<node>3);
 
-      $<node>1->left = $<node>3;
+      insertIntoTree($<node>1, $<node>3);
       $<node>$ = $<node>1;
     }
   | Param
