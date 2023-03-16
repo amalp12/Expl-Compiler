@@ -336,7 +336,7 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
     // if the number of parameters in the function call does not match the number of parameters in the function definition
     if(temp != NULL || temp2 != NULL)
     {
-        printf("Error: Number of parameters in method call %s does not match the number of parameters in method definition\n", name);
+        printf("Error: Number of parameters in function call %s does not match the number of parameters in function definition\n", name);
         exit(1);
     }
     return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,GSTEntry->type, GSTEntry->classType,name , GSTEntry, parameters,NULL);
@@ -440,7 +440,7 @@ struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name
     while(temp != NULL && temp2 != NULL){
         if((temp->type != temp2->type)|| (temp->classType != temp2->classType))
         {
-            printf("Function Definition Node Error: Type mismatch in function call %s", name);
+            printf("Function Definition Error: Type mismatch in function call %s", name);
             exit(1);
         }
         temp = temp->left;
@@ -449,7 +449,7 @@ struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name
     // if the number of parameters do not match
     if(temp != NULL || temp2 != NULL)
     {
-        printf("Error: Number of parameters in method call %s does not match the number of parameters in method definition\n", name);
+        printf("Error: Number of parameters in function definition %s does not match the number of parameters in function declaration\n", name);
         exit(1);
     }
     return makeNode(_NONE, _NODE_TYPE_FUNCTION_DEFINITION,typeEntry, classEntry, name, GSTEntry, parameters,body);
@@ -486,7 +486,7 @@ struct expr_tree_node * makeMethodDefinitionNode( char * typeName, char * name, 
     while(temp != NULL && temp2 != NULL){
         if(temp->type != temp2->type)
         {
-            printf("Function Definition Node Error: Type mismatch in function call %s", name);
+            printf("Method Definition  Error: Type mismatch in method call %s", name);
             exit(1);
         }
         temp = temp->left;
@@ -496,7 +496,7 @@ struct expr_tree_node * makeMethodDefinitionNode( char * typeName, char * name, 
     // if the number of parameters in the method call is not equal to the number of parameters in the method definition
     if(temp != NULL || temp2 != NULL)
     {
-        printf("Error: Number of parameters in method call %s does not match the number of parameters in method definition\n", name);
+        printf("Error: Number of parameters in method definition %s does not match the number of parameters in method declaration\n", name);
         exit(1);
     }
    

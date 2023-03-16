@@ -418,6 +418,31 @@ void typeCheckAssignmentOp(struct expr_tree_node *leftNode, struct expr_tree_nod
     
 }
 
+void typeCheckCondition(struct expr_tree_node * node)
+{
+    struct TypeTable * type = node->type;
+    struct ClassTable * classType = node->classType;
+    // if the node is of nodetype _NODE_TYPE_FIELD, then we need to get the final type of the field
+    if(node->nodetype == _NODE_TYPE_FIELD)
+    {
+        type = node->right->type;
+        classType = node->right->classType;
+    }
+    struct TypeTable * nullType = typeLookup("null");
+    struct TypeTable * boolType = typeLookup("bool");
+    // if the node is of null type, then no need to check
+    if(type == nullType) return;
+
+    // if the type is not bool, then print type mismatch error
+    if(type != boolType || classType != NULL)
+    {
+        printf("Condition Type mismatch error at line %d\n", _CURRENT_LINE);
+        exit(1);
+    }
+    
+}
+
+
 
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     
@@ -803,6 +828,10 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             loopStackPush(whileStartLabel, whileEndLabel);
 
             fprintf(target_file, "_L%d:\n", whileStartLabel);
+            
+            // type checking the condition
+            typeCheckCondition(t->left);
+
             // Evaluating the condtion
             reg_index conditionReg = codeGen(t->left, target_file);  
 
@@ -840,6 +869,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // generating code for do while block
             codeGen(t->left, target_file);
 
+            // type checking the condition
+            typeCheckCondition(t->right);
+            
             // Evaluating the condtion
             reg_index conditionReg = codeGen(t->right, target_file);  
 
@@ -856,6 +888,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_IF_ELSE):
         {
+            // type checking the condition
+            typeCheckCondition(t->left);
+
             // Evaluating the condtion
             reg_index conditionReg = codeGen(t->left, target_file);
 
