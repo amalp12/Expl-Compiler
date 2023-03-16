@@ -244,6 +244,7 @@ Field :
         {
           // set the type of the left field node
           leftFieldNode->type = gstEntry->type;
+          leftFieldNode->GSTEntry = gstEntry;
         }
         else
         {
@@ -327,7 +328,7 @@ GParamList :
     GParamList ',' Param 
     {
 
-      $<node>1->left = $<node>3;
+      insertIntoTree($<node>1, $<node>3);
       $<node>$ = $<node>1;
     }
   | Param
@@ -468,7 +469,7 @@ ParamList :
     {
       pushLocalDeclaration($<node>3);
 
-      $<node>1->left = $<node>3;
+      insertIntoTree($<node>1, $<node>3);
       $<node>$ = $<node>1;
     }
   | Param

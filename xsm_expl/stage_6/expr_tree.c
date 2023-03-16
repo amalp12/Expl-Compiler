@@ -320,6 +320,34 @@ void defineFunction(struct expr_tree_node* node, FILE * target_file)
   
 }
 
+void insertIntoTree(struct expr_tree_node * root, struct expr_tree_node * node)
+{
+    // nullcheck
+    if(root == NULL)
+    {
+        // print error message
+        printf("Error: Null root node in insertIntoTree\n");
+        exit(1);
+    }
+    if(node == NULL)
+    {
+        // print error message
+        printf("Error: Null node in insertIntoTree\n");
+        exit(1);
+    }
+
+    struct expr_tree_node * temp = root;
+    while(temp->left != NULL)
+    {
+        temp = temp->left;
+    }
+    temp->left = node;
+
+
+
+
+}
+
 // insert into field tree
 void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
 {
