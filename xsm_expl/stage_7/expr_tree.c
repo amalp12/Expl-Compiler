@@ -274,7 +274,7 @@ struct expr_tree_node * makeIdDotFunctionNode(char * idNameBeforeDot, char *idNa
 
     // search the id in the global symbol table
     struct GlobalSymbolTable * GSTEntry = GSTLookup(idNode->varname);
-
+    idNode->GSTEntry = GSTEntry;
     // if both not found
     if(GSTEntry == NULL && LSTEntry == NULL)
     {
@@ -440,7 +440,7 @@ struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name
     while(temp != NULL && temp2 != NULL){
         if((temp->type != temp2->type)|| (temp->classType != temp2->classType))
         {
-            printf("Function Definition Error: Type mismatch in function call %s", name);
+            printf("Function Definition Error: Type mismatch in function call %s\n", name);
             exit(1);
         }
         temp = temp->left;
@@ -734,6 +734,34 @@ void insertIntoMethodTree(struct expr_tree_node * root, struct expr_tree_node * 
     
 }
 
+void insertIntoTree(struct expr_tree_node * root, struct expr_tree_node * node)
+{
+    // nullcheck
+    if(root == NULL)
+    {
+        // print error message
+        printf("Error: Null root node in insertIntoTree\n");
+        exit(1);
+    }
+    if(node == NULL)
+    {
+        // print error message
+        printf("Error: Null node in insertIntoTree\n");
+        exit(1);
+    }
+    
+    struct expr_tree_node * temp = root;
+    while(temp->left != NULL)
+    {
+        temp = temp->left;
+    }
+    temp->left = node;
+
+
+
+    
+}
+
 //declare main function
 struct expr_tree_node * declareAndDefineMain(char * typeName, struct expr_tree_node * mainBodyNode, FILE * target_file)
 {
@@ -796,6 +824,7 @@ struct expr_tree_node * makeIdDotIdFieldNode(char * leftIdName, char * rightIdNa
             // set the type of the left field node
             leftFieldNode->type = gstEntry->type;
             leftFieldNode->classType = gstEntry->classType;
+            leftFieldNode->GSTEntry = gstEntry;
         }
         else
         {

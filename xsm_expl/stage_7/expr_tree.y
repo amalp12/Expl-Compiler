@@ -224,7 +224,7 @@ ClassParamList :
     ClassParamList ',' Param 
     {
       // make a tree of params such the left most is the first param
-      $<node>1->left = $<node>3;
+      insertIntoTree($<node>1, $<node>3);
       $<node>$ = $<node>1;
     }
   | Param
@@ -401,7 +401,7 @@ GParamList :
     GParamList ',' Param 
     {
 
-      $<node>1->left = $<node>3;
+      insertIntoTree($<node>1, $<node>3);
       $<node>$ = $<node>1;
     }
   | Param
@@ -553,7 +553,7 @@ ParamList :
     {
       pushLocalDeclaration($<node>3);
 
-      $<node>1->left = $<node>3;
+      insertIntoTree($<node>1, $<node>3);
       $<node>$ = $<node>1;
     }
   | Param

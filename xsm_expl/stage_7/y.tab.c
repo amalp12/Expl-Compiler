@@ -1856,7 +1856,7 @@ yyreduce:
 #line 225 "expr_tree.y"
     {
       // make a tree of params such the left most is the first param
-      (yyvsp[-2].node)->left = (yyvsp[0].node);
+      insertIntoTree((yyvsp[-2].node), (yyvsp[0].node));
       (yyval.node) = (yyvsp[-2].node);
     }
 #line 1863 "y.tab.c"
@@ -2079,7 +2079,7 @@ yyreduce:
 #line 402 "expr_tree.y"
     {
 
-      (yyvsp[-2].node)->left = (yyvsp[0].node);
+      insertIntoTree((yyvsp[-2].node), (yyvsp[0].node));
       (yyval.node) = (yyvsp[-2].node);
     }
 #line 2086 "y.tab.c"
@@ -2293,7 +2293,7 @@ yyreduce:
     {
       pushLocalDeclaration((yyvsp[0].node));
 
-      (yyvsp[-2].node)->left = (yyvsp[0].node);
+      insertIntoTree((yyvsp[-2].node), (yyvsp[0].node));
       (yyval.node) = (yyvsp[-2].node);
     }
 #line 2300 "y.tab.c"

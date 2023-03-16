@@ -106,6 +106,8 @@ void insertIntoTypeFieldTree(struct expr_tree_node * root, struct expr_tree_node
 
 void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * node);
 
+void insertIntoTree(struct expr_tree_node * root, struct expr_tree_node * node);
+
 struct expr_tree_node * makeHeapInitNode();
 
 struct expr_tree_node * makeHeapAllocateNode();
