@@ -224,7 +224,8 @@ Field :
 
       // make field nodes
       struct expr_tree_node * rightFieldNode  = makeFieldNode($<string>3, NULL,NULL);
-      struct expr_tree_node * leftFieldNode  = makeFieldNode($<string>1,rightFieldNode,NULL);
+      struct expr_tree_node * finalTypeNode = makeFieldNode("finalType",NULL,NULL);
+      struct expr_tree_node * leftFieldNode  = makeFieldNode($<string>1,rightFieldNode,finalTypeNode);
 
       // get the LST entry for the variable
       struct LocalSymbolTable * lstEntry = LSTLookup($<string>1);
@@ -261,6 +262,8 @@ Field :
       }
       // set the type of the right field node
       rightFieldNode->type = rightType->type;
+      // set the finalTypeNode 's type to rightType's type
+      finalTypeNode->type = rightFieldNode->type;
       $<node>$ = leftFieldNode;
 
 
@@ -666,6 +669,8 @@ int main()
   _BASE_POINTER = _STACK_POINTER+1;
   // heap
   _HEAP_POINTER = _INITIAL_HEAP_POINTER;
+  // initializing current line number
+  _CURRENT_LINE =2;
   yyin = input_file;
   yyparse(); 
   fclose(input_file);  

@@ -203,11 +203,17 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
     while(temp != NULL && temp2 != NULL){
         if(temp->right->type != temp2->type)
         {
-            printf("Function Call Node Error: Type mismatch in function call %s", name);
+            printf("Function Call Error: Type mismatch in function call %s", name);
             exit(1);
         }
         temp = temp->left;
         temp2 = temp2->prev;
+    }
+    // if the number of parameters do not match
+    if(temp != NULL || temp2 != NULL)
+    {
+        printf("Error: Number of parameters in function call %s does not match the number of parameters in function definition\n", name);
+        exit(1);
     }
    
     return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,GSTEntry->type, name, GSTEntry, parameters,NULL);
@@ -245,6 +251,12 @@ struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name
         }
         temp = temp->left;
         temp2 = temp2->next;
+    }
+    // if the number of parameters do not match
+    if(temp != NULL || temp2 != NULL)
+    {
+        printf("Error: Number of parameters in function definition %s does not match the number of parameters in function declaration\n", name);
+        exit(1);
     }
    
     return makeNode(_NONE, _NODE_TYPE_FUNCTION_DEFINITION,typeEntry, name, GSTEntry, parameters,body);
@@ -340,6 +352,16 @@ void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * n
         exit(1);
     }
     node->type = typeEntry->type;
+
+    struct expr_tree_node * finalTypeNode = root->right;
+
+    // if the final type node is null then throw error
+    if(finalTypeNode == NULL)
+    {
+        // print error message
+        printf("Error: Null final type node in insertIntoTypeFieldTree\n");
+        exit(1);
+    }
 
     
 }

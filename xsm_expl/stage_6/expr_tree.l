@@ -174,7 +174,7 @@ numbers [0-9]+
 }
 
 [\n] {
-    
+    _CURRENT_LINE++;
 }
     
 {identifier} {
