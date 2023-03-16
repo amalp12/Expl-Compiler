@@ -47,6 +47,11 @@ struct expr_tree_node * makeHeapFreeNode(struct expr_tree_node *l)
 {
     return makeNode(-1,_NODE_TYPE_HEAP_FREE, NULL, NULL, NULL, NULL, l, NULL);
 }
+struct expr_tree_node * makeDeleteNode(struct expr_tree_node *l)
+{
+    return makeNode(-1,_NODE_TYPE_DELETE, NULL, NULL, NULL, NULL, l, NULL);
+}
+
 
 
 struct expr_tree_node* makeFieldNode(char * fieldName, struct expr_tree_node *l,struct expr_tree_node *r){
@@ -218,7 +223,6 @@ struct expr_tree_node * makeSelfDotFunctionNode(char * idName, struct expr_tree_
       printf("Self can only be used inside a class \n");
       exit(1);
     }
-    idNode->classType = currentClass;
 
     return makeMethodCallNode(idName, idNode, argNode);
 }
@@ -226,33 +230,40 @@ struct expr_tree_node * makeSelfDotFunctionNode(char * idName, struct expr_tree_
 struct expr_tree_node * makeSelfDotIdFieldNode(char * idName)
 {
     // make field nodes
-      struct expr_tree_node * rightFieldNode  = makeFieldNode(idName, NULL,NULL);
-      struct expr_tree_node * leftFieldNode  = makeFieldNode("self",rightFieldNode,NULL);
-      leftFieldNode->classType = getCurrentClassBeingDefined();
+    struct expr_tree_node * rightFieldNode  = makeFieldNode(idName, NULL,NULL);
+    struct expr_tree_node * finalTypeNode = makeFieldNode("finalType",NULL,NULL);
+    struct expr_tree_node * leftFieldNode  = makeFieldNode("self",rightFieldNode,finalTypeNode);
+    leftFieldNode->classType = getCurrentClassBeingDefined();
 
-      // if left class type is null
-      if(leftFieldNode->classType == NULL)
-      {
+    // if left class type is null
+    if(leftFieldNode->classType == NULL)
+    {
         printf("Self not declared. Self can only be used inside classes.\n");
         exit(1);
-      }
+    }
 
-      
- 
-      // get the type of the right field node
-      struct FieldList * rightType = classFieldLookup(leftFieldNode->classType, rightFieldNode->varname);
-      // if right type is null
-      if(rightType == NULL)
-      {
+
+
+    // get the type of the right field node
+    struct FieldList * rightType = classFieldLookup(leftFieldNode->classType, rightFieldNode->varname);
+    // if right type is null
+    if(rightType == NULL)
+    {
         printf("Field not found in class \n");
         exit(1);
-      }
-     
-      // set the type of the right field node
-      rightFieldNode->type = rightType->type;
-      // set the class type of the right field node
-      rightFieldNode->classType = rightType->classType;
-      return leftFieldNode;
+    }
+
+    // set the type of the right field node
+    rightFieldNode->type = rightType->type;
+    // set the class type of the right field node
+    rightFieldNode->classType = rightType->classType;
+
+
+    // set the types of final type node
+    finalTypeNode->type = rightFieldNode->type;
+    finalTypeNode->classType = rightFieldNode->classType;
+
+    return leftFieldNode;
 
 }
 struct expr_tree_node * makeIdDotFunctionNode(char * idNameBeforeDot, char *idNameAfterDot, struct expr_tree_node * argNode )
@@ -322,7 +333,12 @@ struct expr_tree_node * makeFunctionCallNode(char * name, struct expr_tree_node 
         temp = temp->left;
         temp2 = temp2->prev;
     }
-   
+    // if the number of parameters in the function call does not match the number of parameters in the function definition
+    if(temp != NULL || temp2 != NULL)
+    {
+        printf("Error: Number of parameters in method call %s does not match the number of parameters in method definition\n", name);
+        exit(1);
+    }
     return makeNode(_NONE, _NODE_TYPE_FUNCTION_CALL,GSTEntry->type, GSTEntry->classType,name , GSTEntry, parameters,NULL);
 
 }
@@ -384,8 +400,14 @@ struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * 
         temp = temp->left;
         temp2 = temp2->prev;
     }
-   
-    return makeNode(_NONE, _NODE_TYPE_METHOD_CALL, methodEntry->type, classEntry,name , NULL, parameters, beforeDotNode);
+    // if the number of parameters do not match
+    if(temp != NULL || temp2 != NULL)
+    {
+        printf("Error: Number of parameters in method call %s does not match the number of parameters in method definition\n", name);
+        exit(1);
+    }
+    // for now methods do not reuturn class types
+    return makeNode(_NONE, _NODE_TYPE_METHOD_CALL, methodEntry->type, NULL,name , NULL, parameters, beforeDotNode);
 
 }
 
@@ -424,7 +446,12 @@ struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name
         temp = temp->left;
         temp2 = temp2->next;
     }
-   
+    // if the number of parameters do not match
+    if(temp != NULL || temp2 != NULL)
+    {
+        printf("Error: Number of parameters in method call %s does not match the number of parameters in method definition\n", name);
+        exit(1);
+    }
     return makeNode(_NONE, _NODE_TYPE_FUNCTION_DEFINITION,typeEntry, classEntry, name, GSTEntry, parameters,body);
 
 }
@@ -455,7 +482,7 @@ struct expr_tree_node * makeMethodDefinitionNode( char * typeName, char * name, 
     // typechecking parameters
     struct expr_tree_node * temp = parameters;
     struct ParameterNode * temp2 = method -> paramList->next; // next beacuse the first parameter would be self
-
+   
     while(temp != NULL && temp2 != NULL){
         if(temp->type != temp2->type)
         {
@@ -464,6 +491,13 @@ struct expr_tree_node * makeMethodDefinitionNode( char * typeName, char * name, 
         }
         temp = temp->left;
         temp2 = temp2->next;
+    }
+
+    // if the number of parameters in the method call is not equal to the number of parameters in the method definition
+    if(temp != NULL || temp2 != NULL)
+    {
+        printf("Error: Number of parameters in method call %s does not match the number of parameters in method definition\n", name);
+        exit(1);
     }
    
     return makeNode(_NONE, _NODE_TYPE_FUNCTION_DEFINITION,typeEntry, currentClass,name, NULL, parameters,body);
@@ -579,46 +613,10 @@ void defineFunction(struct expr_tree_node* node, FILE * target_file)
 
 
 
-
-// insert into field tree
-void insertIntoTypeFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
-{
-    // nullcheck
-    if(root == NULL)
-    {
-        // print error message
-        printf("Error: Null root node in insertIntoTypeFieldTree\n");
-        exit(1);
-    }
-    if(node == NULL)
-    {
-        // print error message
-        printf("Error: Null node in insertIntoTypeFieldTree\n");
-        exit(1);
-    }
-    
-    struct expr_tree_node * temp = root;
-    while(temp->left != NULL)
-    {
-        temp = temp->left;
-    }
-    temp->left = node;
-
-    // getting the type of the new node inserted
-    struct FieldList * typeEntry = typeFieldLookup(temp->type, node->varname);
-    if(typeEntry == NULL)
-    {
-        printf("Error: Undeclared field %s in type %s\n", node->varname, temp->type->name);
-        exit(1);
-    }
-    node->type = typeEntry->type;
-
-    
-}
-
 // insert into field tree
 void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * node)
 {
+
     // nullcheck
     if(root == NULL)
     {
@@ -632,6 +630,16 @@ void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * n
         printf("Error: Null node in insertIntoTypeFieldTree\n");
         exit(1);
     }
+    struct expr_tree_node * finalTypeNode = root->right;
+
+    // if the final type node is null then throw error
+    if(finalTypeNode == NULL)
+    {
+        // print error message
+        printf("Error: Null final type node in insertIntoTypeFieldTree\n");
+        exit(1);
+    }
+
     
     struct expr_tree_node * temp = root;
     while(temp->left != NULL)
@@ -653,22 +661,22 @@ void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * n
             printf("Error: Undeclared field %s in class %s\n", node->varname, temp->classType->name);
             exit(1);
         }
-        node->classType = temp->classType;
+        node->classType = feildEntry->classType;
         node->type = NULL;
 
     }
     else if (temp->type!=NULL)
     {
         // if its type is a struct type then search in the type fields for the field 
-        struct FieldList * typeEntry = typeFieldLookup(temp->type, node->varname);
+        struct FieldList * fieldEntry = typeFieldLookup(temp->type, node->varname);
 
         // if the field is not declared
-        if(typeEntry == NULL)
+        if(fieldEntry == NULL)
         {
             printf("Error: Undeclared field %s in type %s\n", node->varname, temp->type->name);
             exit(1);
         }
-        node->type = typeEntry->type;
+        node->type = fieldEntry->type;
         node->classType = NULL;
 
     }
@@ -679,6 +687,10 @@ void insertIntoFieldTree(struct expr_tree_node * root, struct expr_tree_node * n
         exit(1);
 
     }
+
+    // set final node types 
+    finalTypeNode->type = node->type;
+    finalTypeNode->classType = node->classType;
 
 
 
@@ -761,7 +773,8 @@ struct expr_tree_node * makeIdDotIdFieldNode(char * leftIdName, char * rightIdNa
 {
     // make field nodes
     struct expr_tree_node * rightFieldNode  = makeFieldNode(rightIdName, NULL,NULL);
-    struct expr_tree_node * leftFieldNode  = makeFieldNode(leftIdName,rightFieldNode,NULL);
+    struct expr_tree_node * finalTypeNode = makeFieldNode("finalType",NULL,NULL);
+    struct expr_tree_node * leftFieldNode  = makeFieldNode(leftIdName,rightFieldNode,finalTypeNode);
 
     // get the LST entry for the variable
     struct LocalSymbolTable * lstEntry = LSTLookup(leftFieldNode->varname);
@@ -825,13 +838,17 @@ struct expr_tree_node * makeIdDotIdFieldNode(char * leftIdName, char * rightIdNa
         // set the type of the right field node
         rightFieldNode->type = rightType->type;
         rightFieldNode->classType = rightType->classType;
+
     }
     else
     {
         printf("Error: %s is not a struct or a class\n", leftFieldNode->varname);
         exit(1);
     }
-    
+    // set the final type of the left field node
+    finalTypeNode->type = rightFieldNode->type;
+    finalTypeNode->classType = rightFieldNode->classType;
+
     return leftFieldNode;
 }
 

@@ -192,6 +192,7 @@ numbers [0-9]+
 
 [\n] {
     yylineno++;
+    _CURRENT_LINE++;
 }
     
 {identifier} {

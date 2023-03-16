@@ -103,4 +103,5 @@ int _HEAP_POINTER; // Before the start of the program, reserve a large area of t
 // initial state to decide when to print the starter code (header plus calling main functiona and exit)
 int _INIT_STATE ;
 
-
+// global variable that stores the current line number
+int _CURRENT_LINE;

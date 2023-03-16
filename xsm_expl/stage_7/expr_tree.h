@@ -114,6 +114,8 @@ struct expr_tree_node * makeHeapFreeNode(struct expr_tree_node *l);
 
 struct expr_tree_node * makeNewNode(char * className );
 
+struct expr_tree_node * makeDeleteNode(struct expr_tree_node *l);
+
 struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * beforeDotNode, struct expr_tree_node *parameters);
 
 void compilerInit(FILE * target_file);

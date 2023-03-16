@@ -320,6 +320,105 @@ void pushFunctionParametersInReverse(struct expr_tree_node *t, FILE * target_fil
 
 }
 
+void typeCheck(struct expr_tree_node *leftNode, struct expr_tree_node * rightNode)
+{
+    struct TypeTable * leftType = leftNode->type;
+    struct TypeTable * rightType = rightNode->type;
+    struct ClassTable * leftClass = leftNode->classType;
+    struct ClassTable * rightClass = rightNode->classType;
+    // if either of the node is of nodetype _NODE_TYPE_FIELD, then we need to get the final type of the field
+    if(leftNode->nodetype == _NODE_TYPE_FIELD)
+    {
+        leftType = leftNode->right->type;
+        leftClass = leftNode->right->classType;
+    }
+    if(rightNode->nodetype == _NODE_TYPE_FIELD)
+    {
+        rightType = rightNode->right->type;
+        rightClass = rightNode->right->classType;
+    }
+    struct TypeTable * nullType = typeLookup("null");
+
+    // if wither of the node of null type, then no need to check
+    if(leftType == nullType || rightType == nullType) return;
+
+    // tyles do not match print type mismatch error
+    if(leftType != rightType || leftClass != rightClass)
+    {
+        printf("Type mismatch error at line %d\n", _CURRENT_LINE);
+        exit(1);
+    }
+    
+}
+void typeCheckAssignmentOp(struct expr_tree_node *leftNode, struct expr_tree_node * rightNode)
+{
+    struct TypeTable * leftType = leftNode->type;
+    struct TypeTable * rightType = rightNode->type;
+    struct ClassTable * leftClass = leftNode->classType;
+    struct ClassTable * rightClass = rightNode->classType;
+    // if either of the node is of nodetype _NODE_TYPE_FIELD, then we need to get the final type of the field
+    if(leftNode->nodetype == _NODE_TYPE_FIELD)
+    {
+        leftType = leftNode->right->type;
+        leftClass = leftNode->right->classType;
+    }
+    if(rightNode->nodetype == _NODE_TYPE_FIELD)
+    {
+        rightType = rightNode->right->type;
+        rightClass = rightNode->right->classType;
+    }
+    struct TypeTable * nullType = typeLookup("null");
+
+    // if wither of the node of null type, then no need to check
+    if(leftType == nullType || rightType == nullType) return;
+    
+    // when right node is of type HEAP INIT then left node should be of type int
+    if(rightNode->nodetype == _NODE_TYPE_HEAP_INIT)
+    {
+        char * leftTypeName = leftType->name;
+        if(strcmp(leftTypeName, "int") != 0)
+        {
+            printf("Assignment Type mismatch error at line %d\n", _CURRENT_LINE);
+            exit(1);
+        }
+        // return as we have already checked the type
+        return;
+    }
+
+    // if right node is  new, delete then check if left node is of type class 
+    if(rightNode->nodetype == _NODE_TYPE_NEW || rightNode->nodetype == _NODE_TYPE_DELETE)
+    {
+        if(leftClass==NULL)
+        {
+            printf("Assignment Type mismatch error at line %d\n", _CURRENT_LINE);
+            exit(1);
+        }
+        // return as we have already checked the type
+        return;
+    }
+    // if the right node is alloc, free then left node should be of user defined type
+    if(rightNode->nodetype == _NODE_TYPE_HEAP_ALLOC || rightNode->nodetype == _NODE_TYPE_HEAP_FREE)
+    {
+        char * leftTypeName = leftType->name;
+        if(strcmp(leftTypeName, "int") == 0 || strcmp(leftTypeName, "str") == 0 || strcmp(leftTypeName, "bool") == 0)
+        {
+            printf("Assignment Type mismatch error at line %d\n", _CURRENT_LINE);
+            exit(1);
+        }
+        // return as we have already checked the type
+        return;
+    }
+
+    // tyles do not match print type mismatch error
+    if(leftType != rightType || leftClass != rightClass)
+    {
+        printf("Assignment Type mismatch error at line %d\n", _CURRENT_LINE);
+        exit(1);
+    }
+    
+}
+
+
 reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     
     // Corner null case
@@ -478,6 +577,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Addition
         case (_NODE_TYPE_PLUS):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -503,6 +605,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Subtraction
         case(_NODE_TYPE_MINUS):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -529,6 +634,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Muliplication
         case(_NODE_TYPE_MUL):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -556,6 +664,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // Division
         case(_NODE_TYPE_DIV):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -581,6 +692,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // MOD
         case(_NODE_TYPE_MOD):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -607,6 +721,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         // EQUAL TO
         case(_NODE_TYPE_EQUALS):
         {
+            // type checking
+            typeCheckAssignmentOp(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -796,6 +913,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_LE):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -819,10 +939,14 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_GE):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
             reg_index rightReg = codeGen(t->right, target_file);
+
 
             // if left is a variable or field take the value
             if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
@@ -842,6 +966,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_LT):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -866,6 +993,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_GT):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -890,6 +1020,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_NE):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -914,6 +1047,9 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case (_NODE_TYPE_EQ):
         {
+            // type checking
+            typeCheck(t->left, t->right);
+
             // Evaluating the left and right trees respectively
             // Note that the order is very important
             reg_index leftReg = codeGen(t->left, target_file);
@@ -1309,6 +1445,33 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             break;
         }
         case (_NODE_TYPE_HEAP_FREE):
+        {
+            // backend code for free
+            // Evaluating the left tree
+            reg_index leftReg = codeGen(t->left, target_file);
+
+            // both the left and right trees should return -1
+            if(leftReg == -1)
+            {
+                printf("Error: Free can only be done with a address");
+                exit(1);
+            }
+            // if left tree is a variable or Field then take its value
+            if(t->left->nodetype == _NODE_TYPE_ID || t->left->nodetype == _NODE_TYPE_FIELD)
+            {
+                fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
+            }
+            // free the memory
+            reg_index success = freeHeap(leftReg, target_file);
+
+            // move the return valuue to leftReg
+            fprintf(target_file, "MOV R%d, R%d\n", leftReg, success);
+            freeLastReg();
+
+            return_val = leftReg;
+            break;
+        }
+        case (_NODE_TYPE_DELETE):
         {
             // backend code for free
             // Evaluating the left tree

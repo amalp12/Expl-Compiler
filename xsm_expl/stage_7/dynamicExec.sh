@@ -1,10 +1,11 @@
 #!/bin/bash
-path="input.expl"
+echo Enter the test program number of the test program you want to execute:
+read testNumber
 yacc -d expr_tree.y -Wcounterexamples
 lex expr_tree.l
 gcc -g -ll y.tab.c lex.yy.c -o a.out
 echo "Generating Assembly Code..."
-./a.out $path
+./a.out ./test_programs/test_program_$testNumber.expl
 retVal=$?
 if [ $retVal -eq 0 ]; then
     echo "Compilation successful"
@@ -12,7 +13,6 @@ if [ $retVal -eq 0 ]; then
     gcc -g lex.yy.c -o a.out
     ./a.out  
     cd ../
-    echo "Executing the assembly code..."
     ./xsm -l library.lib -e ./stage_7/assemblycode.xsm --debug
     cd stage_7
 else

@@ -127,22 +127,18 @@ int yylex(void);
 
 Program : 
 
-    TypeDefBlock ClassDefBlock GDeclBlock FDefBlock MainBlock {exit(1);}
-    | TypeDefBlock ClassDefBlock GDeclBlock  MainBlock{exit(1);}
+    TypeDefBlock ClassDefBlock GDeclBlock FDefBlock MainBlock {}
+    | TypeDefBlock ClassDefBlock GDeclBlock  MainBlock{}
 
 ;
 
 MainBlock :
     Type MAIN '(' ')' '{' LDeclBlock Body '}'
     {
-  
 
       // declare main function
-      printf("Generating Assembly Code... \n");
-      
       $<node>$ =  declareAndDefineMain($<string>1, $<node>7, target_file);
 
-      printf("Complete \n");
     }
 
 ;
@@ -281,7 +277,7 @@ ClassFieldFunction  :
   }
   | ID '.' ID '(' ')' // This will not occur inside a class
   {
-    $<node>$ = makeIdDotFunctionNode($<string>1, $<string>3, $<node>5);
+    $<node>$ = makeIdDotFunctionNode($<string>1, $<string>3, NULL);
 
   }
   | Field '.' ID '(' ArgList ')'
@@ -503,6 +499,10 @@ identifierUse:
   {
     $<node>$ = makeNewNode($<string>3);
   }
+  | DELETE '(' expr ')' 
+  {
+    $<node>$ = makeDeleteNode($<node>3);
+  }
   | Field 
   {
     $<node>$ = $<node>1;
@@ -647,12 +647,9 @@ Stmt :
   | DoWhileStmt 
   | DeclStmt
   | ReturnStmt
-  | ClassDeleteStmt
 ;
 
-ClassDeleteStmt :
-  DELETE '(' ID ')' SEMICOLON
-;
+
 
 ReturnStmt : 
     RETURN expr SEMICOLON 
@@ -748,12 +745,21 @@ void yyerror(char const *s)
 {
     // print error and line number
     printf("yyerror %s : %s at line number %d\n",s, yytext, yylineno);
+    exit(1);
 }
 
-int main()
+int main(int argc, char **argv)
 {
+ 
 
-  FILE * input_file=fopen("input.expl","r");
+  FILE * input_file=fopen(argv[1],"r");
+  // if input file not found
+  if(input_file==NULL)
+  {
+    printf("Input file %s not found\n",argv[1]);
+    exit(1);
+  }
+
   target_file = fopen("untranslated_assembly.xsm","w+");
   // Initializing Type Table
   typeTableCreate();
@@ -763,8 +769,11 @@ int main()
   _BASE_POINTER = _STACK_POINTER+1;
   // heap
   _HEAP_POINTER = _INITIAL_HEAP_POINTER;
-  
+  // currentline
+  _CURRENT_LINE = 1;
+
   yyin = input_file; 
   yyparse(); 
   fclose(input_file);  
+  exit(0);
 }
