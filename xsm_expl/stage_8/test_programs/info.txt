@@ -1,0 +1,114 @@
+test_program_1.expl:
+Test Program 1 : Binary Search Tree
+This test program inserts elements into a binary search tree and prints the elements in inorder, preorder and postorder traversal. The program stops taking input elements (that are to be inserted in Binary Search Tree) when the user enters 0.
+
+Input
+The elements that are to be inserted into a Binary Search Tree and a 0 at last (indicating the end of input).
+
+Output
+The inorder, preorder and postorder traversal of the tree.
+
+This program test the iteration, recursion, conditional, arrays and passing of user-defined datatype as return value of function.
+
+
+test_program_2.expl:
+Test Program 2 : Linked list
+This test program reads elements into a linked list and prints them.
+
+Input
+Value of length of list and list of values from standard input.
+
+Output
+The list of values stored in linked list.
+
+This program test the working of dynamic memory allocation functions like Initialize(), Alloc() and Free().
+
+
+
+test_program_3.expl:
+Test Program 3 : Sum of Factorials
+This test program reads an element and finds the sum of factorials of all the numbers till that element.
+
+Input
+Value of n.
+
+Output
+Sum of factorials of all the numbers till n.
+
+This program tests the declaration of a member field which is an object of another class. This program also tests the recursion, parameter passing, calling a function inside the call of another function.
+
+
+
+test_program_4.expl:
+Test Program 1: Bubblesort(iterative)
+This test program reads elements into an array and sorts them using the classic bubblesort algorithm. (iterative version)
+
+Input
+1.Number of elements to be sorted from standard input.
+2.Elements to be sorted
+Output
+A sorted array of elements.
+
+This program test the iteration, conditional and arrays.
+
+
+
+test_program_5.expl:
+Test Program 2 : Extended Euclid algorithm (iterative version and with functions)
+
+This test program calculates the GCD (Greatest Common Divisor) of two numbers along with Bezout co-efficients. (iterative version)
+
+Input
+Two numbers
+
+Output
+GCD of the given two numbers and Benoud co-efficients.
+
+This program test the iteration, parameter passing, passing of user-defined datatype as return value of function.
+
+
+test_program_6.expl:
+Test Program 3 : Bubblesort (recursive)
+This test program reads elements into an array and sorts them using the classic bubblesort algorithm. (recursive version)
+
+Input
+1.Number of elements to be sorted from standard input.
+2.Elements to be sorted
+Output
+A sorted array of elements.
+
+This program test the recursion, conditional and arrays.
+
+
+
+test_program_7.expl:
+Extended Euclid(User defined types)
+
+
+test_program_8.expl:
+Program 5 Factorial (recursive)
+
+
+test_program_9.expl:
+Program 6 Quick Sort (recursive)
+
+test_program_10.expl:
+Program 7: Constant Function Test Recursive Program
+
+test_program_11.expl:
+Program 8: Linked List using types
+
+test_program_12.expl:
+Program 9: Binary Search Tree using types
+
+test_program_13.expl:
+Program 10: Fibonacci recursive
+
+test_program_14.expl:
+Program 11: Extended Euclid (linked lists)
+
+test_program_15.expl:
+Program 12: Extended Euclid (iterative)
+
+test_program_16.expl:
+Program 13: Reverse linked list
