@@ -319,7 +319,6 @@ void pushFunctionParametersInReverse(struct expr_tree_node *t, FILE * target_fil
     }
 
 }
-
 void typeCheck(struct expr_tree_node *leftNode, struct expr_tree_node * rightNode)
 {
     struct TypeTable * leftType = leftNode->type;
@@ -384,9 +383,18 @@ void typeCheckAssignmentOp(struct expr_tree_node *leftNode, struct expr_tree_nod
         // return as we have already checked the type
         return;
     }
-
+    // if the right node is of type delete, then left node should be of type int
+    if(rightNode->nodetype == _NODE_TYPE_DELETE)
+    {
+        if(strcmp(leftType->name ,"int")!=0)
+        {
+            printf("Assignment Type mismatch error at line %d\n", _CURRENT_LINE);
+            exit(1);
+        }
+        return;
+    }
     // if right node is  new, delete then check if left node is of type class 
-    if(rightNode->nodetype == _NODE_TYPE_NEW || rightNode->nodetype == _NODE_TYPE_DELETE)
+    if(rightNode->nodetype == _NODE_TYPE_NEW)
     {
         if(leftClass==NULL)
         {

@@ -62,6 +62,13 @@ void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * clas
     _BASE_POINTER += new_gst_entry->size;
     new_gst_entry->next = _GLOBAL_SYMBOL_TABLE;
     _GLOBAL_SYMBOL_TABLE = new_gst_entry;
+
+    // if stack overflows thow error
+    if(_STACK_POINTER >= _FINAL_STACK_POINTER)
+    {
+        printf("Stack Overflow\n");
+        exit(1);
+    }
 }
 
 void clearLST() // Clears the local symbol table

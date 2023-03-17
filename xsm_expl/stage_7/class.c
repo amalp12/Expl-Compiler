@@ -1,5 +1,13 @@
 void classInstall(char * name ,char * parentClassName)
 {
+    // check if the class with same name exits
+    struct ClassTable * temp = classLookup(name);
+    // if same class already exists throw error
+    if(temp != NULL)
+    {
+        printf("Class %s already exists.\n",name);
+        exit(1);
+    }
     struct ClassTable * newClass = (struct ClassTable *)malloc(sizeof(struct ClassTable));
     newClass->name = strdup(name);
     newClass->parent = classLookup(parentClassName);

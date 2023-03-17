@@ -499,7 +499,7 @@ identifierUse:
   {
     $<node>$ = makeNewNode($<string>3);
   }
-  | DELETE '(' expr ')' 
+  | DELETE '(' identifierUse ')' 
   {
     $<node>$ = makeDeleteNode($<node>3);
   }

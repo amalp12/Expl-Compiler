@@ -78,6 +78,8 @@
 // stack
 #define _INITIAL_STACK_POINTER 4096
 #define _STACK_UNIT_SIZE 1
+#define _STACK_SIZE 1024
+#define _FINAL_STACK_POINTER 5120
 
 // heap
 #define _INITIAL_HEAP_POINTER 1024
