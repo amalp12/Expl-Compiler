@@ -349,6 +349,41 @@ void typeCheck(struct expr_tree_node *leftNode, struct expr_tree_node * rightNod
     }
     
 }
+struct TypeTable * getAssignmentType(struct expr_tree_node *node)
+{
+    struct TypeTable * type = node->type;
+    // if either of the node is of nodetype _NODE_TYPE_FIELD, then we need to get the final type of the field
+    if(node->nodetype == _NODE_TYPE_FIELD)
+    {
+        type = node->right->type;
+    }
+    return type;
+    
+}
+struct ClassTable * getAssignmentClassType(struct expr_tree_node *node)
+{
+    struct ClassTable * class = node->classType;
+    // if either of the node is of nodetype _NODE_TYPE_FIELD, then we need to get the final type of the field
+    if(node->nodetype == _NODE_TYPE_FIELD)
+    {
+        class = node->right->classType;
+    }
+    return class;
+    
+}
+
+// is ancestor of  iterative
+int isAncestor(struct ClassTable * ancestor, struct ClassTable * child)
+{
+    if(ancestor == NULL || child == NULL) return _FALSE;
+    struct ClassTable * temp = child;
+    while(temp!=NULL)
+    {
+        if(temp == ancestor) return _TRUE;
+        temp = temp->parent;
+    }
+    return _FALSE;
+}
 void typeCheckAssignmentOp(struct expr_tree_node *leftNode, struct expr_tree_node * rightNode)
 {
     struct TypeTable * leftType = leftNode->type;
@@ -416,9 +451,20 @@ void typeCheckAssignmentOp(struct expr_tree_node *leftNode, struct expr_tree_nod
         // return as we have already checked the type
         return;
     }
+    // class types do not match print type mismatch error
+    if(leftClass != NULL || rightClass != NULL)
+    {
+        if(leftClass != rightClass && isAncestor(leftClass, rightClass)== _FALSE)
+        {
+            printf("Assignment Class Type mismatch error at line %d\n", _CURRENT_LINE);
+            exit(1);
+        }
+    
+    }
+  
 
-    // tyles do not match print type mismatch error
-    if(leftType != rightType || leftClass != rightClass)
+    // types do not match print type mismatch error
+    if(leftType != rightType )
     {
         printf("Assignment Type mismatch error at line %d\n", _CURRENT_LINE);
         exit(1);
@@ -766,6 +812,23 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // if right is a variable or field take the value
             if(t->right->nodetype == _NODE_TYPE_ID || t->right->nodetype == _NODE_TYPE_FIELD)
             {
+                if(getAssignmentClassType(t->left) !=NULL && getAssignmentClassType(t->right) != NULL)
+                {
+                    // copy virtual function table
+                    reg_index virtualFunctionReg = getFreeReg();
+                    fprintf(target_file, "MOV R%d, R%d\n", virtualFunctionReg, rightReg);
+                    // Add 1 to the virtual function register
+                    fprintf(target_file, "ADD R%d, 1\n", virtualFunctionReg);
+                    // Add 1 to the left register
+                    fprintf(target_file, "ADD R%d, 1\n", leftReg);
+                    // copy the virtual function table
+                    fprintf(target_file, "MOV [R%d], [R%d]\n", leftReg, virtualFunctionReg);
+                    // subtract 1 from the left register
+                    fprintf(target_file, "SUB R%d, 1\n", leftReg);
+                    // free the virtual function table register
+                    freeLastReg();                    
+                }
+
                 fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
             }
            
@@ -1336,7 +1399,7 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
                 // get the address of the object
                 fprintf(target_file, "MOV R%d, [R%d]\n", objectAddressReg, objectAddressReg);
                 // take value at the address
-            fprintf(target_file, "MOV R%d, [R%d]\n", methodCallReg, methodCallReg);
+                fprintf(target_file, "MOV R%d, [R%d]\n", methodCallReg, methodCallReg);
             }
             
 

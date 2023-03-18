@@ -120,14 +120,63 @@ This program uses the concepts of inheritance and subtype polymorphism.
 
 Input: If any input > 0
 Output
-
 In A F1
 0
+
 Input : If any input <= 0
 Output :
-
 In B F1
 1
 
 
 test_program_18.expl:
+Program 5
+This program tests the correct set up of the virtual function table by the compiler.
+This program uses the virtual function table, inheritance and subtype polymorphism.
+
+Input : If n < 0
+Output :In A F0
+Input : If n == 0
+Output :In B F0
+Input : If n > 0
+Output :In C F0
+
+
+test_program_19.expl:
+Program 6
+This program tests the implementation of inheritance and subtype polymorphism.
+Input
+1
+length
+breadth
+Output
+
+length * breadth
+Input
+
+2
+length
+Output
+
+length * length
+This test program uses the concepts of inheritance.
+
+
+test_program_20.expl:
+Test program 7
+This program tests the implementation of inheritance and subtype polymorphism.
+
+Input : > 0
+Output
+
+Rogers
+37
+Input : <= 0
+Output :
+
+Mathew
+35
+999
+CS
+This program tests the concepts of inheritance, subtype polymorphism and virtual function table.
+
