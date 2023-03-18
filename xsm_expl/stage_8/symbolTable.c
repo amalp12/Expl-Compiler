@@ -40,7 +40,7 @@ void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * clas
 
     new_gst_entry->rows = rows;
     new_gst_entry->cols = cols;
-    new_gst_entry->binding = _STACK_POINTER;
+    new_gst_entry->binding = _STACK_POINTER+1;
     new_gst_entry->size = max(rows*cols, max(rows, max(cols, _INT_SIZE)));
     new_gst_entry->paramList = NULL;
     new_gst_entry->functionLabelNumber = _NONE;

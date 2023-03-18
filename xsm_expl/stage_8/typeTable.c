@@ -92,10 +92,17 @@ void typeInstall(char *name, struct FieldList *fields)  // Creates a type table 
         fieldID++;
         temp1 = temp1->next;
     }
+    // if there are more than 8 fields throw error
+    if(fieldID > 8)
+    {
+        printf("Error: Type %s has more than 8 fields\n", name);
+        exit(1);
+    }
     
     // adding to the end of the list
     struct TypeTable * temp2 = _TYPE_TABLE_HEAD;
-    while(temp2->next != NULL){
+    while(temp2->next != NULL)
+    {
         temp2 = temp2->next;
     }
     temp2->next = newType;

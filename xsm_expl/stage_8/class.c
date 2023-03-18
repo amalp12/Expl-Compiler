@@ -28,8 +28,6 @@ void classInstall(char * name ,char * parentClassName)
 
     
 
-    
-
     // if parent exists then copy the fields and methods
     if(newClass->parent != NULL)
     {
@@ -53,10 +51,7 @@ void classInstall(char * name ,char * parentClassName)
             tempMethod = tempMethod->next;
         }
 
-        // copy field count
-        newClass->fieldCount = newClass->parent->fieldCount-1;
-        //copy method count
-        newClass->methodCount = newClass->parent->methodCount;
+       
     }
     
     // if head is empty then insert at head
@@ -120,7 +115,12 @@ void classFieldInstall(struct ClassTable * classPtr, char * typeName, char *name
     // insert into head
     newField->next = classPtr->memberFields;
     classPtr->memberFields = newField;
-    classPtr->fieldCount++;
+    // if method count is greater than or equal to 8
+    if(classPtr->fieldCount > 8)
+    {
+        printf("Error : Class %s has more than 8 fields.\n",classPtr->name);
+        exit(1);
+    }
 }
 
 
@@ -141,6 +141,7 @@ void classMethodInstall (struct ClassTable * classPtr, char *name, struct TypeTa
     newMethod->paramList = Paramlist;
     // method index starts from 0 hence the next methodIndex will have value equal to method count of the class
     newMethod->functionPosition = classPtr->methodCount;
+    classPtr->methodCount++;
     // get label for method
     newMethod->functionLabel = getNewFunctionLabel();
     newMethod->next = NULL;
@@ -156,7 +157,13 @@ void classMethodInstall (struct ClassTable * classPtr, char *name, struct TypeTa
     // insert into head of class
     newMethod->next = classPtr->memberFunctionList;
     classPtr->memberFunctionList = newMethod;
-    classPtr->methodCount++;
+
+    // if method count is greater than or equal to 8
+    if(classPtr->methodCount > 8)
+    {
+        printf("Error : Class %s has more than 8 methods.\n",classPtr->name);
+        exit(1);
+    }
 }
 void classMethodCopy(struct ClassTable * classPtr, char *name, struct TypeTable *type, struct ParameterNode *Paramlist, int functionLabel, int functionPosition)
 {
@@ -173,6 +180,7 @@ void classMethodCopy(struct ClassTable * classPtr, char *name, struct TypeTable 
     newMethod->name = strdup(name);
     newMethod->type = type;
     newMethod->paramList = Paramlist;
+    classPtr->methodCount++;
     // method index starts from 0 hence the next methodIndex will have value equal to method count of the class
     newMethod->functionPosition = functionPosition;
     // get label for method
@@ -190,7 +198,12 @@ void classMethodCopy(struct ClassTable * classPtr, char *name, struct TypeTable 
     // insert into head of class
     newMethod->next = classPtr->memberFunctionList;
     classPtr->memberFunctionList = newMethod;
-    classPtr->methodCount++;
+    // if method count is greater than or equal to 8
+    if(classPtr->methodCount > 8)
+    {
+        printf("Error : Class %s has more than 8 methods.\n",classPtr->name);
+        exit(1);
+    }
 }
 
 

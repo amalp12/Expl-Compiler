@@ -204,9 +204,6 @@ void popAllLocalDeclarationsAndCreateEntry(char * typeName)
     {
         // add self to the local symbol table
         LSTInstall("self", NULL, 0,0, 0);
-        // intall it in class too
-        struct ClassTable *classEntry = getCurrentClassBeingDefined();
-        classFieldInstall(classEntry, "int", "self");
         // get lst entry and add class type
         struct LocalSymbolTable *LSTEntry = LSTLookup("self");
         LSTEntry->classType = getCurrentClassBeingDefined();

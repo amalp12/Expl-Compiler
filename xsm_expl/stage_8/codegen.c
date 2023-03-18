@@ -1391,15 +1391,16 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
             // get the address of the function in the virtual function table
             reg_index methodCallReg = getFreeReg();
+
+            fprintf(target_file, "MOV R%d, R%d\n", methodCallReg, objectAddressReg);
+            fprintf(target_file, "ADD R%d, 1\n", methodCallReg);
+            fprintf(target_file, "MOV R%d, [R%d]\n", methodCallReg, methodCallReg);
             // if the object is id then get the address of the object
-            if (t->right->nodetype == _NODE_TYPE_ID)
+            if (nodeJustBeforeMethod->nodetype == _NODE_TYPE_ID || nodeJustBeforeMethod->nodetype == _NODE_TYPE_FIELD)
             {
-                fprintf(target_file, "MOV R%d, R%d\n", methodCallReg, objectAddressReg);
-                fprintf(target_file, "ADD R%d, %d\n", methodCallReg, 1);
                 // get the address of the object
                 fprintf(target_file, "MOV R%d, [R%d]\n", objectAddressReg, objectAddressReg);
                 // take value at the address
-                fprintf(target_file, "MOV R%d, [R%d]\n", methodCallReg, methodCallReg);
             }
             
 
