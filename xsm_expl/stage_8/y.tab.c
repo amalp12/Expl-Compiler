@@ -2376,7 +2376,7 @@ yyreduce:
   case 89: /* ArgList: expr  */
 #line 625 "expr_tree.y"
     {
-      (yyval.node) =makeConnectorNode(NULL,(yyvsp[0].node));
+      (yyval.node) = makeConnectorNode(NULL,(yyvsp[0].node));
     }
 #line 2382 "y.tab.c"
     break;
@@ -2848,6 +2848,8 @@ int main(int argc, char **argv)
   _HEAP_POINTER = _INITIAL_HEAP_POINTER;
   // currentline
   _CURRENT_LINE = 1;
+  // counting classes
+  _GLOBAL_CLASS_COUNTER = 0;
 
   yyin = input_file; 
   yyparse(); 

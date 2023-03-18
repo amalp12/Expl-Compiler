@@ -38,6 +38,8 @@ The following scope rules must be carefully checked to ensure correct semantic a
 
 4.    There is exactly one method carrying a name in a class. Thus, function overloading is not permitted.
 */
+struct ClassTable * getClassTableHead();
+
 void classInstall(char * name ,char * parentClassName);
 
 struct ClassTable* classLookup(char * className);
@@ -56,10 +58,14 @@ void resetCurrentClassBeingDefined();
 
 struct ClassTable * getCurrentClassBeingDefined();
 
+void classMethodCopy(struct ClassTable * classPtr, char *name, struct TypeTable *type, struct ParameterNode *Paramlist, int functionLabel, int functionPosition);
+
+
 struct ClassMemberFunctionList* classMethodLookup(struct ClassTable* classPtr ,char* methodName);
 
 int getVirtualFunctionTableAddress(int  classIndex);
 
+void classMethodDelete(struct ClassTable * classPtr, char * methodName);
 
 
 

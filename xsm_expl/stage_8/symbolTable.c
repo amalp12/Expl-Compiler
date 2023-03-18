@@ -60,6 +60,14 @@ void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * clas
     
     _STACK_POINTER += new_gst_entry->size;
     _BASE_POINTER += new_gst_entry->size;
+
+    // if class variable then increment the stack pointer by 1 more
+    if(classType != NULL)
+    {
+        _STACK_POINTER += new_gst_entry->size;;
+        _BASE_POINTER += new_gst_entry->size;
+    }
+
     new_gst_entry->next = _GLOBAL_SYMBOL_TABLE;
     _GLOBAL_SYMBOL_TABLE = new_gst_entry;
 

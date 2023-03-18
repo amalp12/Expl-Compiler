@@ -18,17 +18,66 @@ void classInstall(char * name ,char * parentClassName)
     newClass->next = NULL;
     newClass->classIndex = _GLOBAL_CLASS_COUNTER++;
     
+    _CURRENT_CLASS_BEING_DEFINED = newClass;
+    
+    // increment stack pointer and base pointer
+    // increment the stack pointer and the base pointer
+    _BASE_POINTER+=_VIRTUAL_FUNCTION_TABLE_SIZE;
+    _STACK_POINTER+=_VIRTUAL_FUNCTION_TABLE_SIZE;
+
 
     
 
-    // insert into head
-    newClass->next = _CLASS_TABLE_HEAD;
-    _CLASS_TABLE_HEAD = newClass;
-    _CURRENT_CLASS_BEING_DEFINED = newClass;
+    
+
+    // if parent exists then copy the fields and methods
+    if(newClass->parent != NULL)
+    {
+        // copy fields
+        struct FieldList * tempField = newClass->parent->memberFields;
+        while(tempField != NULL)
+        {
+            // do not copy the parent's self
+            if(strcmp(tempField->name,"self") != 0)
+            {
+                classFieldInstall(newClass,tempField->type->name,tempField->name);
+            }
+            tempField = tempField->next;
+        }
+
+        // copy methods
+        struct ClassMemberFunctionList * tempMethod = newClass->parent->memberFunctionList;
+        while(tempMethod != NULL)
+        {
+            classMethodCopy(newClass,tempMethod->name,tempMethod->type,tempMethod->paramList->next, tempMethod->functionLabel, tempMethod->functionPosition);// no need self
+            tempMethod = tempMethod->next;
+        }
+
+        // copy field count
+        newClass->fieldCount = newClass->parent->fieldCount-1;
+        //copy method count
+        newClass->methodCount = newClass->parent->methodCount;
+    }
+    
+    // if head is empty then insert at head
+    if(_CLASS_TABLE_HEAD == NULL)
+    {
+        _CLASS_TABLE_HEAD = newClass;
+    }
+    else
+    {
+        // insert into tail
+        struct ClassTable * temp = _CLASS_TABLE_HEAD;
+        while(temp->next != NULL)
+        {
+            temp = temp->next;
+        }
+        temp->next = newClass;
+    }
 }
 int getVirtualFunctionTableAddress(int  classIndex)
 {
-    return _INITIAL_STACK_POINTER + (classIndex * _VIRTUAL_FUNCTION_TABLE_SIZE);
+    return _INITIAL_STACK_POINTER+1 + (classIndex * _VIRTUAL_FUNCTION_TABLE_SIZE);
 }
 
 struct ClassTable* classLookup(char * className)
@@ -109,6 +158,43 @@ void classMethodInstall (struct ClassTable * classPtr, char *name, struct TypeTa
     classPtr->memberFunctionList = newMethod;
     classPtr->methodCount++;
 }
+void classMethodCopy(struct ClassTable * classPtr, char *name, struct TypeTable *type, struct ParameterNode *Paramlist, int functionLabel, int functionPosition)
+{
+    // check if method already exists
+    // 4. There is exactly one method carrying a name in a class. Thus, function overloading is not permitted.
+    if(classMethodLookup(classPtr,name) != NULL)
+    {
+        printf("Method %s already exists in class %s.\n",name,classPtr->name);
+        exit(1);
+    }
+
+    // create new method
+    struct ClassMemberFunctionList * newMethod = (struct ClassMemberFunctionList *)malloc(sizeof(struct ClassMemberFunctionList));
+    newMethod->name = strdup(name);
+    newMethod->type = type;
+    newMethod->paramList = Paramlist;
+    // method index starts from 0 hence the next methodIndex will have value equal to method count of the class
+    newMethod->functionPosition = functionPosition;
+    // get label for method
+    newMethod->functionLabel = functionLabel;
+    newMethod->next = NULL;
+
+    // create a parameter called self for each method
+    struct ParameterNode * self = (struct ParameterNode *)malloc(sizeof(struct ParameterNode));
+    self->name = strdup("self");
+    self->type = typeLookup("int");
+    self->next = Paramlist;
+    newMethod->paramList = self;
+    
+
+    // insert into head of class
+    newMethod->next = classPtr->memberFunctionList;
+    classPtr->memberFunctionList = newMethod;
+    classPtr->methodCount++;
+}
+
+
+
 
 struct ClassMemberFunctionList* classMethodLookup(struct ClassTable* classPtr ,char* methodName)
 {
@@ -181,4 +267,38 @@ void resetCurrentClassBeingDefined()
 struct ClassTable * getCurrentClassBeingDefined()
 {
     return _CURRENT_CLASS_BEING_DEFINED;
+}
+
+struct ClassTable * getClassTableHead()
+{
+    return _CLASS_TABLE_HEAD;
+}
+
+// delete method from a class
+void classMethodDelete(struct ClassTable * classPtr, char * methodName)
+{
+    // null check
+    if(methodName == NULL) return;
+
+    struct ClassMemberFunctionList * temp = classPtr->memberFunctionList;
+    struct ClassMemberFunctionList * prev = NULL;
+    while(temp != NULL){
+        if(strcmp(temp->name,methodName) == 0)
+        {
+            // if first element
+            if(prev == NULL)
+            {
+                classPtr->memberFunctionList = temp->next;
+            }
+            else
+            {
+                prev->next = temp->next;
+            }
+            // free memory
+            free(temp);
+            return;
+        }
+        prev = temp;
+        temp = temp->next;
+    }
 }

@@ -101,7 +101,7 @@ void popAllGlobalDeclarationsAndCreateEntry(char * typeName)
 
         while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
         {
-            entry->paramList = AddToParameterList(entry->paramList, param->varname, param->type, param->classType, rows, cols);
+            entry->paramList = addToParameterList(entry->paramList, param->varname, param->type, param->classType, rows, cols);
             param = param->left;
         }
 
@@ -226,22 +226,74 @@ void declareMethod( struct expr_tree_node * node)
         printf("Error: Class not found\n");
         exit(1);
     }
-    // check if method already exists in class
+    // check if method already exists in class but not the parent if it exists
     struct ClassMemberFunctionList *methodEntry = classMethodLookup(classEntry, node->varname);
-    if (methodEntry != NULL) 
+    if (methodEntry != NULL ) 
     {
-        printf("Error: Method %s already exists in class %s\n", node->varname, classEntry->name);
-        exit(1);
+        // parent is null
+        if(classEntry->parent==NULL)
+        {
+            printf("Error: Method %s already exists in class %s\n", node->varname, classEntry->name);
+            exit(1);
+        }
+        else
+        {
+            // check if method already exists in ancestor class if no then throw error
+            if(classMethodLookup(classEntry->parent, node->varname) == NULL)
+            {
+                printf("Error: Method %s already exists in class %s\n", node->varname, classEntry->name);
+                exit(1);
+            }
+        }
+
+        // check if the parameters name, type and classType are same
+        struct ParameterNode *paramList = methodEntry->paramList->next; // skip self
+        struct expr_tree_node *param = node->left;
+        while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
+        {
+            // if paramList is null, throw error as the number of parameters are not same
+            if(paramList==NULL)
+            {
+                printf("Error: The number of parameters in the overriden method %s in class %s are not same\n", node->varname, classEntry->name);
+                exit(1);
+            }
+            // if the name, type or classType is not same, throw error
+            if(strcmp(paramList->name, param->varname)!=0 || paramList->type!=param->type || paramList->classType!=param->classType)
+            {
+                printf("Error: The parameters in the overriden method %s in class %s are not same\n", node->varname, classEntry->name);
+                exit(1);
+            }
+            paramList = paramList->next;
+            param = param->left;
+        }
+        // if paramList is not null, throw error as the number of parameters are not same
+        if(paramList!=NULL)
+        {
+            printf("Error: The number of parameters in the overriden method %s in class %s are not same\n", node->varname, classEntry->name);
+            exit(1);
+        }
+        // get a new function label for the method
+        int functionLabel = getNewFunctionLabel();
+        // add the function label to the method entry
+        methodEntry->functionLabel = functionLabel;
+
+        
+    }
+    //or  if method doesn't exist in class
+    else
+    {
+        // create a method entry in the class
+        struct ParameterNode *paramList = NULL;
+        struct expr_tree_node *param = node->left;
+        while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
+        {
+            paramList = addToParameterList(paramList, param->varname, param->type, param->classType, 0, 0);
+            param = param->left;
+        }
+
+        classMethodInstall(classEntry, node->varname, node->type, paramList) ;
     }
 
-    // create a method entry in the class
-    struct ParameterNode *paramList = NULL;
-    struct expr_tree_node *param = node->left;
-    while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
-    {
-        paramList = AddToParameterList(paramList, param->varname, param->type, param->classType, 0, 0);
-        param = param->left;
-    }
-    classMethodInstall (classEntry, node->varname, node->type, paramList) ;
+    
 
 }

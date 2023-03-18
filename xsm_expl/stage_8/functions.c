@@ -15,7 +15,7 @@ struct ParameterNode * createParameterNode(char * name, struct TypeTable *  type
 
     return new_parameter_node;
 }
-struct ParameterNode * AddToParameterList(struct ParameterNode * parameter_list, char * varname, struct TypeTable * type, struct ClassTable * classType, int rows, int cols)
+struct ParameterNode * addToParameterList(struct ParameterNode * parameter_list, char * varname, struct TypeTable * type, struct ClassTable * classType, int rows, int cols)
 {
     struct ParameterNode * parameter_node = createParameterNode(varname, type, classType);
     if (parameter_list == NULL)

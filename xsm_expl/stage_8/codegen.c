@@ -770,6 +770,22 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             }
            
             fprintf(target_file, "MOV [R%d], R%d\n", leftReg, rightReg);
+
+            // if left is a variable of a class type and right is a new node
+            if(t->right->nodetype == _NODE_TYPE_NEW)
+            {
+                // if classEntry is null then the class is not defined
+                if(t->right->classType == NULL)
+                {
+                    printf("Class not provided for new\n");
+                    exit(1);
+                }
+                // add one to the left register 
+                fprintf(target_file, "ADD R%d, 1\n", leftReg);
+                // move the class address to the address in left register
+                fprintf(target_file, "MOV [R%d], %d\n", leftReg, getVirtualFunctionTableAddress(t->right->classType->classIndex));
+                
+            }
             // freeing the register used by the right tree evaluation
             freeLastReg();
             freeLastReg();
@@ -1310,16 +1326,28 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
             // get the address of the object
             reg_index objectAddressReg = codeGen(t->right, target_file);
 
+            // get the address of the function in the virtual function table
+            reg_index methodCallReg = getFreeReg();
             // if the object is id then get the address of the object
             if (t->right->nodetype == _NODE_TYPE_ID)
             {
+                fprintf(target_file, "MOV R%d, R%d\n", methodCallReg, objectAddressReg);
+                fprintf(target_file, "ADD R%d, %d\n", methodCallReg, 1);
                 // get the address of the object
                 fprintf(target_file, "MOV R%d, [R%d]\n", objectAddressReg, objectAddressReg);
+                // take value at the address
+            fprintf(target_file, "MOV R%d, [R%d]\n", methodCallReg, methodCallReg);
             }
             
 
             // before pushing the parameters push the object address (self)
             fprintf(target_file, "PUSH R%d\n", objectAddressReg);
+
+
+            // get address to the virtual function table of the object and push it on the stack
+            fprintf(target_file, "PUSH R%d\n", methodCallReg);
+            
+            
             
             // push all parameters on the stack in reverse and assign them their relative binding addresses
             pushFunctionParametersInReverse(t->left, target_file);
@@ -1327,11 +1355,25 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
 
             // push the return value reg
-            reg_index returnReg = getFreeReg();
+            reg_index returnReg = methodCallReg;
             fprintf(target_file, "PUSH R%d\n", returnReg);
+            
+
+            
+            // get the address of the function in the virtual function table
+            fprintf(target_file, "ADD R%d, %d\n", methodCallReg, method->functionPosition);
+            // get the label from the address
+            fprintf(target_file, "MOV R%d, [R%d]\n", methodCallReg, methodCallReg);
+
+
+            
 
             //Call the function
-            fprintf(target_file, "CALL _F%d\n", method->functionLabel);
+            fprintf(target_file, "CALL R%d\n", methodCallReg);
+
+            // free method call reg
+            freeLastReg();
+            returnReg = objectAddressReg;
 
           
             // when it it return pop the return value
@@ -1344,12 +1386,15 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
 
             reg_index dummyRegister = getFreeReg();            // pop self from the stack
-            // pop all parameters from the stack (this includes self also)
+            // pop all parameters from the stack (this includes virtual table address also)
             while (temp != NULL )
             {
                 fprintf(target_file, "POP R%d\n", dummyRegister);
                 temp = temp->next;
             }
+            // pop object table address from the stack
+            fprintf(target_file, "POP R%d\n", dummyRegister);
+
             freeLastReg();
             
             //  restore all used registers
@@ -1659,6 +1704,67 @@ void deleteFileContents(FILE *fp) {
     ftruncate(fileno(fp), 0); // truncate the file to zero bytes
 }
 
+// method lookup based on function Position
+struct ClassMemberFunctionList * classMethodPositionWiseLookup(int position, struct ClassTable * classTableEntry)
+{
+    struct ClassMemberFunctionList * method = classTableEntry->memberFunctionList;
+    
+    while(method)
+    {
+        if(method->functionPosition == position)
+        {
+            return method;
+        }
+        method = method->next;
+    }
+    return NULL;
+}
+// create virtual function table for classes
+void createVirtualFunctionTable(FILE * target_file)
+{
+    // get the head of class table
+    struct ClassTable * classTableEntry = getClassTableHead();
+
+    // get a free register
+    reg_index freeReg = getFreeReg();
+    // iterate over the class table
+    while (classTableEntry)
+    {
+        // get the head of the method table
+        struct ClassMemberFunctionList * method ;
+        int methodCount = 0;
+        // iterate over the method table
+        // for each method create a label and push it to the stack
+        // while method count is less than _VIRTUAL_FUNCTION_TABLE_SIZE (here its 8)
+        while(methodCount < _VIRTUAL_FUNCTION_TABLE_SIZE)
+        {
+            method = classMethodPositionWiseLookup(methodCount, classTableEntry);
+            if(method != NULL)
+            {
+                // move the value of the label to the register
+                fprintf(target_file, "MOV R%d, _F%d\n", freeReg, method->functionLabel);
+                // push the value of the register to the stack
+                fprintf(target_file, "PUSH R%d\n", freeReg);
+                
+            }
+            else
+            {
+                // push -1 to the stack
+                // move -1 to the register
+                fprintf(target_file, "MOV R%d, -1\n", freeReg);
+                fprintf(target_file, "PUSH R%d\n", freeReg);
+            }
+
+            // increment the method count
+            methodCount++;
+        }
+
+        classTableEntry = classTableEntry->next;
+    }
+    // free the register
+    freeLastReg();
+    
+}
 void explInit(FILE * target_file)
 {
 
@@ -1676,12 +1782,15 @@ void explInit(FILE * target_file)
     deleteFileContents(target_file); // delete the contents of the file
 
     fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0);
+    fprintf(target_file, "MOV SP, %d\n",_INITIAL_STACK_POINTER);
+    fprintf(target_file, "MOV BP, %d\n", _INITIAL_STACK_POINTER+1);
+    createVirtualFunctionTable(target_file);
     fprintf(target_file, "MOV SP, %d\n",_STACK_POINTER);
     fprintf(target_file, "MOV BP, %d\n", _BASE_POINTER);
-
     // pushing the return address of the main function
     fprintf(target_file, "PUSH R0\n");
     fprintf(target_file, "CALL _F0\n");
+    fprintf(target_file, "POP R0\n");
     
     // calling int 10
     fprintf(target_file, "INT 10\n");
@@ -1938,8 +2047,8 @@ void classMethodCodegen(struct ClassTable * classPtr, struct expr_tree_node * t,
         printf("Error: Parameter self not declared.\n");
         exit(1);
     }
-    LSTEntry->binding = currentBindingAddress;
     currentBindingAddress-=_STACK_UNIT_SIZE;
+    LSTEntry->binding = currentBindingAddress;
  
     // pushing previous BP to the stack
     fprintf(target_file, "PUSH BP\n");
