@@ -1,71 +1,71 @@
 class
-    Person
+    A
     {
         decl
-            str name;
-            int age;
-            int printDetails();
-            str findName();
-            int createPerson(str name, int age);
+            int f0();
+            int f1();
         enddecl
-        int printDetails()
+        int f0() 
         {
-            decl
-            enddecl
             begin
-                write(self.name);
-                write(self.age);
+                write("In class A f0");
                 return 1;
             end
         }
-        str findName()
+        int f1() 
         {
-            decl
-            enddecl
             begin
-                return self.name;
-            end
-        }
-        int createPerson(str name, int age)
-        {
-            decl
-            enddecl
-            begin
-                self.name=name;
-                self.age=age;
+                write("In class A f1");
                 return 1;
             end
         }
     }
-    Student extends Person
+    B extends A
     {
         decl
-            int rollnumber;
-            str dept;
-            int printDetails();
-            int createStudent(str name, int age,int rollNo, str dept);
+            int f0();
+            int f2();
         enddecl
-        int createStudent(str name, int age,int rollNo, str dept)
+        int f0()
         {
-            decl
-            enddecl
             begin
-                self.name =name;
-                self.age = age;
-                self.rollnumber = rollNo;
-                self.dept = dept;
+                write("In class B f0");
                 return 1;
             end
         }
-        int printDetails()
+        int f2() 
         {
-            decl
-            enddecl
             begin
-                write(self.name);
-                write(self.age);
-                write(self.rollnumber);
-                write(self.dept);
+                write("In class B f2");
+                return 1;
+            end
+        }
+    }
+    C extends B
+    {
+        decl
+            int f0();
+            int f2();
+            int f4();
+        enddecl
+        int f0()
+        {
+            begin
+                write("In class C f0");
+                return 1;
+            end
+        }
+        int f2()
+        {
+            begin
+                write("In class C f2");
+                return 1;
+            end
+        }
+        int f4()
+        {
+            begin
+                write("In class C f4");
                 return 1;
             end
         }
@@ -73,31 +73,31 @@ class
 endclass
 
 decl
-    int n,temp;
-    str name;
-    Person first;
-    Student second;
-    Person arbitrary;
+    A obj ;
+    A test_obj;
 enddecl
 
-int main()
+int main() 
 {
     decl
+        int temp,n;
     enddecl
-
     begin
-        n = initialize();
-        first=new(Person);
-        temp = first.createPerson("Rogers", 37);
-        second=new(Student);
-        temp = second.createStudent("Mathew", 35, 999, "CS");
+        temp= initialize();
         read(n);
-        if (n>0) then
-            arbitrary = first;
+        if(n < 0)then
+            obj = new(A);
         else
-            arbitrary = second;
+            if(n == 0)then
+                obj = new(B);
+            else
+                if(n > 0)then
+                    obj = new(C);
+                endif;
+            endif;
         endif;
-        n = arbitrary.printDetails();
-        return 0;
+        test_obj = obj;
+        write(test_obj.f0());
+        return 1;
     end
 }

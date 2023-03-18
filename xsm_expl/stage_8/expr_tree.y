@@ -164,8 +164,12 @@ ClassDefList :
 
 ClassDef  : 
     ClassName '{' DECL ClassFieldLists ClassMethodDeclList ENDDECL ClassMethodDefns '}'
+  |  ClassName '{' DECL ClassMethodDeclList ENDDECL ClassMethodDefns '}'
+  |  ClassName '{' DECL ClassFieldLists ENDDECL ClassMethodDefns '}'
+
 
 ;
+
 
 ClassName :
     ID         

@@ -2,7 +2,6 @@ class
     A
     {
         decl
-            int asf;
             int f0();
             int f1();
         enddecl
@@ -24,7 +23,6 @@ class
     B extends A
     {
         decl
-            int asdad;
             int f0();
             int f2();
         enddecl
@@ -46,7 +44,6 @@ class
     C extends B
     {
         decl
-            int asdsdfas;
             int f0();
             int f2();
             int f4();

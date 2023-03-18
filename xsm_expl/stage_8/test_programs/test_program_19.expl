@@ -30,7 +30,6 @@ class
     Square extends Rectangle
     {
         decl
-            int sdf;
             int set_dimensions();
         enddecl
         int set_dimensions() 

@@ -454,7 +454,7 @@ void typeCheckAssignmentOp(struct expr_tree_node *leftNode, struct expr_tree_nod
     // class types do not match print type mismatch error
     if(leftClass != NULL || rightClass != NULL)
     {
-        if(leftClass != rightClass && isAncestor(leftClass, rightClass)== _FALSE)
+        if(isAncestor(leftClass, rightClass) == _FALSE)
         {
             printf("Assignment Class Type mismatch error at line %d\n", _CURRENT_LINE);
             exit(1);

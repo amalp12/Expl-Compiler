@@ -30,7 +30,6 @@ class
     B extends A
     {
         decl
-            int o;
             int f1();
         enddecl
         int f1() 
