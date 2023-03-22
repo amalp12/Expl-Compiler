@@ -8,6 +8,11 @@
 #include "functions.h"
 #endif
 
+struct IndexNode {
+    int index;
+    struct IndexNode * next;
+};
+
 struct GlobalSymbolTable {
     char* name;         // name of the variable
     int size;         // size of the type of the variable
@@ -18,6 +23,7 @@ struct GlobalSymbolTable {
     struct ParameterNode * paramList;
     int functionLabelNumber;
     struct ClassTable *classType;  //THIS FIELD IS REQUIRED ONLY FOR OEXPL
+     struct IndexNode * indexList; // for array
 
 
 };
@@ -33,6 +39,7 @@ struct LocalSymbolTable
     int functionLabelNumber;
     struct ParameterNode * paramList;
     struct ClassTable *classType;  //THIS FIELD IS REQUIRED ONLY FOR OEXPL
+     struct IndexNode * indexList; // for array
 
 };
 
@@ -48,9 +55,9 @@ int max(int a, int  b);
 int min(int a, int b);
 
 
-void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * classType,int nodetype, int offset, int rows, int cols);   // Creates a symbol table entry.
+void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * classType,int nodetype, int offset, struct IndexNode * indexList);   // Creates a symbol table entry.
 
-void LSTInstall(char * varname, struct TypeTable * type, int offset, int rows, int cols) ;  // Creates a symbol table entry.
+void LSTInstall(char * varname, struct TypeTable * type, int offset, struct IndexNode * indexList) ;  // Creates a symbol table entry.
 
 void clearLST(); // Clears the local symbol table
 
@@ -60,3 +67,5 @@ void printGSTNode(struct GlobalSymbolTable * gst_node);
 void printGST();
 
 int getLSTLength();
+
+struct IndexNode * createIndexNode(int index);

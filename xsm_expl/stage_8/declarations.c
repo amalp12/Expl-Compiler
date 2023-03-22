@@ -69,6 +69,24 @@ int isGlobalDeclarationStackEmpty()
     return _GLOBAL_DECLARATION_STACK_HEAD == NULL;
 }
 
+ struct IndexNode * addToIndexList( struct IndexNode * indexList, int index)
+{
+    // create a new index node
+     struct IndexNode * newIndexNode = createIndexNode(index);
+    // if indexList is null, return the new index node
+    if (indexList == NULL) {
+        return newIndexNode;
+    }
+    // else, add the new index node to the end of the list
+     struct IndexNode * temp = indexList;
+    while (temp->next != NULL) {
+        temp = temp->next;
+    }
+    temp->next = newIndexNode;
+    return indexList;
+
+}
+
 void popAllGlobalDeclarationsAndCreateEntry(char * typeName)
 {
     // search type table for stuct type
@@ -89,11 +107,22 @@ void popAllGlobalDeclarationsAndCreateEntry(char * typeName)
     {
         // void GSTInstall(char *name, int type, int size, int offset)   // Creates a local symbol table entry.
         // get rows and cols
-        int rows = 0, cols = 0;
-        if(temp->node->left != NULL) rows = temp->node->left->val;
-        if(temp->node->right != NULL) cols = temp->node->right->val;
         
-        GSTInstall(temp->node->varname, typeEntry, classEntry, temp->node->nodetype, 0,rows, cols);
+        // get the indexList
+        struct expr_tree_node * treeIndexList = temp->node-> indexList;
+        struct IndexNode * indexList = NULL;
+
+        while(treeIndexList!= NULL)
+        {
+
+            // add to indexList
+            indexList = addToIndexList(indexList, treeIndexList->val);
+            treeIndexList = treeIndexList->left;
+        }
+        
+
+        
+        GSTInstall(temp->node->varname, typeEntry, classEntry, temp->node->nodetype, 0, indexList);
         // getting the enty
         struct GlobalSymbolTable *entry = GSTLookup(temp->node->varname);
         // adding the parameters
@@ -101,7 +130,7 @@ void popAllGlobalDeclarationsAndCreateEntry(char * typeName)
 
         while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
         {
-            entry->paramList = addToParameterList(entry->paramList, param->varname, param->type, param->classType, rows, cols);
+            entry->paramList = addToParameterList(entry->paramList, param->varname, param->type, param->classType);
             param = param->left;
         }
 
@@ -192,7 +221,19 @@ void popAllLocalDeclarationsAndCreateEntry(char * typeName)
             printf("Error: Type %s not found\n", typeName);
             exit(1);
         }
-        LSTInstall(temp->node->varname, typeEntry, 0,rows, cols);
+        // get the indexList
+        struct expr_tree_node * treeIndexList = temp->node -> indexList;
+        struct IndexNode * indexList = NULL;
+
+        while (treeIndexList!= NULL)
+        {
+
+            // add to indexList
+            indexList = addToIndexList(indexList, treeIndexList->val);
+            treeIndexList = treeIndexList->left;
+        }
+
+        LSTInstall(temp->node->varname, typeEntry, 0,indexList);
     
         
         free(temp);
@@ -203,7 +244,7 @@ void popAllLocalDeclarationsAndCreateEntry(char * typeName)
     if(getCurrentClassBeingDefined()!=NULL && LSTLookup("self")==NULL)
     {
         // add self to the local symbol table
-        LSTInstall("self", NULL, 0,0, 0);
+        LSTInstall("self", NULL, 0, NULL);
         // get lst entry and add class type
         struct LocalSymbolTable *LSTEntry = LSTLookup("self");
         LSTEntry->classType = getCurrentClassBeingDefined();
@@ -284,7 +325,7 @@ void declareMethod( struct expr_tree_node * node)
         struct expr_tree_node *param = node->left;
         while (param != NULL && param->nodetype == _NODE_TYPE_PARAMETER)
         {
-            paramList = addToParameterList(paramList, param->varname, param->type, param->classType, 0, 0);
+            paramList = addToParameterList(paramList, param->varname, param->type, param->classType);
             param = param->left;
         }
 

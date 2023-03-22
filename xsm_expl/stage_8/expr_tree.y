@@ -422,70 +422,62 @@ identifierDecl:
     {
       $<node>$ = makeDeclareIdNode($<string>1, NULL);
     }
-  | ID '[' INT ']' 
-    {  
-        struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
-        idNode->left = $<node>3;
-        $<node>$ = idNode;
+  | VariableArrayDecl
+    {
+      $<node>$ = $<node>1;
     }
-  | ID '[' INT ']' '[' INT ']'
-    { 
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
-      idNode->left = $<node>3; 
-      idNode->right = $<node>6; 
-      $<node>$ = idNode;
-    }
-  | ID '[' ID ']' '[' INT ']'
-    { 
 
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
-      idNode->left = $<node>3; 
-      idNode->right = $<node>6; 
-      $<node>$ = idNode;
+;
+VariableArrayDecl :
+    ID ArrayIndexDecl
+    {
+      $<node>$ = makeDeclArrayNode($<string>1,NULL, $<node>2);
     }
-  | ID '[' INT ']' '[' ID ']'
-    { 
 
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
-      idNode->left = $<node>3; 
-      idNode->right = $<node>6; 
-      $<node>$ = idNode;
-    }
-  | ID '[' ID ']' '[' ID ']'
-    { 
-
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
-      idNode->left = $<node>3; 
-      idNode->right = $<node>6; 
-      $<node>$ = idNode;
-    }
-  | ID '[' ID ']'
-    { 
-      struct expr_tree_node * idNode = makeDeclareIdNode($<string>1, NULL);
-      idNode->left = $<node>3; 
-      $<node>$ = idNode;
-    }
-  
 ;
 
+ArrayIndexDecl :
+    ArrayIndexDecl '[' INT ']'   
+    {
+      // connect the expr to the array index
+      insertIntoTree($<node>1, $<node>3);
+      $<node>$ = $<node>1;
+    }
+  | '[' INT ']'
+    {
+      // connect the expr to the array index
+      $<node>$ = $<node>2;
+    }
+;
 
-identifierUse:
-     ID 
+VariableArrayUse :
+    ID ArrayIndexUse
+    {
+      $<node>$ = makeArrayNode($<string>1, $<node>2);
+    }
+  | ID
     {
       $<node>$ = makeIdNode($<string>1);
     }
-  | ID '[' expr ']' 
+;
+
+ArrayIndexUse :
+    ArrayIndexUse '[' expr ']'   
     {
-        struct expr_tree_node * idNode = makeIdNode($<string>1);
-        idNode->left = $<node>3;
-        $<node>$ = idNode;
+      // connect the expr to the array index
+      $<node>$ = makeConnectorNode($<node>1, $<node>3 );
     }
-  | ID '[' expr ']' '[' expr ']'
-    { 
-      struct expr_tree_node * idNode = makeIdNode($<string>1);
-      idNode->left = $<node>3;
-      idNode->right = $<node>6; 
-      $<node>$ = idNode;
+  | '[' expr ']'
+    {
+      // connect the expr to the array index
+      $<node>$ = makeConnectorNode(NULL, $<node>2);
+    }
+;
+    
+identifierUse:
+    VariableArrayUse
+    {
+      $<node>$ = $<node>1;
     }
   | INITIALIZE '(' ')' 
     {
@@ -596,6 +588,7 @@ LDecList :
     LDecList LDecl 
   | LDecl
 ;
+
 LDecl :
     ID LIdList SEMICOLON
     {
@@ -752,21 +745,8 @@ void yyerror(char const *s)
     exit(1);
 }
 
-int main(int argc, char **argv)
+void globalVariablesInit()
 {
- 
-
-  FILE * input_file=fopen(argv[1],"r");
-  // if input file not found
-  if(input_file==NULL)
-  {
-    printf("Input file %s not found\n",argv[1]);
-    exit(1);
-  }
-
-  target_file = fopen("untranslated_assembly.xsm","w+");
-  // Initializing Type Table
-  typeTableCreate();
   _INIT_STATE = _FALSE;
   // stack
   _STACK_POINTER = _INITIAL_STACK_POINTER;
@@ -777,6 +757,27 @@ int main(int argc, char **argv)
   _CURRENT_LINE = 1;
   // counting classes
   _GLOBAL_CLASS_COUNTER = 0;
+}
+
+int main(int argc, char **argv)
+{
+ 
+
+  FILE * input_file=fopen(argv[1],"r");
+
+  globalVariablesInit();
+
+  // if input file not found
+  if(input_file==NULL)
+  {
+    printf("Input file %s not found\n",argv[1]);
+    exit(1);
+  }
+
+  target_file = fopen("untranslated_assembly.xsm","w+");
+  // Initializing Type Table
+  typeTableCreate();
+  
 
   yyin = input_file; 
   yyparse(); 

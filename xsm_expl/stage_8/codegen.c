@@ -510,10 +510,11 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
     
         case(_NODE_TYPE_ID):
         {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
-            reg_index leftReg = codeGen(t->left, target_file);
-            reg_index rightReg = codeGen(t->right, target_file);
+            
+           
+
+
+            
 
     
             /*
@@ -526,80 +527,95 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
 
             // checking if the variable has been declared or not
             struct LocalSymbolTable * LSTEntry = LSTLookup(t->varname);
+            struct GlobalSymbolTable * GSTEntry = GSTLookup(t->varname);
 
-            if(t->GSTEntry==NULL && LSTEntry==NULL)
+            if(GSTEntry==NULL && LSTEntry==NULL)
             {
                 printf("Variable %s not declared\n", t->varname);
                 exit(1);
             }
-            // for variable
-            if(leftReg==-1 && rightReg==-1)
-            {
-                reg_index newReg = getBinding(t->varname, target_file);
-                // Address of the variable
-                return_val = newReg;
-            }  
-            // for 1D array
-            else if(leftReg!=-1 && rightReg==-1)
-            {
-                // if index is an identifier or field
-                if(t->left->nodetype==_NODE_TYPE_ID || t->left->nodetype==_NODE_TYPE_FIELD)
-                {
-                    // load the value of the index into a register
-                    fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
-                }
-                reg_index bindingReg = getBinding(t->varname, target_file);
-                // Address of the variable
-                fprintf(target_file, "ADD R%d, R%d\n", leftReg, bindingReg);
-                // free binding reg
-                freeLastReg();
-                return_val = leftReg;
-            }
-            // for 2D array
-            else if(leftReg!=-1 && rightReg!=-1)
-            {
-                // total number of rows in the matrix
-                int totalCols ;
-                if(LSTEntry!=NULL) totalCols = LSTEntry->cols;
-                else totalCols = t->GSTEntry->cols;                
-
-                // if row index is an identifier or a field
-                if(t->left->nodetype==_NODE_TYPE_ID || t->left->nodetype==_NODE_TYPE_FIELD)
-                {
-                    // load the value of the row index into a register
-                    fprintf(target_file, "MOV R%d, [R%d]\n", leftReg, leftReg);
-                }
-
-                // multiply row index by total number of cols
-                fprintf(target_file, "MUL R%d, %d\n", leftReg, totalCols);
                 
 
-              
-                // if column index is an identifier or a field
-                if(t->right->nodetype==_NODE_TYPE_ID || t->right->nodetype==_NODE_TYPE_FIELD)
-                {
-                    // load the value of the column index into a register
-                    fprintf(target_file, "MOV R%d, [R%d]\n", rightReg, rightReg);
-                }
-                // add column index to row index
-                fprintf(target_file, "ADD R%d, R%d\n", leftReg, rightReg);
-                // getting the binding address
-                reg_index bindingReg = getBinding(t->varname, target_file);
-                // Address of the variable
-                fprintf(target_file, "ADD R%d, R%d\n", leftReg, bindingReg);
-                // free binding reg
-                freeLastReg();
-                // free right reg
-                freeLastReg();
-                return_val = leftReg;
-                
+            struct expr_tree_node * indexPositionNode = t->indexList; // declaration of the array 
+            struct IndexNode * indexSizeList; // size of the array
+
+            // if the variable is a global variable
+            if(GSTEntry != NULL)
+            {
+                indexSizeList = GSTEntry->indexList;
             }
+            // if the variable is a local variable
             else
             {
-                //error
-                printf("Invalid array declaration\n");
+                indexSizeList = LSTEntry->indexList;
+            }
+            // get the base address of the array
+            reg_index baseAddressReg = getBinding(t->varname, target_file);
+            
+            // if array
+            if(indexPositionNode != NULL && indexSizeList != NULL)
+            {
+                // get a free register
+                reg_index prevIndex = getFreeReg();
+                // move zero to the register
+                fprintf(target_file, "MOV R%d, 0\n", prevIndex);
+
+                while(indexPositionNode != NULL && indexSizeList != NULL)
+                {
+                    struct TypeTable * nodeType =   getAssignmentType(indexPositionNode->right);
+                    // if the index position is not of type int, then print type mismatch error
+                    if(strcmp(nodeType->name, "int") != 0)
+                    {
+                        printf("Array index position should be of type int\n");
+                        exit(1);
+                    }
+                    reg_index indexPositionValueReg = codeGen(indexPositionNode->right, target_file);
+
+                    // if indexPosition return an id or a field, then we need to get the value of the id or field
+                    if(indexPositionNode->right->nodetype == _NODE_TYPE_ID || indexPositionNode->right->nodetype == _NODE_TYPE_FIELD)
+                    {
+                
+                        fprintf(target_file, "MOV R%d, [R%d]\n", indexPositionValueReg, indexPositionValueReg);
+                    }
+
+                    // mulitply the index position value by the size of the array index
+                    fprintf(target_file, "MUL R%d, %d\n", prevIndex, indexSizeList->index);
+                    // add the index position value to the previous index
+                    fprintf(target_file, "ADD R%d, R%d\n", prevIndex, indexPositionValueReg);
+
+                    // get next index size
+                    indexSizeList = indexSizeList->next;
+                    // get next index position
+                    indexPositionNode = indexPositionNode->left;
+                    // free the index position value reg
+                    freeLastReg();
+                
+                }
+
+                // prevIndex now contains the place of the array element
+                // mulitply it by size of one element
+                fprintf(target_file, "MUL R%d, %d\n", prevIndex, _INT_SIZE);
+
+                // add index register to the binding register
+                fprintf(target_file, "ADD R%d, R%d\n", baseAddressReg, prevIndex);
+                // free the prevIndex reg
+                freeLastReg();
+
+            }
+
+           
+            // if either of the index position or index size is not null, then print error
+            if(indexPositionNode != NULL || indexSizeList != NULL)
+            {
+                printf("Array index mismatch error\n");
                 exit(1);
             }
+
+            
+            
+
+            // Address of the variable
+            return_val = baseAddressReg;
             break;
         }
         case(_NODE_TYPE_NUM):
@@ -875,10 +891,15 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case(_NODE_TYPE_READ):
         {
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
+            // type checking
+            // read only if the left node is an id or a field
+            if(t->left->nodetype != _NODE_TYPE_ID && t->left->nodetype != _NODE_TYPE_FIELD)
+            {
+                printf("Read can only be used with variables\n");
+                exit(1);
+            }
+            // Evaluating the left expression
             reg_index leftReg = codeGen(t->left, target_file);
-            reg_index rightReg = codeGen(t->right, target_file);
 
 
             explRead(leftReg, target_file);
@@ -888,10 +909,17 @@ reg_index codeGen( struct expr_tree_node *t, FILE * target_file) {
         }
         case(_NODE_TYPE_WRITE):
         {    
-            // Evaluating the left and right trees respectively
-            // Note that the order is very important
+           
+            // type checking
+            // write only if the left node final type is int or string
+            struct TypeTable * finalType = getAssignmentType(t->left);
+            if(finalType != typeLookup("int") && finalType != typeLookup("str"))
+            {
+                printf("Write can only be used with variables or constants\n");
+                exit(1);
+            }
             reg_index leftReg = codeGen(t->left, target_file);
-            reg_index rightReg = codeGen(t->right, target_file);
+        
 
             // if left node is id or feild take the value
             if(t->left->nodetype == _NODE_TYPE_ID ||  t->left->nodetype == _NODE_TYPE_FIELD)
@@ -1984,6 +2012,12 @@ void funcCodegen(struct expr_tree_node * t, FILE * target_file)
 
         LSTEntry = LSTEntry->next;
 
+    }
+    // check if type of the function is equal to the return type of the function
+    if(GSTEntry->type!=t->right->left->type)
+    {
+        printf("Error: The value returned by the function %s does not match the return type in the function definition.\n", GSTEntry->name);
+        exit(1);
     }
 
     // codeGen for the body of the function
