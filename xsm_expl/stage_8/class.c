@@ -110,6 +110,12 @@ void classFieldInstall(struct ClassTable * classPtr, char * typeName, char *name
     // field index starts from 0 hence the next fieldIndex will have value equal to field count of the class
     newField->fieldIndex = classPtr->fieldCount;
     classPtr->fieldCount++;
+    // if field is of class type then it needs two words hence we increment feild could by 2 times
+    if(newField->classType!=NULL)
+    {
+        classPtr->fieldCount++;
+    }
+    
     newField->next = NULL;
 
     // insert into head
@@ -118,7 +124,7 @@ void classFieldInstall(struct ClassTable * classPtr, char * typeName, char *name
     // if method count is greater than or equal to 8
     if(classPtr->fieldCount > 8)
     {
-        printf("Error : Class %s has more than 8 fields.\n",classPtr->name);
+        printf("Error : Class %s has exceeded the maximum memory capacity alloted for fields.\n",classPtr->name);
         exit(1);
     }
 }
