@@ -17,7 +17,7 @@ struct ParameterNode {
 int _LAST_USED_FUNCTION_LABEL = 0;
 // Creates a new parameter list with the given parameter as head if the list is empty
 // if the list is not empty, it adds the parameter to the end of the list
-struct ParameterNode * addToParameterList(struct ParameterNode * parameter_list, char * varname, struct TypeTable * type, struct ClassTable * classType, int rows, int cols);
+struct ParameterNode * addToParameterList(struct ParameterNode * parameter_list, char * varname, struct TypeTable * type, struct ClassTable * classType);
 // Creates a new parameter node with the given name and type and returns it 
 struct ParameterNode * createParameterNode(char * name, struct TypeTable *  type, struct ClassTable* classType);
 

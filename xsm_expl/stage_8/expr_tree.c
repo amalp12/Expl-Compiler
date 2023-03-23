@@ -11,6 +11,8 @@ struct expr_tree_node * makeNode(int val, int nodetype, struct TypeTable * type,
     new_node->varname =varname;
     new_node->GSTEntry = GSTEntry;
     new_node->classType = classType;
+    new_node->indexList = NULL;
+    new_node->indexCount = 0;
     return new_node;
 
 }
@@ -54,10 +56,26 @@ struct expr_tree_node * makeDeleteNode(struct expr_tree_node *l)
 
 
 
-struct expr_tree_node* makeFieldNode(char * fieldName, struct expr_tree_node *l,struct expr_tree_node *r){
+struct expr_tree_node* makeFieldNode(char * fieldName, struct expr_tree_node *l,struct expr_tree_node *r)
+{
+    struct LocalSymbolTable * LSTEntry = LSTLookup(fieldName);
+    struct GlobalSymbolTable * GSTEntry = GSTLookup(fieldName);
+
+    struct ClassTable * classEntry = NULL;
+    struct TypeTable * typeEntry = NULL;
+
+    if(LSTEntry != NULL)
+    {
+        typeEntry = LSTEntry->type;
+    }
+    else if(GSTEntry != NULL)
+    {
+        typeEntry = GSTEntry->type;
+    }
+
         
              
-        return makeNode(-1,_NODE_TYPE_FIELD, NULL, NULL, strdup(fieldName),NULL, l, r);
+    return makeNode(-1,_NODE_TYPE_FIELD, typeEntry, classEntry, strdup(fieldName),NULL, l, r);
 }
 
 struct expr_tree_node* makeOperatorNode(int nodetype, struct expr_tree_node *l,struct expr_tree_node *r){
@@ -509,7 +527,12 @@ struct expr_tree_node * makeMethodDefinitionNode( char * typeName, char * name, 
 
 struct expr_tree_node * makeReturnNode (struct expr_tree_node *expr)
 {
-    return makeNode(_NONE, _NODE_TYPE_RETURN,NULL, NULL, NULL, NULL, expr,NULL);
+    // if return type is null then it is a void function
+    if(expr == NULL)
+    {
+        return makeNode(_NONE, _NODE_TYPE_RETURN,typeLookup("void"), NULL, NULL, NULL, NULL,NULL);
+    }
+    return makeNode(_NONE, _NODE_TYPE_RETURN,expr->type, NULL, NULL, NULL, expr,NULL);
 }
 
 
@@ -774,7 +797,7 @@ struct expr_tree_node * declareAndDefineMain(char * typeName, struct expr_tree_n
     }
 
     // declare main in Global Symbol Table
-    GSTInstall("main", typeLookup("int"),NULL, _NODE_TYPE_FUNCTION_DEFINITION, 0,0, 0);
+    GSTInstall("main", typeLookup("int"),NULL, _NODE_TYPE_FUNCTION_DEFINITION, 0,NULL);
 
 
     // if init state is false initialze
@@ -804,6 +827,9 @@ struct expr_tree_node * makeIdDotIdFieldNode(char * leftIdName, char * rightIdNa
     struct expr_tree_node * finalTypeNode = makeFieldNode("finalType",NULL,NULL);
     struct expr_tree_node * leftFieldNode  = makeFieldNode(leftIdName,rightFieldNode,finalTypeNode);
 
+    // all class variables are private
+    // left and right are class fields then throw error
+
     // get the LST entry for the variable
     struct LocalSymbolTable * lstEntry = LSTLookup(leftFieldNode->varname);
     // if lst entry is not null
@@ -812,6 +838,14 @@ struct expr_tree_node * makeIdDotIdFieldNode(char * leftIdName, char * rightIdNa
         // set the type of the left field node
         leftFieldNode->type = lstEntry->type;
         leftFieldNode->classType = lstEntry->classType;
+
+        // if class is defined then throw error
+        if(leftFieldNode->classType != NULL)
+        {
+            // class variables are private
+            printf("Error: Class variables are private. In class object %s, class variable %s was attempted to be accessed.\n", leftIdName, rightIdName);
+            exit(1);
+        }
 
     }
     else
@@ -825,6 +859,13 @@ struct expr_tree_node * makeIdDotIdFieldNode(char * leftIdName, char * rightIdNa
             leftFieldNode->type = gstEntry->type;
             leftFieldNode->classType = gstEntry->classType;
             leftFieldNode->GSTEntry = gstEntry;
+            // if class is defined then throw error
+            if(leftFieldNode->classType != NULL)
+            {
+                // class variables are private
+                printf("Error: Class variables are private. In class object %s, class variable %s was attempted to be accessed.\n", leftIdName, rightIdName);
+                exit(1);
+            }
         }
         else
         {
@@ -937,3 +978,35 @@ void compilerInit(FILE * target_file)
         _INIT_STATE = _TRUE;
     }
 }
+struct expr_tree_node * makeDeclArrayNode(char * idName, char * typeName, struct expr_tree_node * indexList)
+{
+    struct expr_tree_node * idNode = makeDeclareIdNode(idName,NULL);
+    int indexCount = 0;
+    // counting the number of indexes
+    struct expr_tree_node * temp = indexList;
+    while(temp != NULL)
+    {
+        indexCount++;
+        temp = temp->left;
+    }
+    idNode->indexCount = indexCount;
+    idNode->indexList = indexList;
+    return idNode;
+}
+
+struct expr_tree_node * makeArrayNode(char * idName, struct expr_tree_node * indexList)
+{
+    struct expr_tree_node * idNode = makeIdNode(idName);
+    int indexCount = 0;
+    // counting the number of indexes
+    struct expr_tree_node * temp = indexList;
+    while(temp != NULL)
+    {
+        indexCount++;
+        temp = temp->left;
+    }
+    idNode->indexCount = indexCount;
+    idNode->indexList = indexList;
+    return idNode;
+}
+

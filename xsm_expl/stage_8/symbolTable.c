@@ -20,7 +20,7 @@ int max(int a, int b)
     return b;
 }
 
-void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * classType, int nodetype, int offset, int rows, int cols)   // Creates a symbol table entry.
+void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * classType, int nodetype, int offset, struct IndexNode * IndexList)   // Creates a symbol table entry.
 {
     // see if declaration already exists in GST
     struct GlobalSymbolTable *temp = GSTLookup(varname);
@@ -28,6 +28,16 @@ void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * clas
     {
         printf("Variable %s already declared\n", varname);
         exit(1);
+    }
+    
+
+    // get size
+    int size = 1;
+    struct IndexNode * tempIndexList = IndexList;
+    while (tempIndexList != NULL)
+    {
+        size *= tempIndexList->index;
+        tempIndexList = tempIndexList->next;
     }
     
     // create new entry in the GST
@@ -38,12 +48,12 @@ void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * clas
     new_gst_entry->type = type;
     new_gst_entry->classType = classType;
 
-    new_gst_entry->rows = rows;
-    new_gst_entry->cols = cols;
+
     new_gst_entry->binding = _STACK_POINTER+1;
-    new_gst_entry->size = max(rows*cols, max(rows, max(cols, _INT_SIZE)));
+    new_gst_entry->size = size;
     new_gst_entry->paramList = NULL;
     new_gst_entry->functionLabelNumber = _NONE;
+    new_gst_entry->indexList = IndexList;
 
     if(nodetype == _NODE_TYPE_FUNCTION_DEFINITION && strcmp(varname, "main") == 0)
     {
@@ -106,7 +116,7 @@ struct LocalSymbolTable *LSTLookup(char * name)            // Returns a pointer 
 }
 
 
-void LSTInstall(char * varname, struct TypeTable * type , int offset, int rows, int cols)   // Creates a symbol table entry.
+void LSTInstall(char * varname, struct TypeTable * type , int offset, struct IndexNode * indexList)   // Creates a symbol table entry.
 {
     struct LocalSymbolTable * LSTEntry = LSTLookup(varname);
     if(LSTEntry != NULL)
@@ -115,19 +125,28 @@ void LSTInstall(char * varname, struct TypeTable * type , int offset, int rows, 
         exit(1);
     }
     free(LSTEntry);
+
+    // get size
+    int size = 1;
+    struct IndexNode * tempIndexList = indexList;
+    while (tempIndexList != NULL)
+    {
+        size *= tempIndexList->index;
+        tempIndexList = tempIndexList->next;
+    }
+    
     struct LocalSymbolTable  * new_node = (struct LocalSymbolTable *)malloc(sizeof(struct LocalSymbolTable));
 
     new_node->name  = strndup(varname, strlen(varname)-offset);
-
+    new_node->indexList = indexList;
     new_node->type = type;
     new_node->paramList = NULL;
     new_node->functionLabelNumber = _NONE;
 
 
     
-    new_node->rows = rows;
-    new_node->cols = cols;
-    new_node->size = max(rows*cols, max(rows, max(cols, _INT_SIZE)));
+ 
+    new_node->size = size;
     new_node->binding = _NONE;
     
     if(_LOCAL_SYMBOL_TABLE == NULL)
@@ -188,3 +207,13 @@ int getLSTLength()
     }
     return length;
 }
+
+// create index 
+struct IndexNode * createIndexNode(int index)
+{
+    struct IndexNode * new_node = (struct IndexNode *)malloc(sizeof(struct IndexNode));
+    new_node->index = index;
+    new_node->next = NULL;
+    return new_node;
+} 
+

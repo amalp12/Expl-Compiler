@@ -45,6 +45,8 @@ struct expr_tree_node
     struct GlobalSymbolTable * GSTEntry;     // pointer to GST entry for global variables and functions
     struct expr_tree_node * left, * right;     // left and right branches
     struct ClassTable * classType; // for field list
+    struct expr_tree_node * indexList ; // for array
+    int indexCount; // for array
 
 };
 
@@ -119,5 +121,9 @@ struct expr_tree_node * makeNewNode(char * className );
 struct expr_tree_node * makeDeleteNode(struct expr_tree_node *l);
 
 struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * beforeDotNode, struct expr_tree_node *parameters);
+
+struct expr_tree_node * makeArrayNode(char * idName, struct expr_tree_node * indexList);
+
+struct expr_tree_node * makeDeclArrayNode(char * idName, char * typeName, struct expr_tree_node * indexList);
 
 void compilerInit(FILE * target_file);
