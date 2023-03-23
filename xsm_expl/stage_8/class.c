@@ -150,6 +150,8 @@ void classMethodInstall (struct ClassTable * classPtr, char *name, struct TypeTa
     classPtr->methodCount++;
     // get label for method
     newMethod->functionLabel = getNewFunctionLabel();
+    // to balance the number of function declarations and definitions
+    incrementFunctionCounter();
     newMethod->next = NULL;
 
     // create a parameter called self for each method

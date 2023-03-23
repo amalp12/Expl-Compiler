@@ -24,3 +24,8 @@ struct ParameterNode * createParameterNode(char * name, struct TypeTable *  type
 // Gets a new function label Number for the function
 int getNewFunctionLabel();
 
+void incrementFunctionCounter();
+
+void decrementFunctionCounter();
+
+int getFunctionCounter();

@@ -112,3 +112,4 @@ int _CURRENT_LINE;
 // class index counter
 int _GLOBAL_CLASS_COUNTER;
 
+int _BALANCE_FUNCTION_DEFINITIONS;

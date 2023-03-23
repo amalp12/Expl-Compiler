@@ -256,6 +256,7 @@ void popAllLocalDeclarationsAndCreateEntry(char * typeName)
 
 void declareMethod( struct expr_tree_node * node)
 {
+    
    // get the current class being defined
     struct ClassTable *classEntry = getCurrentClassBeingDefined();
     // if class not found, throw error
@@ -312,6 +313,8 @@ void declareMethod( struct expr_tree_node * node)
         }
         // get a new function label for the method
         int functionLabel = getNewFunctionLabel();
+        // to balance the number of function declarations and definitions
+        incrementFunctionCounter();
         // add the function label to the method entry
         methodEntry->functionLabel = functionLabel;
 

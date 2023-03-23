@@ -4,7 +4,15 @@ class
         decl
             int x;
             int findfactorial(int n);
+            int dummy();
         enddecl
+        int dummy()
+        {
+            begin
+                write("dummy");
+                return 1;
+            end
+        }
             int findfactorial(int n){
                 decl
                     int p;
@@ -35,6 +43,7 @@ class
         {
             begin
             self.o2 = new(fact);
+            self.k = self.o2.dummy();
             return 1;
             end
         }

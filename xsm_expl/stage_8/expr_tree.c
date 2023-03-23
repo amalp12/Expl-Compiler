@@ -431,10 +431,13 @@ struct expr_tree_node * makeMethodCallNode(char * name, struct expr_tree_node * 
 
 struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body)
 {
+    // to balance the number of function declarations and definitions
+    decrementFunctionCounter();
     // lookup type
     struct TypeTable * typeEntry = typeLookup(typeName);
     // lookup class if that is the return type
     struct ClassTable * classEntry = classLookup(typeName);
+
 
     if(typeEntry == NULL && classEntry == NULL)
     {
@@ -448,6 +451,13 @@ struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name
     if(GSTEntry == NULL)
     {
         printf("Error: Function %s not declared\n", name);
+        exit(1);
+    }
+
+    // check if return type of the function declaration and definition match
+    if(GSTEntry->type != typeEntry )
+    {
+        printf("Error: Return type of function definition %s does not match the return type of function declaration\n", name);
         exit(1);
     }
 
@@ -477,6 +487,8 @@ struct expr_tree_node * makeFunctionDefinitionNode( char * typeName, char * name
 
 struct expr_tree_node * makeMethodDefinitionNode( char * typeName, char * name, struct expr_tree_node *parameters, struct expr_tree_node *body)
 {
+    // to balance the number of function declarations and definitions
+    decrementFunctionCounter();
     // lookup type
     struct TypeTable * typeEntry = typeLookup(typeName);
     if(typeEntry == NULL)
@@ -495,6 +507,12 @@ struct expr_tree_node * makeMethodDefinitionNode( char * typeName, char * name, 
     if(method == NULL)
     {
         printf("Error: Method %s not declared in class %s \n", name, currentClass->name);
+        exit(1);
+    }
+    // check if return type of the function declaration and definition match
+    if(method->type != typeEntry )
+    {
+        printf("Error: Return type of function definition %s does not match the return type of function declaration\n", name);
         exit(1);
     }
     // typechecking parameters
@@ -784,6 +802,15 @@ void insertIntoTree(struct expr_tree_node * root, struct expr_tree_node * node)
 
     
 }
+void checkIfAllDeclaredFunctionsAreDefined()
+{
+    int value = getFunctionCounter();
+    if(value != 0)
+    {
+        printf("Error: %d functions declared but not defined\n", value);
+        exit(1);
+    }
+}
 
 //declare main function
 struct expr_tree_node * declareAndDefineMain(char * typeName, struct expr_tree_node * mainBodyNode, FILE * target_file)
@@ -795,6 +822,8 @@ struct expr_tree_node * declareAndDefineMain(char * typeName, struct expr_tree_n
         printf("Error: Main function already declared!\n");
         exit(1);
     }
+
+    checkIfAllDeclaredFunctionsAreDefined();
 
     // declare main in Global Symbol Table
     GSTInstall("main", typeLookup("int"),NULL, _NODE_TYPE_FUNCTION_DEFINITION, 0,NULL);

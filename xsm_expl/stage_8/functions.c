@@ -40,3 +40,15 @@ int getNewFunctionLabel()
     return _LAST_USED_FUNCTION_LABEL;
 }
 
+void incrementFunctionCounter()
+{
+    _BALANCE_FUNCTION_DEFINITIONS++;
+}
+void decrementFunctionCounter()
+{
+    _BALANCE_FUNCTION_DEFINITIONS--;
+}
+int getFunctionCounter()
+{
+    return _BALANCE_FUNCTION_DEFINITIONS;
+}

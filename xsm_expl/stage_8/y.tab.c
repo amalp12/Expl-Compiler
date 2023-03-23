@@ -2837,6 +2837,8 @@ void globalVariablesInit()
   _CURRENT_LINE = 1;
   // counting classes
   _GLOBAL_CLASS_COUNTER = 0;
+  // counting functions
+  _BALANCE_FUNCTION_DEFINITIONS = 0;
 }
 
 int main(int argc, char **argv)
@@ -2861,6 +2863,8 @@ int main(int argc, char **argv)
 
   yyin = input_file; 
   yyparse(); 
+  
+  fclose(target_file);
   fclose(input_file);  
   exit(0);
 }

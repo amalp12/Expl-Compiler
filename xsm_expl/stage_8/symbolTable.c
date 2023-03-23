@@ -64,6 +64,8 @@ void GSTInstall(char * varname,struct TypeTable * type, struct ClassTable * clas
     else if(nodetype == _NODE_TYPE_FUNCTION_DEFINITION)
     {
         new_gst_entry->functionLabelNumber = getNewFunctionLabel();
+        // to balance the number of function declarations and definitions
+        incrementFunctionCounter();
         new_gst_entry->size = 0;
     }
    
