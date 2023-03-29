@@ -1,53 +1,38 @@
 decl
-  int n,arr[10],i,j,dup, BubbleSort(int first, int last);
+  int f (int x, int y);
 enddecl
-
-int BubbleSort(int first, int last)
+int f(int x, int y)
 {
-  decl
-    int temp;
-  enddecl
-
-  begin
-    if((first < last) AND (last > 0)) then
-
-      if(arr[first] > arr[first+1]) then
-        temp = arr[first];
-        arr[first] = arr[first+1];
-        arr[first+1] = temp;
-      endif;
-
-      dup = BubbleSort(first+1, last);
-      dup = BubbleSort(first, last-1);
-    endif;
-
-    return 0;
-  end
+            decl
+                int val;
+            enddecl
+            begin
+                write("Args ");
+                write("x: ");
+                write(x);
+                write("y: ");
+                write(y);
+                if(y == 0)then
+                    val = x;
+                else
+                    val = f(f(x-1,y-1),y-1);
+                endif;
+                
+                return val;
+            end
 }
 
 int main()
 {
-  decl
-    int r;
-  enddecl
-
-  begin
-    read(n);
-
-    i=0;
-    while(i<n) do
-      read(arr[i]);
-      i = i+1;
-    endwhile;
-
-    r = BubbleSort(0,n-1);
-
-    i=0;
-    while(i<n) do
-      write(arr[i]);
-      i = i+1;
-    endwhile;
-
-    return 0;
-  end
+            decl
+                int x;
+                int y;
+            enddecl
+            begin
+                
+                x = 8;
+                y = 5;
+                write(f(x,y));
+                return 0;
+            end
 }

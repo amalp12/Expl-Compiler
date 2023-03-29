@@ -1,85 +1,155 @@
 class
-    fact
+    A
     {
         decl
-            int x;
-            int findfactorial(int n);
-            int dummy();
+            int f0();
+            int f1();
+            int f(int x, int y);
         enddecl
-        int dummy()
+        int f0() 
         {
             begin
-                write("dummy");
+                write("In class A f0");
                 return 1;
             end
         }
-            int findfactorial(int n){
-                decl
-                    int p;
-                enddecl
-                begin
-                    if(n<=1)then
-                        p=1;
-                    else
-                        p=n*self.findfactorial(n-1);
-                    endif;
-                return p;
+        int f1() 
+        {
+            begin
+                write("In class A f1");
+                return 1;
+            end
+        }
+        int f(int x, int y)
+        {
+            begin
+                return x;
             end
         }
     }
-    testfactsum
+    B extends A
     {
         decl
-            fact o1;
-            fact o2;
-            int k;
-            int j;
-            int r;
-            int e;
-            int testfun(int n);
-            int chain();
+            int f0();
+            int f2();
+            int f(int x, int y);
         enddecl
-        int chain()
+        int f0()
         {
             begin
-            self.o2 = new(fact);
-            self.k = self.o2.dummy();
-            return 1;
+                write("In class B f0");
+                return 1;
             end
         }
-        int testfun(int n)
+        int f2() 
+        {
+            begin
+                write("In class B f2");
+                return 1;
+            end
+        }
+        int f(int x, int y)
+        {
+            begin
+                return y;
+            end
+        }
+    }
+    C extends B
+    {
+        decl
+            int f0();
+            int f2();
+            int f4();
+            int f(int x, int y);
+            int  g(int x, int y);
+        enddecl
+        int f0()
+        {
+            begin
+                write("In class C f0");
+                return 1;
+            end
+        }
+        int f2()
+        {
+            begin
+                write("In class C f2");
+                return 1;
+            end
+        }
+        int f4()
+        {
+            begin
+                write("In class C f4");
+                return 1;
+            end
+        }
+        int f(int x, int y)
         {
             decl
-                int sum;
+                int val;
             enddecl
             begin
-                self.o1=new(fact);
-                sum=0;
-                while(n!=0)do
-                    sum=sum+self.o1.findfactorial(n);
-                    n=n-1;
-                endwhile;
-                return sum;
+                if(y == 0)then
+                    val = x;
+                else
+                    val = self.g(self.f(x-1,y-1),y-1);
+                endif;
+                
+                return val;
+            end
+        }
+
+        int g(int x, int y)
+        {
+            decl
+                int val;
+            enddecl
+            begin
+                if(y == 0)then
+                    val = x;
+                else
+                    val = self.f(self.g(x-1,y-1),y-1);
+                endif;
+                
+                return val;
             end
         }
     }
 endclass
 
 decl
-    testfactsum obj;
+    A obj ;
+    A test_obj;
 enddecl
 
-int main()
+int main() 
 {
     decl
-        int x,n;
+        int temp,n;
+        int x,y;
     enddecl
     begin
-        x=initialize();
-        obj=new(testfactsum);
+        temp= initialize();
         read(n);
-        write(obj.testfun(n));
-        x=obj.chain();
+        if(n < 0)then
+            obj = new(A);
+        else
+            if(n == 0)then
+                obj = new(B);
+            else
+                if(n > 0)then
+                    obj = new(C);
+                endif;
+            endif;
+        endif;
+        test_obj = obj;
+
+        x = 8;
+        y = 5;
+
+        write(test_obj.f(x,y));
         return 1;
     end
 }
